@@ -23,7 +23,7 @@ async def chat(user_input: UserInput):
                     "content": user_input.prompt,
                 }
             ],
-            model="gpt-4o-mini",
+            model="gpt-4o-mini-2024-07-18",
         )
         
         # Извлечение ответа из результата
