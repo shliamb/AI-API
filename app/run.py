@@ -27,7 +27,7 @@ async def chat(user_input: UserInput):
         )
         
         # Извлечение ответа из результата
-        response_content = chat_completion.choices[0].message['content']
+        response_content = chat_completion.choices[0].message.content
         
         return {"response": response_content}
     
