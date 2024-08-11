@@ -17,6 +17,7 @@ class UserInput(BaseModel):
 async def chat(user_input: UserInput, x_api_key: str = Header(...)):
 
     # Проверка api_key
+    print(my_key)
     if x_api_key != my_key:
         raise HTTPException(status_code=403, detail="Forbidden")
 
