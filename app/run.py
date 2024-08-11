@@ -1,6 +1,6 @@
 import asyncio
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Query, HTTPException
 from pydantic import BaseModel
 from keys import api_key_openai, my_key
 
@@ -14,11 +14,10 @@ class UserInput(BaseModel):
     prompt: str
 
 @app.post("/chat/")
-async def chat(user_input: UserInput, x_api_key: str = Header(...)):
+async def chat(user_input: UserInput, api_key: str = Query(...)):
 
     # Проверка api_key
-    print(my_key)
-    if x_api_key != my_key:
+    if api_key != my_key:
         raise HTTPException(status_code=403, detail="Forbidden")
 
     try:
