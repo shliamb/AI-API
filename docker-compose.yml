@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  web:
+    # image: tiangolo/uvicorn-gunicorn-fastapi:python3.9 #v используется образ tiangolo/uvicorn-gunicorn-fastapi, который уже настроен для работы с приложениями на FastAPI
+    build: . 
+    container_name: fastapi_app
+    volumes:
+      - ./app:/app # Для удобства разработки (можно убрать в продакшене)
+    ports:
+      - "8000:80"
+    # environment:
+      # - MODULE_NAME=run # Имя вашего модуля без .py
+
