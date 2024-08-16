@@ -10,12 +10,12 @@ app = FastAPI()
 
 
 # Checking the api_key user
-def verify_api_key(api_key: str = Header(...)):
-    if api_key != my_key:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid API Key",
-        )
+# def verify_api_key(api_key: str = Header(...)):
+#     if api_key != my_key:
+#         raise HTTPException(
+#             status_code=status.HTTP_403_FORBIDDEN,
+#             detail="Invalid API Key",
+#         )
 
 # Model Text Chat GPT
 class UserInput(BaseModel):
@@ -23,8 +23,14 @@ class UserInput(BaseModel):
 
 # Endpoint Text Chat GPT
 @app.post("/chat/", status_code=status.HTTP_201_CREATED)
-async def chat(user_input: UserInput, api_key: str = Depends(verify_api_key)):
+async def chat(user_input: UserInput, api_key: str = Header(...)): # api_key: str = Depends(verify_api_key)):
 
+
+    if api_key != my_key:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid API Key",
+        )
 
     '''
     API Sample Question:
@@ -54,7 +60,7 @@ async def chat(user_input: UserInput, api_key: str = Depends(verify_api_key)):
     except RateLimitError:
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
     except OpenAIError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Ошибка какая то {str(e)}")
 
 
 
