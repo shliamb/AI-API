@@ -29,6 +29,7 @@ async def hello_api():
 
 
 # Checking the api_key user
+# Переделать позже, под работу с базой данных...
 def verify_user_appkey(username: str, appkey: str):
 
     if username != "vlad":
@@ -43,6 +44,9 @@ def verify_user_appkey(username: str, appkey: str):
             detail="Invalid API Key",
         )
 
+
+
+
 # Model Text Chat GPT
 class UserInput(BaseModel):
     prompt: str
@@ -50,9 +54,11 @@ class UserInput(BaseModel):
     model: str
 
 
+
+
 # Endpoint Text Chat GPT
 @app.post("/api/chat/", status_code=status.HTTP_200_OK)
-async def chat(user_input: UserInput, appkey: str = Header(...)):   # = Depends(verify_appkey)):
+async def chat(user_input: UserInput, appkey: str = Header(...)):
 
     # Verify user and her appkey
     username = user_input.username
@@ -62,12 +68,10 @@ async def chat(user_input: UserInput, appkey: str = Header(...)):   # = Depends(
     try:
         chat_completion = await client.chat.completions.create(
             messages=[
-                {
-                    "role": "user",
-                    "content": user_input.prompt,
-                }
-            ],
-            model=user_input.model,
+                {"role": "system", "content": "Ты наглая девушка, отвечающая хабалисто и нагло"}, # Определение роли AI
+                {"role": "user", "content": user_input.prompt}, # Сообщение от пользователя для AI
+                ],
+                model=user_input.model,
         )
         
         # Извлечение ответа из результата
@@ -79,6 +83,9 @@ async def chat(user_input: UserInput, appkey: str = Header(...)):   # = Depends(
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
     except OpenAIError as e:
         raise HTTPException(status_code=500, detail=f"Ошибка какая то {str(e)}")
+
+
+
 
 
 
