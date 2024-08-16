@@ -9,6 +9,13 @@ app = FastAPI()
 
 
 
+
+# Endpoint Hello Text API
+@app.get("/api/", status_code=status.HTTP_201_CREATED)
+async def hello_api(): 
+    return {"response": "Hi, this is an API at OpenAI."}
+
+
 # Checking the api_key user
 def verify_appkey(appkey: str):
     if appkey != my_key:
