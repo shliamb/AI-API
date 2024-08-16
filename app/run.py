@@ -10,10 +10,9 @@ app = FastAPI()
 
 
 
-
-
 # One Sample Question to API:
 '''
+Post API Key to Heads
     {
         "username": "vlad",
         "prompt": "Как ты бро?",
@@ -23,11 +22,10 @@ app = FastAPI()
 '''
 
 
-
 # Endpoint Just Instruction To Work API
 @app.get("/api/", status_code=status.HTTP_200_OK)
 async def hello_api(): 
-    return {readme}
+    return {"response": readme}
 
 
 # Checking the api_key user
@@ -36,7 +34,7 @@ def verify_user_appkey(username: str, appkey: str):
     if username != "vlad":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid API Key",
+            detail="Invalid Name User",
         )
 
     if appkey != "fdft5jhy5445dfftghd334":
@@ -49,6 +47,7 @@ def verify_user_appkey(username: str, appkey: str):
 class UserInput(BaseModel):
     prompt: str
     username: str
+    model: str
 
 
 # Endpoint Text Chat GPT
@@ -68,7 +67,7 @@ async def chat(user_input: UserInput, appkey: str = Header(...)):   # = Depends(
                     "content": user_input.prompt,
                 }
             ],
-            model="gpt-4o-mini-2024-07-18",
+            model=user_input.model,
         )
         
         # Извлечение ответа из результата
