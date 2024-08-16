@@ -26,11 +26,12 @@ class UserInput(BaseModel):
 async def chat(user_input: UserInput, app_key: str = Header(...)): # api_key: str = Depends(verify_api_key)):
 
 
-    if str(app_key) != str(my_key):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid API Key",
-        )
+    # if str(app_key) != str(my_key):
+    #     raise HTTPException(
+    #         status_code=status.HTTP_403_FORBIDDEN,
+    #         detail="Invalid API Key",
+    #     )
+    print(app_key)
 
     '''
     API Sample Question:
