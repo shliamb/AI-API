@@ -10,12 +10,12 @@ app = FastAPI()
 
 
 # Checking the api_key user
-# def verify_api_key(api_key: str = Header(...)):
-#     if api_key != my_key:
-#         raise HTTPException(
-#             status_code=status.HTTP_403_FORBIDDEN,
-#             detail="Invalid API Key",
-#         )
+def verify_appkey(appkey: str = Header(...)):
+    if appkey != my_key:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid API Key",
+        )
 
 # Model Text Chat GPT
 class UserInput(BaseModel):
@@ -23,15 +23,7 @@ class UserInput(BaseModel):
 
 # Endpoint Text Chat GPT
 @app.post("/api/chat/", status_code=status.HTTP_201_CREATED)
-async def chat(user_input: UserInput, appkey: str = Header(...)): # api_key: str = Depends(verify_api_key)):
-
-
-    # if str(app_key) != str(my_key):
-    #     raise HTTPException(
-    #         status_code=status.HTTP_403_FORBIDDEN,
-    #         detail="Invalid API Key",
-    #     )
-    print(appkey)
+async def chat(user_input: UserInput, appkey: str = Depends(verify_appkey)):
 
     '''
     API Sample Question:
