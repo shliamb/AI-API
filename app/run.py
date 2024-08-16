@@ -15,7 +15,8 @@ app = FastAPI()
 Post API Key to Heads
     {
         "username": "vlad",
-        "prompt": "Как ты бро?",
+        "user_content": "Как ты бро?",
+        "system_content": "Ты сексуальная девушка, которая общается очень сексуально и с заигрыванием.",
         "model": "gpt-4o-mini-2024-07-18",
 
     }
@@ -49,7 +50,8 @@ def verify_user_appkey(username: str, appkey: str):
 
 # Model Text Chat GPT
 class UserInput(BaseModel):
-    prompt: str
+    user_content: str
+    system_content: str
     username: str
     model: str
 
@@ -68,8 +70,8 @@ async def chat(user_input: UserInput, appkey: str = Header(...)):
     try:
         chat_completion = await client.chat.completions.create(
             messages=[
-                {"role": "system", "content": "Ты сексуальная девушка, которая общается очень сексуально и с заигрыванием."}, # Определение роли AI
-                {"role": "user", "content": user_input.prompt}, # Сообщение от пользователя для AI
+                {"role": "system", "content": user_input.system_content}, # Определение роли AI
+                {"role": "user", "content": user_input.user_content}, # Сообщение от пользователя для AI
                 ],
                 model=user_input.model,
         )
