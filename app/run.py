@@ -22,8 +22,8 @@ class UserInput(BaseModel):
     prompt: str
 
 # Endpoint Text Chat GPT
-@app.post("/chat/", status_code=status.HTTP_201_CREATED)
-async def chat(user_input: UserInput, app_key: str = Header(...)): # api_key: str = Depends(verify_api_key)):
+@app.post("/api/chat/", status_code=status.HTTP_201_CREATED)
+async def chat(user_input: UserInput, appkey: str = Header(...)): # api_key: str = Depends(verify_api_key)):
 
 
     # if str(app_key) != str(my_key):
@@ -31,7 +31,7 @@ async def chat(user_input: UserInput, app_key: str = Header(...)): # api_key: st
     #         status_code=status.HTTP_403_FORBIDDEN,
     #         detail="Invalid API Key",
     #     )
-    print(app_key)
+    print(appkey)
 
     '''
     API Sample Question:
