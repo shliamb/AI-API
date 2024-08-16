@@ -48,6 +48,7 @@ def verify_user_appkey(username: str, appkey: str):
 # Model Text Chat GPT
 class UserInput(BaseModel):
     prompt: str
+    username: str
 
 
 # Endpoint Text Chat GPT
