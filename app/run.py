@@ -3,7 +3,7 @@ from openai import AsyncOpenAI, RateLimitError, OpenAIError
 from fastapi import FastAPI, Header, Depends, HTTPException, status
 from pydantic import BaseModel
 from instruction import readme
-from keys import api_key_openai, my_key
+from keys import api_key_openai
 
 client = AsyncOpenAI(api_key=api_key_openai)
 app = FastAPI()
@@ -55,7 +55,8 @@ class UserInput(BaseModel):
 async def chat(user_input: UserInput, appkey: str = Header(...)):   # = Depends(verify_appkey)):
 
     # Verify user and her appkey
-    verify_user_appkey(user_input.username, appkey)
+    username = user_input.username
+    verify_user_appkey(username, appkey)
 
 
     try:
