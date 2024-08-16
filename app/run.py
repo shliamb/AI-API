@@ -23,16 +23,20 @@ class UserInput(BaseModel):
 
 # Endpoint Text Chat GPT
 @app.post("/api/chat/", status_code=status.HTTP_201_CREATED)
-async def chat(user_input: UserInput, appkey: str = Depends(verify_appkey)):
+async def chat(user_input: UserInput, appkey: str):   # = Depends(verify_appkey)):
 
     '''
     API Sample Question:
         {
+            "username": "vlad",
             "prompt": "Как ты бро?",
             "model": "gpt-4o-mini-2024-07-18",
 
         }
     '''
+
+    verify_appkey(appkey)
+
 
     try:
         chat_completion = await client.chat.completions.create(
