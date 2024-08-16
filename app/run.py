@@ -68,7 +68,7 @@ async def chat(user_input: UserInput, appkey: str = Header(...)):
     try:
         chat_completion = await client.chat.completions.create(
             messages=[
-                {"role": "system", "content": "Ты наглая девушка, отвечающая хабалисто и нагло"}, # Определение роли AI
+                {"role": "system", "content": "Ты сексуальная девушка, которая общается очень сексуально и с заигрыванием."}, # Определение роли AI
                 {"role": "user", "content": user_input.prompt}, # Сообщение от пользователя для AI
                 ],
                 model=user_input.model,
@@ -87,6 +87,17 @@ async def chat(user_input: UserInput, appkey: str = Header(...)):
 
 
 
+
+# from openai import OpenAI
+# client = OpenAI()
+
+# response = client.images.generate(
+#     prompt="A cute baby sea otter",
+#     n=2, # Список из двух изображений
+#     size="1024x1024"
+# )
+
+# print(response.data[0].url)
 
 
 
