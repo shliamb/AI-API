@@ -2,6 +2,7 @@ import asyncio
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
 from fastapi import FastAPI, Header, Depends, HTTPException, status
 from pydantic import BaseModel
+from instruction import readme
 from keys import api_key_openai, my_key
 
 client = AsyncOpenAI(api_key=api_key_openai)
@@ -10,15 +11,35 @@ app = FastAPI()
 
 
 
-# Endpoint Hello Text API
-@app.get("/api/", status_code=status.HTTP_201_CREATED)
+
+# One Sample Question to API:
+'''
+    {
+        "username": "vlad",
+        "prompt": "Как ты бро?",
+        "model": "gpt-4o-mini-2024-07-18",
+
+    }
+'''
+
+
+
+# Endpoint Just Instruction To Work API
+@app.get("/api/", status_code=status.HTTP_200_OK)
 async def hello_api(): 
-    return {"response": "Hi, this is an API at OpenAI."}
+    return {readme}
 
 
 # Checking the api_key user
-def verify_appkey(appkey: str):
-    if appkey != my_key:
+def verify_user_appkey(username: str, appkey: str):
+
+    if username != "vlad":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid API Key",
+        )
+
+    if appkey != "fdft5jhy5445dfftghd334":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid API Key",
@@ -28,21 +49,13 @@ def verify_appkey(appkey: str):
 class UserInput(BaseModel):
     prompt: str
 
+
 # Endpoint Text Chat GPT
-@app.post("/api/chat/", status_code=status.HTTP_201_CREATED)
+@app.post("/api/chat/", status_code=status.HTTP_200_OK)
 async def chat(user_input: UserInput, appkey: str = Header(...)):   # = Depends(verify_appkey)):
 
-    '''
-    API Sample Question:
-        {
-            "username": "vlad",
-            "prompt": "Как ты бро?",
-            "model": "gpt-4o-mini-2024-07-18",
-
-        }
-    '''
-
-    verify_appkey(appkey)
+    # Verify user and her appkey
+    verify_user_appkey(user_input.username, appkey)
 
 
     try:
