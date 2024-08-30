@@ -16,7 +16,7 @@ Post API Key to Heads
     {
         "username": "vlad",
         "user_content": "Как ты бро?",
-        "system_content": "Ты сексуальная девушка, которая общается очень сексуально и с заигрыванием.",
+        "system_content": "ты инопланетянин",
         "model": "gpt-4o-mini-2024-07-18",
 
     }
