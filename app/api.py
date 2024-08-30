@@ -2,6 +2,8 @@ import asyncio
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
 from fastapi import FastAPI, Header, Depends, HTTPException, status
 from pydantic import BaseModel
+import uvicorn
+import gunicorn
 from instruction import readme
 from keys import api_key_openai
 
@@ -106,6 +108,4 @@ async def chat(user_input: UserInput, appkey: str = Header(...)):
 
 
 if __name__ == "__main__":
-    import uvicorn
-    
     uvicorn.run(app, host="0.0.0.0", port=8000) # При деплое переделать
