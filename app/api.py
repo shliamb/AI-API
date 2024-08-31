@@ -1,11 +1,14 @@
 import asyncio
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
-from fastapi import FastAPI, Header, Depends, HTTPException, status
 from pydantic import BaseModel
+from fastapi import FastAPI, Header, Depends, HTTPException, status
 import uvicorn
 import gunicorn
+
 from instruction import readme
 from keys import api_key_openai
+
+from worker_db import get_user_by_username
 
 client = AsyncOpenAI(api_key=api_key_openai)
 app = FastAPI()
@@ -32,8 +35,13 @@ async def hello_api():
 
 
 # Checking the api_key user
-# Переделать позже, под работу с базой данных...
-def verify_user_appkey(username: str, appkey: str):
+async def verify_user_appkey(username: str, appkey: str):
+
+    data_by_username = await get_user_by_username(username)
+
+    if data_by_username is None:
+        print("Нет такого имени")
+        return 
 
     if username != "vlad":
         raise HTTPException(
@@ -66,7 +74,7 @@ async def chat(user_input: UserInput, appkey: str = Header(...)):
 
     # Verify user and her appkey
     username = user_input.username
-    verify_user_appkey(username, appkey)
+    await verify_user_appkey(username, appkey)
 
 
     try:
