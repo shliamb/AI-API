@@ -40,7 +40,7 @@ bot = Bot(token_telegram) # Initialize Bot instance with a default parse mode wh
 
 
 
-
+# Settings:
 money_to_start = 5 # 5$ to start work
 my_app_key = "appkey" # Key to API Key
 time_correction = +3 # Moscow
@@ -95,6 +95,7 @@ async def command_start_handler(message: Message) -> None:
 
     # Menu bot
     bot_commands = [
+       BotCommand(command="/menu", description="MENU"),
        BotCommand(command="/my_key", description="Show Key"),
        BotCommand(command="/balance", description="Balance"),
        BotCommand(command="/add_money", description="Add Money"),
@@ -134,14 +135,14 @@ async def command_start_handler(message: Message) -> None:
             last_act_to_base = await day_utcnow(time_correction) # Записываю дату и время
 
             user_data = {
-                            "id": id,
-                            "name": name,
-                            "full_name": full_name,
-                            "first_name":first_name,
-                            "last_name": last_name,
-                            "username": username,
-                            "money": money_to_start,
-                            "date_last_activ": last_act_to_base,
+                "id": id,
+                "name": name,
+                "full_name": full_name,
+                "first_name":first_name,
+                "last_name": last_name,
+                "username": username,
+                "money": money_to_start,
+                "date_last_activ": last_act_to_base,
                         }
 
             await adding_user(user_data)
@@ -150,25 +151,41 @@ async def command_start_handler(message: Message) -> None:
             # last_a = is_on_user.date_last_activ
             # current_datetime = await unformat_date(last_a) 
             text_get_key = (  
-                            "Use the following keys to use the API:\n\n"
-                            "<b>Username:</b>\n"
-                            f"Username: <code>{is_on_user.username}</code>\n"
-                            "Add to: <i>Json</i>\n"
-                            "\n"
-                            "<b>API Key:</b>\n"
-                            f"Key: <code>{my_app_key}</code>\n"
-                            f"Value: <code>{is_on_user.appkey}</code>\n"
-                            "Add to: <i>Header</i>\n"
-                            "\n"
-                            "If you are inactive for a long time, the user will be deleted from the database. You will be able to register again after.\n"
-                            "\n"
-                            f"You have <b>{is_on_user.money}</b> $ to your balance.\n"
-                            "\n"
-                            "If you don't understand anything - /help \n"
-                            # f"Last user activity is - {current_datetime}"
+                "Use the following keys to use the API:\n\n"
+                "<b>Username:</b>\n"
+                f"Username: <code>{is_on_user.username}</code>\n"
+                "Add to: <i>Json</i>\n"
+                "\n"
+                "<b>API Key:</b>\n"
+                f"Key: <code>{my_app_key}</code>\n"
+                f"Value: <code>{is_on_user.appkey}</code>\n"
+                "Add to: <i>Header</i>\n"
+                "\n"
+                "If you are inactive for a long time, the user will be deleted from the database. You will be able to register again after.\n"
+                "\n"
+                f"You have <b>{is_on_user.money}</b> $ to your balance.\n"
+                "\n"
+                "If you don't understand anything - /help \n"
+                # f"Last user activity is - {current_datetime}"
                     )
             
             await message.answer(text_get_key, parse_mode="HTML")
+
+
+#### Push /MENU ####
+@dp.message(Command("menu"))
+async def main_menu(message: types.Message):
+    await bot.send_chat_action(message.chat.id, action='typing')
+
+    await message.answer(
+        "<b>MAIN MENU:</b> \n\n"
+        "/my_key - View your API key\n\n"
+        "/balance - View your account balance\n\n"
+        "/add_money - Add $ to your account*\n\n"
+        "/get_stat - Get statistics*\n\n"
+        "/reset_key - Change the API key\n\n"
+        "/help - Learn more about the API and instructions\n\n"
+        , parse_mode="HTML")
 
 
 
@@ -180,22 +197,22 @@ async def my_key(message: types.Message):
     data = await get_user_by_id(id)
 
     text_get_key = (  
-                    "Use the following keys to use the API:\n\n"
-                    "<b>Username:</b>\n"
-                    f"Username: <code>{data.username}</code>\n"
-                    "Add to: <i>Json</i>\n"
-                    "\n"
-                    "<b>API Key:</b>\n"
-                    f"Key: <code>{my_app_key}</code>\n"
-                    f"Value: <code>{data.appkey}</code>\n"
-                    "Add to: <i>Header</i>\n"
-                    "\n"
-                    "If you are inactive for a long time, the user will be deleted from the database. You will be able to register again after.\n"
-                    "\n"
-                    f"You have <b>{data.money}</b> $ to your balance.\n"
-                    "\n"
-                    "If you don't understand anything - /help \n"
-                    # f"Last user activity is - {current_datetime}"
+        "Use the following keys to use the API:\n\n"
+        "<b>Username:</b>\n"
+        f"Username: <code>{data.username}</code>\n"
+        "Add to: <i>Json</i>\n"
+        "\n"
+        "<b>API Key:</b>\n"
+        f"Key: <code>{my_app_key}</code>\n"
+        f"Value: <code>{data.appkey}</code>\n"
+        "Add to: <i>Header</i>\n"
+        "\n"
+        "If you are inactive for a long time, the user will be deleted from the database. You will be able to register again after.\n"
+        "\n"
+        f"You have <b>{data.money}</b> $ to your balance.\n"
+        "\n"
+        "If you don't understand anything - /help \n"
+        # f"Last user activity is - {current_datetime}"
             )
             
     await message.answer(text_get_key, parse_mode="HTML")
@@ -216,9 +233,109 @@ async def add_money(message: types.Message):
     await bot.send_chat_action(message.chat.id, action='typing')
     id = user_id(message)
     data = await get_user_by_id(id)
+    #await message.answer(f"Your Balance is {data.money} $", parse_mode="HTML")
 
 
-    await message.answer(f"Your Balance is {data.money} $", parse_mode="HTML")
+
+
+
+#### СНОВНАЯ ФОРМА ОПЛАТЫ ####
+# Set State
+# class Form_my_pay(StatesGroup):
+#     add_summ = State()
+#     #confirm_summt = State()
+
+
+
+# # Запуск цепочки
+# @dp.callback_query(lambda c: c.data == 'pay_by_card')
+# async def start_invoice(callback_query: types.CallbackQuery, state: FSMContext):
+#     await bot.send_message(callback_query.from_user.id, "Введите сумму пополнения в RUB:\nEnter the deposit amount in RUB:", reply_markup=ReplyKeyboardRemove()) # !!!!
+#     await bot.answer_callback_query(callback_query.id) # Закрытие сесси кнопки
+#     await state.set_state(Form_my_pay.add_summ) # Ожидание следующего шага
+
+
+
+# # Ожидание получения суммы пополнения
+# @dp.message(Form_my_pay.add_summ, F.content_type.in_({'text'}))
+# async def invoice_user_1(message: Message, state: FSMContext):
+
+#     mes_id = message.chat.id
+#     summ = message.text
+#     id = user_id(message)
+#     admin_id = admin_user_ids[1:-1]
+#     url = f"tg://user?id={id}"
+
+#     # Проверка на число
+#     if message.text.isdigit() is not True:
+#         await bot.send_message(message.chat.id, f"Введите только сумму цифрами в RUB.\nEnter only the amount in numbers in RUB.")
+#         return
+
+#     if float(summ) < 50:
+#         await bot.send_message(message.chat.id, f"Минимальная сумма 50 RUB.\nThe minimum amount is 50 RUB.")
+#         return
+
+#     # запускаю функцию и передаю данные для подтверждения админом.
+#     await confirm_my_pyz(id, summ, admin_id, mes_id, url)
+
+#     # Закрытие Stats
+#     await state.clear()
+
+
+
+# # Вызов у админа кнопки подтверждения
+# async def confirm_my_pyz(id, summ, admin_id, mes_id, url):
+#     # Кнопка подтверждения
+#     keyboard = InlineKeyboardMarkup(
+#         inline_keyboard=[
+#             [InlineKeyboardButton(text="👛 Подтвердить", callback_data=f"confirm_summ_user_d:{id}:{summ}:{admin_id}:{mes_id}")], 
+#         ]
+#     )
+#     await bot.send_message(admin_id, f"Пользователь: <a href='{url}'>{id}</a>, хочет пополнить счет на: {summ} РУБ", parse_mode="HTML", reply_markup=keyboard)
+#     await bot.send_message(mes_id, f"Запрос принят, ожидайте.\nThe request has been accepted, wait.")
+#     return
+
+
+
+
+# # Обработчик подтверждения
+# @dp.callback_query(lambda c: c.data and c.data.startswith('confirm_summ_user_d'))
+# async def confirm_callback_handler_d(callback_query: types.CallbackQuery):
+#     data = callback_query.data.split(':')
+#     if len(data) == 5:
+#         id = int(data[1])
+#         summ = float(data[2])
+#         admin_id = int(data[3])
+#         mes_id = int(data[4])
+#     else:
+#         await bot.answer_callback_query(callback_query.id, text="Ошибка в данных запроса.", show_alert=True)
+#         return
+
+#     data_set = await get_settings(id)
+#     new_money = data_set.money + float(summ)
+
+#     updated_data = {"money": new_money}
+#     conf = await update_settings(id, updated_data)
+
+#     if conf is True:
+#         await bot.send_message(admin_id, f"Счет клиента {id} пополнен, общий:  {new_money} RUB.")
+#         await bot.send_message(mes_id, f"Ваш счет пополнен на {summ} RUB\nYour account has been topped up with {summ} RUB.")
+#         await bot.answer_callback_query(callback_query.id)
+#         return
+#     else:
+#         await bot.send_message(admin_id, f"Ошибка пополнения счета.")
+#         await bot.answer_callback_query(callback_query.id)
+#         return
+# ####
+
+
+
+
+
+
+
+
+
 
 
 
@@ -228,10 +345,7 @@ async def get_stat(message: types.Message):
     await bot.send_chat_action(message.chat.id, action='typing')
     id = user_id(message)
     data = await get_user_by_id(id)
-
-    
     await message.answer(f"Your Balance is {data.money} $", parse_mode="HTML")
-
 
 
 #### Push /reset_key ####
@@ -251,7 +365,6 @@ async def reset_key(message: types.Message):
         await message.answer("Sorry, error, try again later.")
 
 
-
 #### Push /help ####
 @dp.message(Command("help"))
 async def help(message: types.Message):
@@ -264,6 +377,26 @@ async def help(message: types.Message):
 
 
 #### WORK MENU ADMIN ####
+
+# Admin menu
+@dp.message(Command("admin"))
+async def admin(message: types.Message):
+    await bot.send_chat_action(message.chat.id, action='typing')
+    id = user_id(message)
+
+    # Check access
+    if id != is_admin:
+        await message.answer(f"Sorry, access is denied.")
+        return
+
+    await message.answer(
+        "<b>ADMIN MENU:</b> \n\n"
+        "/backup - Make a backup of the database\n\n"
+        "/clear_old_users - Deleting old users*\n\n"
+        "/clear_db - Cleaning up old DB data*\n\n"
+        "/restore_db - Restoring a DB from a file*\n\n"
+        , parse_mode="HTML")
+
 
 # Admin BackupDB
 @dp.message(Command("backup"))

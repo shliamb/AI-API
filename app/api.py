@@ -28,10 +28,6 @@ Post API Key to Heads
 '''
 
 
-# Endpoint Just Instruction To Work API
-@app.get("/api/", status_code=status.HTTP_200_OK)
-async def hello_api(): 
-    return {"response": readme}
 
 
 # Checking the api_key user
@@ -58,12 +54,19 @@ async def verify_user_appkey(username: str, appkey: str):
 
 
 
+
 # Model Text Chat GPT
 class UserInput(BaseModel):
     user_content: str
     system_content: str
     username: str
     model: str
+
+
+# Endpoint Just Instruction To Work API
+@app.get("/api/", status_code=status.HTTP_200_OK)
+async def hello_api(): 
+    return {"response": readme}
 
 
 
