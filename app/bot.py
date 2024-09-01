@@ -44,6 +44,7 @@ bot = Bot(token_telegram) # Initialize Bot instance with a default parse mode wh
 money_to_start = 5 # 5$ to start work
 my_app_key = "appkey" # Key to API Key
 time_correction = +3 # Moscow
+min_pay = 1 # Minimum pay 
 
 
 
@@ -184,7 +185,7 @@ async def main_menu(message: types.Message):
         "/add_money - Add $ to your account*\n\n"
         "/get_stat - Get statistics*\n\n"
         "/reset_key - Change the API key\n\n"
-        "/help - Learn more about the API and instructions\n\n"
+        "/help - Learn more about the API\n\n"
         , parse_mode="HTML")
 
 
@@ -227,111 +228,100 @@ async def balance(message: types.Message):
     await message.answer(f"Your Balance is {data.money} $", parse_mode="HTML")
 
 
+
+
+
+
+
 #### Push /add_money ####
+
+# Set State
+class Form_my_pay(StatesGroup):
+    add_summ = State()
+    confirm_summt = State()
+
 @dp.message(Command("add_money"))
-async def add_money(message: types.Message):
-    await bot.send_chat_action(message.chat.id, action='typing')
-    id = user_id(message)
-    data = await get_user_by_id(id)
+async def add_money(message: types.Message, state: FSMContext):
+    # await bot.send_chat_action(message.chat.id, action='typing')
+    # id = user_id(message)
+    # data = await get_user_by_id(id)
     #await message.answer(f"Your Balance is {data.money} $", parse_mode="HTML")
 
+    await message.answer("Enter the deposit amount in USD:", reply_markup=ReplyKeyboardRemove())
+
+    # await bot.send_message(callback_query.from_user.id, "Введите сумму пополнения в RUB:\nEnter the deposit amount in RUB:", reply_markup=ReplyKeyboardRemove()) # !!!!
+    # await bot.answer_callback_query(callback_query.id) # Закрытие сесси кнопки
+    await state.set_state(Form_my_pay.add_summ) # Ожидание следующего шага
 
 
+# Вызов у админа кнопки подтверждения
+async def confirm_my_pyz(id, summ, admin_id, mes_id, url):
+    # Кнопка подтверждения
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="👛 Подтвердить", callback_data=f"confirm_summ_user_d:{id}:{summ}:{admin_id}:{mes_id}")], 
+        ]
+    )
+    await bot.send_message(admin_id, f"User: <a href='{url}'>{id}</a>, he wants to top up his account on: {summ} $", parse_mode="HTML", reply_markup=keyboard)
+    await bot.send_message(mes_id, f"The request has been accepted, wait.")
+    return
 
 
-#### СНОВНАЯ ФОРМА ОПЛАТЫ ####
-# Set State
-# class Form_my_pay(StatesGroup):
-#     add_summ = State()
-#     #confirm_summt = State()
+# Ожидание получения суммы пополнения
+@dp.message(Form_my_pay.add_summ, F.content_type.in_({'text'}))
+async def invoice_user_1(message: Message, state: FSMContext):
+
+    mes_id = message.chat.id
+    summ = message.text
+    id = user_id(message)
+    admin_id = is_admin
+    url = f"tg://user?id={id}"
+
+    # Проверка на число
+    if message.text.isdigit() is not True:
+        await bot.send_message(message.chat.id, f"Enter only the amount in numbers in USD.")
+        return
+
+    if float(summ) < min_pay:
+        await bot.send_message(message.chat.id, f"The minimum amount is {min_pay} $.")
+        return
+
+    # запускаю функцию и передаю данные для подтверждения админом.
+    await confirm_my_pyz(id, summ, admin_id, mes_id, url)
+
+    # Закрытие Stats
+    await state.clear()
 
 
+# Обработчик подтверждения
+@dp.callback_query(lambda c: c.data and c.data.startswith('confirm_summ_user_d'))
+async def confirm_callback_handler_d(callback_query: types.CallbackQuery):
+    data = callback_query.data.split(':')
+    if len(data) == 5:
+        id = int(data[1])
+        summ = float(data[2])
+        admin_id = int(data[3])
+        mes_id = int(data[4])
+    else:
+        await bot.answer_callback_query(callback_query.id, text="Error in the request data.", show_alert=True)
+        return
 
-# # Запуск цепочки
-# @dp.callback_query(lambda c: c.data == 'pay_by_card')
-# async def start_invoice(callback_query: types.CallbackQuery, state: FSMContext):
-#     await bot.send_message(callback_query.from_user.id, "Введите сумму пополнения в RUB:\nEnter the deposit amount in RUB:", reply_markup=ReplyKeyboardRemove()) # !!!!
-#     await bot.answer_callback_query(callback_query.id) # Закрытие сесси кнопки
-#     await state.set_state(Form_my_pay.add_summ) # Ожидание следующего шага
+    data_set = await get_user_by_id(id)
+    new_money = data_set.money + float(summ)
 
+    updated_data = {"money": new_money}
+    conf = await update_user(id, updated_data)
 
-
-# # Ожидание получения суммы пополнения
-# @dp.message(Form_my_pay.add_summ, F.content_type.in_({'text'}))
-# async def invoice_user_1(message: Message, state: FSMContext):
-
-#     mes_id = message.chat.id
-#     summ = message.text
-#     id = user_id(message)
-#     admin_id = admin_user_ids[1:-1]
-#     url = f"tg://user?id={id}"
-
-#     # Проверка на число
-#     if message.text.isdigit() is not True:
-#         await bot.send_message(message.chat.id, f"Введите только сумму цифрами в RUB.\nEnter only the amount in numbers in RUB.")
-#         return
-
-#     if float(summ) < 50:
-#         await bot.send_message(message.chat.id, f"Минимальная сумма 50 RUB.\nThe minimum amount is 50 RUB.")
-#         return
-
-#     # запускаю функцию и передаю данные для подтверждения админом.
-#     await confirm_my_pyz(id, summ, admin_id, mes_id, url)
-
-#     # Закрытие Stats
-#     await state.clear()
-
-
-
-# # Вызов у админа кнопки подтверждения
-# async def confirm_my_pyz(id, summ, admin_id, mes_id, url):
-#     # Кнопка подтверждения
-#     keyboard = InlineKeyboardMarkup(
-#         inline_keyboard=[
-#             [InlineKeyboardButton(text="👛 Подтвердить", callback_data=f"confirm_summ_user_d:{id}:{summ}:{admin_id}:{mes_id}")], 
-#         ]
-#     )
-#     await bot.send_message(admin_id, f"Пользователь: <a href='{url}'>{id}</a>, хочет пополнить счет на: {summ} РУБ", parse_mode="HTML", reply_markup=keyboard)
-#     await bot.send_message(mes_id, f"Запрос принят, ожидайте.\nThe request has been accepted, wait.")
-#     return
-
-
-
-
-# # Обработчик подтверждения
-# @dp.callback_query(lambda c: c.data and c.data.startswith('confirm_summ_user_d'))
-# async def confirm_callback_handler_d(callback_query: types.CallbackQuery):
-#     data = callback_query.data.split(':')
-#     if len(data) == 5:
-#         id = int(data[1])
-#         summ = float(data[2])
-#         admin_id = int(data[3])
-#         mes_id = int(data[4])
-#     else:
-#         await bot.answer_callback_query(callback_query.id, text="Ошибка в данных запроса.", show_alert=True)
-#         return
-
-#     data_set = await get_settings(id)
-#     new_money = data_set.money + float(summ)
-
-#     updated_data = {"money": new_money}
-#     conf = await update_settings(id, updated_data)
-
-#     if conf is True:
-#         await bot.send_message(admin_id, f"Счет клиента {id} пополнен, общий:  {new_money} RUB.")
-#         await bot.send_message(mes_id, f"Ваш счет пополнен на {summ} RUB\nYour account has been topped up with {summ} RUB.")
-#         await bot.answer_callback_query(callback_query.id)
-#         return
-#     else:
-#         await bot.send_message(admin_id, f"Ошибка пополнения счета.")
-#         await bot.answer_callback_query(callback_query.id)
-#         return
-# ####
-
-
-
-
-
+    if conf is True:
+        await bot.send_message(admin_id, f"Customer's account {id} replenished, shared:  {new_money} $.")
+        await bot.send_message(mes_id, f"Your account has been topped up with {summ} $.")
+        await bot.answer_callback_query(callback_query.id)
+        return
+    else:
+        await bot.send_message(admin_id, f"Replenishment error.")
+        await bot.answer_callback_query(callback_query.id)
+        return
+####
 
 
 
@@ -392,8 +382,10 @@ async def admin(message: types.Message):
     await message.answer(
         "<b>ADMIN MENU:</b> \n\n"
         "/backup - Make a backup of the database\n\n"
-        "/clear_old_users - Deleting old users*\n\n"
-        "/clear_db - Cleaning up old DB data*\n\n"
+        "clear \n"
+        "   │ \n"
+        "   ├── /clear_old_users - Deleting old users* \n"
+        "   └── /clear_db - Cleaning up old DB data* \n\n"
         "/restore_db - Restoring a DB from a file*\n\n"
         , parse_mode="HTML")
 
