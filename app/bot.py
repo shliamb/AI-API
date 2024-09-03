@@ -1,17 +1,21 @@
+# Base
 import logging
-
-# logging.getLogger('aiogram').propagate = True # Блокировка логирование aiogram до его импорта
-# logging.basicConfig(level=logging.INFO, filename='log/app.log', filemode='a', format='%(levelname)s - %(asctime)s - %(name)s - %(message)s',) # При деплое активировать логирование в файл
-
-from keys import token_telegram, is_admin
-
-# import time
-# import sys
+logging.getLogger('aiogram').propagate = True # Блокировка логирование aiogram до его импорта
+logging.basicConfig(level=logging.INFO, filename='log/app.log', filemode='a', format='%(levelname)s - %(asctime)s - %(name)s - %(message)s',) # При деплое активировать логирование в файл
 import re
 import random
 import os
 import asyncio
-from pathlib import Path
+from io import StringIO, BytesIO
+import uuid
+from pathlib import Path # Работа с файловыми путями 
+# from datetime import datetime, timezone, timedelta
+# import time
+# import sys
+# import csv
+# import datetime
+
+# Aiogram
 from aiogram import Bot, Dispatcher, types, F, Router
 from aiogram.enums import ParseMode
 from aiogram.utils.markdown import hbold
@@ -22,34 +26,22 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-
-# import csv
-# import datetime
-from io import StringIO, BytesIO
-import uuid
-
+# Service
 from worker_db import get_user_by_id, get_user_by_username, update_user, adding_user
 from backupdb import backup_db
 from restore_db import restore_db
-
-from datetime import datetime, timezone, timedelta
+from general_functions import day_utcnow, unformat_date
+from keys import token_telegram, is_admin
 
 
 dp = Dispatcher() # All handlers should be attached to the Router (or Dispatcher)
 bot = Bot(token_telegram) # Initialize Bot instance with a default parse mode which will be passed to all API calls
-
-
 
 # Settings:
 money_to_start = 5 # 5$ to start work
 my_app_key = "appkey" # Key to API Key
 time_correction = +3 # Moscow
 min_pay = 1 # Minimum pay 
-
-
-
-
-
 
 #########
 # Get User_ID
@@ -66,22 +58,6 @@ async def gen_username(about):
     cleaned_text = re.sub(r'[^a-zA-Z0-9]', '', about)
     username = cleaned_text + str(random.randint(1, 10))
     return username or None
-
-# GET DAY AND TIME
-async def day_utcnow(time_correction: str) -> datetime:
-    utc_zone = timezone.utc
-    a = datetime.now(timezone.utc).replace(tzinfo=utc_zone)
-    a = a + timedelta(hours=time_correction)
-    day_str = a.strftime("%Y-%m-%d %H:%M:%S")
-    day = datetime.strptime(day_str, '%Y-%m-%d %H:%M:%S')
-    # print("info: Getting the day and time from the server")
-    return day or None
-
-# UNFORMAT TIME
-async def unformat_date(date) -> str | int:
-    day_now = str(date.strftime("%Y-%m-%d"))
-    time_now = float(date.strftime("%H.%M"))
-    return day_now, time_now
 
 ########
 
