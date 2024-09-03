@@ -2,7 +2,7 @@ from datetime import datetime, timezone, timedelta
 
 
 # GET DAY AND TIME
-async def day_utcnow(time_correction: str) -> datetime:
+async def day_utcnow(time_correction: str):
     utc_zone = timezone.utc
     a = datetime.now(timezone.utc).replace(tzinfo=utc_zone)
     a = a + timedelta(hours=time_correction)
@@ -12,7 +12,7 @@ async def day_utcnow(time_correction: str) -> datetime:
     return day or None
 
 # UNFORMAT TIME
-async def unformat_date(date) -> str | int:
+async def unformat_date(date):
     day_now = str(date.strftime("%Y-%m-%d"))
     time_now = float(date.strftime("%H.%M"))
     return day_now, time_now

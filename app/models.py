@@ -18,7 +18,7 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 user_db, paswor_db = os.environ.get('USER_DB'),  os.environ.get('PASWOR_DB')
 
                                                             # @localhost  # @postgres
-DATABASE_URL = f"postgresql+asyncpg://{user_db}:{paswor_db}@localhost:5432/my_database"
+DATABASE_URL = f"postgresql+asyncpg://{user_db}:{paswor_db}@postgres:5432/my_database"
 engine = create_async_engine(DATABASE_URL) # Создание асинхронного движка для работы с базой данных
 Base = declarative_base() # Создание базового класса для объявления моделей
 Column = sqlalchemy.Column

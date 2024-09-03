@@ -17,7 +17,7 @@ from sqlalchemy import select, insert, update, join, func
 
 
 async def create_async_engine_and_session():                                # @localhost  # @postgres
-    engine = create_async_engine(f"postgresql+asyncpg://{user_db}:{paswor_db}@localhost:5432/my_database") # echo=True - вывод логирования
+    engine = create_async_engine(f"postgresql+asyncpg://{user_db}:{paswor_db}@postgres:5432/my_database") # echo=True - вывод логирования
     async_session = sessionmaker(bind=engine, class_=AsyncSession)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
