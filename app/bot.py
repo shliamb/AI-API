@@ -1,7 +1,7 @@
 # Base
 import logging
-logging.getLogger('aiogram').propagate = True # Блокировка логирование aiogram до его импорта
-logging.basicConfig(level=logging.INFO, filename='log/app.log', filemode='a', format='%(levelname)s - %(asctime)s - %(name)s - %(message)s',) # При деплое активировать логирование в файл
+# logging.getLogger('aiogram').propagate = True # Блокировка логирование aiogram до его импорта
+# logging.basicConfig(level=logging.INFO, filename='log/app.log', filemode='a', format='%(levelname)s - %(asctime)s - %(name)s - %(message)s',) # При деплое активировать логирование в файл
 import re
 import random
 import os
