@@ -7,3 +7,5 @@ api_key_openai = os.environ.get('OPENAI_API_KEY') # OpenAI key-token - уста�
 user_db = os.environ.get('USER_DB')
 paswor_db = os.environ.get('PASWOR_DB')
 is_admin = int(os.environ.get('ADMIN'))
+api_key_gemini = os.environ.get('GEMINI_KEY')
+

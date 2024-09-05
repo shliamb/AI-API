@@ -10,6 +10,7 @@ import gunicorn
 from worker_db import get_user_by_username, update_user
 from general_functions import day_utcnow, unformat_date
 from mod_openai import mod_openai
+from mod_gemini import mod_gemini
 from config import limit_trying, timeout_after_error_username, waiting_time, time_correction
 
 
@@ -17,18 +18,10 @@ app = FastAPI()
 
 
 
-#### OPENAI TEXT ####
-
-'''
-Post API Key to Heads
-    {
-        "username": "vlad", 
-        "user_content": "поясни за физику?",
-        "system_content": "ты преподаватель физики",
-        "model": "gpt-4o-mini-2024-07-18",
-
-    }
-'''
+# MAIN Endpoint
+@app.get("/api/", status_code=status.HTTP_200_OK)
+async def hello_api(): 
+    return {"response": "https://t.me/myapi_aibot"}
 
 
 # USER VERIFICATION
@@ -105,7 +98,7 @@ async def verify_user_appkey(username: str, appkey: str):
 
 
 
-# Model OPENAI TEXT
+# Model # OPENAI TEXT
 class UserInput(BaseModel):
     user_content: str
     system_content: str
@@ -113,15 +106,23 @@ class UserInput(BaseModel):
     model: str
 
 
-# MAIN Endpoint
-@app.get("/api/", status_code=status.HTTP_200_OK)
-async def hello_api(): 
-    return {"response": "https://t.me/myapi_aibot"}
+#### OPENAI TEXT ####
+
+'''
+Post API Key to Heads
+    {
+        "username": "vlad", 
+        "user_content": "поясни за физику?",
+        "system_content": "ты преподаватель физики",
+        "model": "gpt-4o-mini-2024-07-18",
+
+    }
+'''
 
 
 # TEXT OPENAI Endpoint
-@app.post("/api/chat/", status_code=status.HTTP_200_OK)
-async def chat(user_input: UserInput, appkey: str = Header(...)):
+@app.post("/api/openai/", status_code=status.HTTP_200_OK)
+async def openai_api(user_input: UserInput, appkey: str = Header(...)):
 
     # Verify user and her appkey
     username = user_input.username
@@ -134,9 +135,50 @@ async def chat(user_input: UserInput, appkey: str = Header(...)):
 
     if confirm_openai == "Error: There is no money for OpenAI account.":
         logging.info("There is no money for OpenAI account.")
-        # Передача сигнала телеграмм боту, администратору
+        # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
 
     return confirm_openai
+
+
+
+
+
+# # Model GEMINI TEXT
+# class UserInput(BaseModel):
+#     user_content: str
+#     system_content: str
+#     username: str
+#     model: str
+
+
+#### GEMINI TEXT ####
+
+
+# TEXT GEMINI Endpoint
+@app.post("/api/gemini/", status_code=status.HTTP_200_OK)
+async def gemini_api(user_input: UserInput, appkey: str = Header(...)):
+
+    # Verify user and her appkey
+    username = user_input.username
+    confirm_verify = await verify_user_appkey(username, appkey)
+    if confirm_verify["status_code"] != status.HTTP_200_OK:
+        raise
+
+    # Working with Gemini
+    confirm_openai = await mod_gemini(username, user_input)
+
+
+    return confirm_openai
+
+
+
+
+
+
+
+
+
+
 
 
 

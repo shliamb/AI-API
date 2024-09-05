@@ -5,13 +5,12 @@ limit_trying = 5
 timeout_after_error_username = 5 # sec.
 waiting_time = 15 # min/
 time_correction = +3 # Moscow
-money_to_start = 0.2 # 5$ to start work
+money_to_start = 1 # 1$ to start work
 my_app_key = "appkey" # Key to API Key
 min_pay = 1 # Minimum pay 
 
 
 # Prices per 1M tokens:
-
 price = { 
     'chatgpt-4o-latest': 40,
     'gpt-4o': 40, 
@@ -22,6 +21,12 @@ price = {
     'gpt-4-turbo-2024-04-09': 80,
     'DALL·E 3': 0.08,
     }
+
+
+
+
+
+
 
 
 
