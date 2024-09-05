@@ -2,17 +2,18 @@
 import asyncio
 from pydantic import BaseModel
 # OpenAI
-from openai import AsyncOpenAI, RateLimitError, OpenAIError
+# from openai import AsyncOpenAI, RateLimitError, OpenAIError
 # Fasapi
 from fastapi import FastAPI, Header, Depends, HTTPException, status
 import uvicorn
 import gunicorn
 # Service
-from keys import api_key_openai
+# from keys import api_key_openai
 from worker_db import get_user_by_username, update_user
 from general_functions import day_utcnow, unformat_date
+from openai import mod_openai
 
-client = AsyncOpenAI(api_key=api_key_openai)
+# client = AsyncOpenAI(api_key=api_key_openai)
 app = FastAPI()
 
 
@@ -23,7 +24,7 @@ app = FastAPI()
 
 limit_trying = 5
 timeout_after_error_username = 5 # sec.
-waiting_time = 1 # min/
+waiting_time = 15 # min/
 time_correction = +3 # Moscow
 
 
@@ -133,47 +134,15 @@ async def chat(user_input: UserInput, appkey: str = Header(...)):
 
         # Verify user and her appkey
         username = user_input.username
-        confirm = await verify_user_appkey(username, appkey)
-
-        if confirm["status_code"] != status.HTTP_200_OK:
+        confirm_verify = await verify_user_appkey(username, appkey)
+        if confirm_verify["status_code"] != status.HTTP_200_OK:
             raise
 
-        chat_completion = await client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": user_input.system_content}, # Определение роли AI
-                {"role": "user", "content": user_input.user_content}, # Сообщение от пользователя для AI
-                ],
-                model=user_input.model,
-        )
-        
-        # Извлечение ответа из результата
-        response_content = chat_completion.choices[0].message.content
-        
-        return {"response": response_content}
+        # Working with OpenAI
+        confirm_openai = await mod_openai(user_input)
 
-
-    
-
-    
-    except RateLimitError:
-        raise HTTPException(status_code=429, detail="Rate limit exceeded")
-    except OpenAIError as e:
-        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
-
-
-
-
-
-# from openai import OpenAI
-# client = OpenAI()
-
-# response = client.images.generate(
-#     prompt="A cute baby sea otter",
-#     n=2, # Список из двух изображений
-#     size="1024x1024"
-# )
-
-# print(response.data[0].url)
+    except:
+        return confirm_openai
 
 
 
