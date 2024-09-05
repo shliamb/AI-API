@@ -27,7 +27,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 # from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 # Service
-from worker_db import get_user_by_id, get_user_by_username, update_user, adding_user, get_user_by_username, get_last_statistics
+from worker_db import get_user_by_id, get_user_by_username, update_user, adding_user, get_all_data_user_by_username, get_last_statistics
 from backupdb import backup_db
 from restore_db import restore_db
 from general_functions import day_utcnow, unformat_date
@@ -460,7 +460,7 @@ async def backup(message: types.Message):
 @dp.message(Command("admin_stat"))
 async def get_admin_stat(message: types.Message):
 
-    data = await get_user_by_username()
+    data = await get_all_data_user_by_username()
 
     all_static = []
     number = 0

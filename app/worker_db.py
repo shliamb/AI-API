@@ -95,7 +95,7 @@ async def adding_user(user_data):
 
 
 # Admin get all users and her data
-async def get_user_by_username():
+async def get_all_data_user_by_username():
     async_session = await create_async_engine_and_session()
     async with async_session() as session:
         query = select(UsersBase)
