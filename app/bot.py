@@ -430,7 +430,7 @@ async def get_admin_stat(message: types.Message):
     
     for it in data:
         number += 1
-        Username = it.Username
+        username = it.username
         is_failed = it.is_failed
         is_block = it.is_block
         date_block = it.date_block
@@ -442,7 +442,7 @@ async def get_admin_stat(message: types.Message):
         first_name = it.first_name
         last_name = it.last_name
 
-        all_static.append([number, Username, is_failed, is_block, date_block, date_last_activ, money, id, name, full_name,\
+        all_static.append([number, username, is_failed, is_block, date_block, date_last_activ, money, id, name, full_name,\
                             first_name, last_name]) # added user data
 
     # Create csv file
