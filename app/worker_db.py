@@ -133,12 +133,12 @@ async def add_statistic(data):
 
 
 # Read Statistics on id all 30 line
-async def get_last_30_statistics(username_table_stat):
+async def get_last_statistics(username):
     async_session = await create_async_engine_and_session()
     async with async_session() as session:
         query = (
             select(Statistics)
-            .filter(Statistics.username_table_stat == username_table_stat)
+            .filter(Statistics.username_table_stat == username)
             .order_by(Statistics.time.desc())  # Сортировка по убыванию даты
             .limit(100)  # Ограничение на количество строк
         )
@@ -146,21 +146,3 @@ async def get_last_30_statistics(username_table_stat):
         data = result.scalars().all()  # Получение всех строк
         return data
 
-
-# # ADMIN Read all settings and users an id
-# async def get_all_stat_admin():
-#     async_session = await create_async_engine_and_session()
-#     async with async_session() as session:
-
-#         query = (
-#             select(UsersTelegram, Settings)
-#             .join(Settings)
-#         )
-
-#         # for user_telegram, settings in data:
-#         #     print("User:", user_telegram.id, user_telegram.is_admin, user_telegram.full_name,\
-#         #            user_telegram.name)
-#         #     print("Settings:", settings.id, settings.temp_chat, settings.money)
-#         result = await session.execute(query)
-#         data = result.fetchall()  # Получение всех строк
-#         return data

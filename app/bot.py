@@ -9,7 +9,7 @@ import asyncio
 from io import StringIO, BytesIO
 import uuid
 from pathlib import Path # Работа с файловыми путями 
-from datetime import datetime, timezone, timedelta
+# from datetime import datetime, timezone, timedelta
 # import time
 # import sys
 import csv
@@ -27,7 +27,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 # from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 # Service
-from worker_db import get_user_by_id, get_user_by_username, update_user, adding_user, get_user_by_username
+from worker_db import get_user_by_id, get_user_by_username, update_user, adding_user, get_user_by_username, get_last_statistics
 from backupdb import backup_db
 from restore_db import restore_db
 from general_functions import day_utcnow, unformat_date
@@ -319,11 +319,50 @@ async def confirm_callback_handler_d(callback_query: types.CallbackQuery):
 
 #### Push /get_stat ####
 @dp.message(Command("get_stat"))
-async def get_stat(message: types.Message):
-    await bot.send_chat_action(message.chat.id, action='typing')
+async def get_stat_user(message: types.Message):
+
     id = user_id(message)
-    data = await get_user_by_id(id)
-    await message.answer(f"Your Balance is {data.money} $", parse_mode="HTML")
+    data_user_id = await get_user_by_id(id)
+
+
+    data = await get_last_statistics(data_user_id.username)
+
+    all_static = []
+    number = 0
+    all_static.append(["№", "№", "username_table_stat", "time", "use_model", "sesion_token", "price_1_tok", "total_price"]) # First a names row
+    
+    for it in data:
+        number += 1
+        id_table = it.id
+        username_table_stat = it.username_table_stat
+        time = it.time
+        use_model = it.use_model
+        sesion_token = it.sesion_token
+        price_1_tok = it.price_1_tok
+        total_price = it.total_price
+
+
+        all_static.append([number, id_table, username_table_stat, time, use_model, sesion_token, price_1_tok, total_price, id]) # added user data
+
+    # Create csv file
+    output = StringIO()
+    writer = csv.writer(output)
+    for row in all_static:
+        writer.writerow(row)
+    csv_data = output.getvalue()
+    output.close()
+
+
+    # csv file to download
+    file_name = f"User-statistic-{str(random.randint(30, 40))}.csv"
+    buffered_input_file = types.input_file.BufferedInputFile(file=csv_data.encode(), filename=file_name)
+    try:
+        await bot.send_document(chat_id=message.chat.id, document=buffered_input_file)
+    except:
+        print(f"Error sending documentb User stat")
+
+
+
 
 
 #### Push /reset_key ####
@@ -417,7 +456,7 @@ async def backup(message: types.Message):
     await message.bot.send_document(chat_id=message.chat.id, document=types.input_file.FSInputFile(last_downloaded_file))
 
 
-# Admin submenu stat
+# Admin get statistic
 @dp.message(Command("admin_stat"))
 async def get_admin_stat(message: types.Message):
 
@@ -425,8 +464,8 @@ async def get_admin_stat(message: types.Message):
 
     all_static = []
     number = 0
-    all_static.append(["№", "Username", "is_failed", "is_block", "date_block", "date_last_activ", "money",\
-                        "id", "name", "full_name", "first_name", "last_name"]) # First a names row
+    all_static.append(["№", "Username", "is failed", "is block", "date block", "date last activ", "money",\
+                        "id", "name", "full name", "first name", "last name"]) # First a names row
     
     for it in data:
         number += 1
@@ -460,7 +499,7 @@ async def get_admin_stat(message: types.Message):
     try:
         await bot.send_document(chat_id=message.chat.id, document=buffered_input_file)
     except:
-        print(f"Error sending documentb Admin stat")
+        print(f"Error sending document Admin stat")
 
 
 # Admin submenu download log
