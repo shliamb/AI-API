@@ -11,7 +11,7 @@ import gunicorn
 # from keys import api_key_openai
 from worker_db import get_user_by_username, update_user
 from general_functions import day_utcnow, unformat_date
-from openai import mod_openai
+from mod_openai import mod_openai
 
 # client = AsyncOpenAI(api_key=api_key_openai)
 app = FastAPI()
