@@ -31,17 +31,13 @@ from worker_db import get_user_by_id, get_user_by_username, update_user, adding_
 from backupdb import backup_db
 from restore_db import restore_db
 from general_functions import day_utcnow, unformat_date
+from config import money_to_start, my_app_key, time_correction, min_pay
 from keys import token_telegram, is_admin
 
 
 dp = Dispatcher() # All handlers should be attached to the Router (or Dispatcher)
 bot = Bot(token_telegram) # Initialize Bot instance with a default parse mode which will be passed to all API calls
 
-# Settings:
-money_to_start = 5 # 5$ to start work
-my_app_key = "appkey" # Key to API Key
-time_correction = +3 # Moscow
-min_pay = 1 # Minimum pay 
 
 #########
 # Get User_ID
@@ -71,6 +67,7 @@ async def gen_username(about):
 # Восстановление базы
 # Ключ от Gemini получил, теперь ее тоже можно прикрутить и попробовать.
 # Передача сигнала телеграмм боту, администратору
+# Список пользователей
 
 
 
