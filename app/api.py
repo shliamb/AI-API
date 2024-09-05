@@ -98,12 +98,13 @@ async def verify_user_appkey(username: str, appkey: str):
 
 
 
-# Model # OPENAI TEXT
+# Model TEXT
 class UserInput(BaseModel):
     user_content: str
     system_content: str
     username: str
     model: str
+    tools: str
 
 
 #### OPENAI TEXT ####
@@ -141,18 +142,7 @@ async def openai_api(user_input: UserInput, appkey: str = Header(...)):
 
 
 
-
-
-# # Model GEMINI TEXT
-# class UserInput(BaseModel):
-#     user_content: str
-#     system_content: str
-#     username: str
-#     model: str
-
-
 #### GEMINI TEXT ####
-
 
 # TEXT GEMINI Endpoint
 @app.post("/api/gemini/", status_code=status.HTTP_200_OK)
