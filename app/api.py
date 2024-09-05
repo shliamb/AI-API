@@ -130,23 +130,23 @@ async def hello_api():
 @app.post("/api/chat/", status_code=status.HTTP_200_OK)
 async def chat(user_input: UserInput, appkey: str = Header(...)):
 
-    try:
+    # try:
 
-        # Verify user and her appkey
-        username = user_input.username
-        confirm_verify = await verify_user_appkey(username, appkey)
-        if confirm_verify["status_code"] != status.HTTP_200_OK:
-            raise
+    # Verify user and her appkey
+    username = user_input.username
+    confirm_verify = await verify_user_appkey(username, appkey)
+    if confirm_verify["status_code"] != status.HTTP_200_OK:
+        raise
 
-        # Working with OpenAI
-        confirm_openai = await mod_openai(user_input)
-        return confirm_openai
+    # Working with OpenAI
+    confirm_openai = await mod_openai(user_input)
+    return confirm_openai
 
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="HTTP_500_INTERNAL_SERVER_ERROR.",
-        )
+    # except:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #         detail="HTTP_500_INTERNAL_SERVER_ERROR.",
+    #     )
 
 
 
