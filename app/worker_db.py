@@ -93,6 +93,28 @@ async def adding_user(user_data):
     return confirmation
 
 
+
+# Admin get all users and her data
+async def get_user_by_username():
+    async_session = await create_async_engine_and_session()
+    async with async_session() as session:
+        query = select(UsersBase)
+        result = await session.execute(query)
+        # data = result.fetchall()
+        data = result.scalars().all()
+        return data or None
+
+
+
+
+
+
+
+
+
+
+
+
 #### STATISTICS ####
 # Add statistics
 async def add_statistic(data):

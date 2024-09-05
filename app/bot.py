@@ -9,10 +9,10 @@ import asyncio
 from io import StringIO, BytesIO
 import uuid
 from pathlib import Path # Работа с файловыми путями 
-# from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta
 # import time
 # import sys
-# import csv
+import csv
 # import datetime
 
 # Aiogram
@@ -27,7 +27,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 # from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 # Service
-from worker_db import get_user_by_id, get_user_by_username, update_user, adding_user
+from worker_db import get_user_by_id, get_user_by_username, update_user, adding_user, get_user_by_username
 from backupdb import backup_db
 from restore_db import restore_db
 from general_functions import day_utcnow, unformat_date
@@ -370,8 +370,9 @@ async def admin(message: types.Message):
     await message.answer(
         "<b>ADMIN MENU:</b> \n\n"
         "/backup - Make a backup of the database\n\n"
-        "/get_log"
-        "/clear_log"
+        "/admin_stat \n\n"
+        "/get_log \n\n"
+        "/clear_log \n\n"
         "clear \n"
         "   │ \n"
         "   ├── /clear_old_users - Deleting old users* \n"
@@ -394,9 +395,9 @@ async def backup(message: types.Message):
 
     confirmation = backup_db() # - резервная копия
     if confirmation is True:
-        await message.answer("Резервная копия базы данных создана успешно и представленна ниже. Сохранены 3 последние версии в рабочей папке, остальные удалены.")
+        await message.answer("The backup copy of the database was created successfully and is presented below. The 3 latest versions are saved in the working folder, the rest are deleted.")
     else:
-        await message.answer("Ошибка создания резервной копии базы данных.")
+        await message.answer("Error creating a backup copy of the database.")
 
     await asyncio.sleep(0.5)
 
@@ -416,6 +417,51 @@ async def backup(message: types.Message):
     await message.bot.send_document(chat_id=message.chat.id, document=types.input_file.FSInputFile(last_downloaded_file))
 
 
+# Admin submenu stat
+@dp.message(Command("admin_stat"))
+async def get_admin_stat(message: types.Message):
+
+    data = await get_user_by_username()
+
+    all_static = []
+    number = 0
+    all_static.append(["№", "Username", "is_failed", "is_block", "date_block", "date_last_activ", "money",\
+                        "id", "name", "full_name", "first_name", "last_name"]) # First a names row
+    
+    for it in data:
+        number += 1
+        Username = it.Username
+        is_failed = it.is_failed
+        is_block = it.is_block
+        date_block = it.date_block
+        date_last_activ = it.date_last_activ
+        money = round(it.money, 5)
+        id = it.id
+        name = it.name
+        full_name = it.full_name
+        first_name = it.first_name
+        last_name = it.last_name
+
+        all_static.append([number, Username, is_failed, is_block, date_block, date_last_activ, money, id, name, full_name,\
+                            first_name, last_name]) # added user data
+
+    # Create csv file
+    output = StringIO()
+    writer = csv.writer(output)
+    for row in all_static:
+        writer.writerow(row)
+    csv_data = output.getvalue()
+    output.close()
+
+
+    # csv file to download
+    file_name = f"Admin-{datetime.datetime.utcnow().strftime('%Y-%m-%d-%H-%M')}.csv"
+    buffered_input_file = types.input_file.BufferedInputFile(file=csv_data.encode(), filename=file_name)
+    try:
+        await bot.send_document(chat_id=message.chat.id, document=buffered_input_file)
+    except:
+        print(f"Error sending documentb Admin stat")
+
 
 # Admin submenu download log
 @dp.message(Command("get_log"))
@@ -424,7 +470,7 @@ async def admin_get_log(message: types.Message):
     if os.path.exists("./log/app.log") and os.path.getsize("./log/app.log") > 0:
         await bot.send_document(message.chat.id, document=types.input_file.FSInputFile("./log/app.log"))
     else:
-        await bot.send_message(message.chat.id, "Файл app.log пустой или отсуствует.")
+        await bot.send_message(message.chat.id, "The app.log file is empty or missing.")
 
 
 # Admin clear log /clearlog
@@ -435,9 +481,9 @@ async def admin_clear_log(message: types.Message):
 
         with open("./log/app.log", 'w'):
             pass
-        await bot.send_message(message.chat.id, "Файл app.log очищен успешно.")
+        await bot.send_message(message.chat.id, "The app.log file has been cleared successfully.")
     else:
-        await bot.send_message(message.chat.id, "Файл app.log пустой или отсуствует.")
+        await bot.send_message(message.chat.id, "The app.log file is empty or missing.")
 
 
 # Admin Clear Old Users
