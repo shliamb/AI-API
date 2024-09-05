@@ -140,9 +140,13 @@ async def chat(user_input: UserInput, appkey: str = Header(...)):
 
         # Working with OpenAI
         confirm_openai = await mod_openai(user_input)
+        return confirm_openai
 
     except:
-        return confirm_openai
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="HTTP_500_INTERNAL_SERVER_ERROR.",
+        )
 
 
 
