@@ -23,9 +23,9 @@ from aiogram.filters import CommandStart, Command, Filter
 from aiogram.types import (Message, BotCommand, LabeledPrice, ContentType,
                             InputFile, Document, PhotoSize, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton)
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.storage.memory import MemoryStorage
+# from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+# from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 # Service
 from worker_db import get_user_by_id, get_user_by_username, update_user, adding_user
 from backupdb import backup_db
