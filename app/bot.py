@@ -370,12 +370,15 @@ async def admin(message: types.Message):
     await message.answer(
         "<b>ADMIN MENU:</b> \n\n"
         "/backup - Make a backup of the database\n\n"
+        "/get_log"
+        "/clear_log"
         "clear \n"
         "   │ \n"
         "   ├── /clear_old_users - Deleting old users* \n"
         "   └── /clear_db - Cleaning up old DB data* \n\n"
         "/restore_db - Restoring a DB from a file*\n\n"
         , parse_mode="HTML")
+
 
 
 # Admin BackupDB
@@ -412,6 +415,29 @@ async def backup(message: types.Message):
 
     await message.bot.send_document(chat_id=message.chat.id, document=types.input_file.FSInputFile(last_downloaded_file))
 
+
+
+# Admin submenu download log
+@dp.message(Command("get_log"))
+async def admin_get_log(message: types.Message):
+
+    if os.path.exists("./log/app.log") and os.path.getsize("./log/app.log") > 0:
+        await bot.send_document(message.chat.id, document=types.input_file.FSInputFile("./log/app.log"))
+    else:
+        await bot.send_message(message.chat.id, "Файл app.log пустой или отсуствует.")
+
+
+# Admin clear log /clearlog
+@dp.message(Command("clear_log"))
+async def admin_clear_log(message: types.Message):
+
+    if os.path.exists("./log/app.log") and os.path.getsize("./log/app.log") > 0:
+
+        with open("./log/app.log", 'w'):
+            pass
+        await bot.send_message(message.chat.id, "Файл app.log очищен успешно.")
+    else:
+        await bot.send_message(message.chat.id, "Файл app.log пустой или отсуствует.")
 
 
 # Admin Clear Old Users
