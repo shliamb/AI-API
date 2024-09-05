@@ -455,7 +455,7 @@ async def get_admin_stat(message: types.Message):
 
 
     # csv file to download
-    file_name = f"Admin-{datetime.datetime.utcnow().strftime('%Y-%m-%d-%H-%M')}.csv"
+    file_name = f"Admin-statistic-{str(random.randint(30, 40))}.csv"
     buffered_input_file = types.input_file.BufferedInputFile(file=csv_data.encode(), filename=file_name)
     try:
         await bot.send_document(chat_id=message.chat.id, document=buffered_input_file)
