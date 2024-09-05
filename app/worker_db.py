@@ -46,7 +46,7 @@ async def get_user_by_username(username):
         data = result.scalar_one_or_none()  # - это метод SQLAlchemy, который возвращает ровно один результат из результата запроса или None, если запрос не вернул ни одного результата.
         return data or None
 
-# Update User Telegram
+# Update User Telegram by ID
 async def update_user(id, updated_data):
     async_session = await create_async_engine_and_session()
     confirmation = False
@@ -57,6 +57,22 @@ async def update_user(id, updated_data):
             await session.commit()
             confirmation = True
             logging.info(f"update_user {id}")
+        except Exception as e:
+            logging.error(f"Failed to update user: {e}")
+    return confirmation
+
+
+# Update User Telegram by Username
+async def update_user_by_username(username, updated_data):
+    async_session = await create_async_engine_and_session()
+    confirmation = False
+    async with async_session() as session:
+        try:
+            query = update(UsersBase).where(UsersBase.username == username).values(**updated_data)
+            await session.execute(query)
+            await session.commit()
+            confirmation = True
+            logging.info(f"update_user {username}")
         except Exception as e:
             logging.error(f"Failed to update user: {e}")
     return confirmation
@@ -77,139 +93,6 @@ async def adding_user(user_data):
     return confirmation
 
 
-
-
-# #### SETTINGS CHATGPT ####
-# # Read Settings
-# async def get_settings(id):
-#     async_session = await create_async_engine_and_session()
-#     async with async_session() as session:
-#         query = select(Settings).filter(Settings.id == id)
-#         result = await session.execute(query)
-#         data = result.scalar_one_or_none() 
-#         return data or None
-
-# # Update Settings 
-# async def update_settings(id, updated_data):
-#     async_session = await create_async_engine_and_session()
-#     confirmation = False
-#     async with async_session() as session:
-#         try:
-#             query = update(Settings).where(Settings.id == id).values(**updated_data)
-#             await session.execute(query)
-#             await session.commit()
-#             confirmation = True
-#             logging.info(f"Update Settings {id}")
-#         except Exception as e:
-#             logging.error(f"Failed to update settings: {e}")
-#     return confirmation
-
-# # Add to settings User ID
-# async def add_settings(id):
-#     async_session = await create_async_engine_and_session()
-#     confirmation = False
-#     async with async_session() as session:
-#         try:
-#             data = {"id": id}
-#             query = insert(Settings).values(**data)
-#             await session.execute(query)
-#             await session.commit()
-#             confirmation = True
-#             logging.info(f"add_settings {id}")
-#         except Exception as e:
-#             logging.error(f"Failed to add id settings: {e}")
-#     return confirmation
-
-
-
-
-# ####  DISCUSSION ####
-# # Read Discussion
-# async def get_discussion(id):
-#     async_session = await create_async_engine_and_session()
-#     async with async_session() as session:
-#         query = select(Discussion).filter(Discussion.id == id)
-#         result = await session.execute(query)
-#         data = result.scalar_one_or_none() 
-#         return data or None
-
-# # Update Discussion 
-# async def update_discussion(id, updated_data):
-#     async_session = await create_async_engine_and_session()
-#     confirmation = False
-#     async with async_session() as session:
-#         try:
-#             query = update(Discussion).where(Discussion.id == id).values(**updated_data)
-#             await session.execute(query)
-#             await session.commit()
-#             confirmation = True
-#             logging.info(f"Update Discussion {id}")
-#         except Exception as e:
-#             logging.error(f"Failed to update Discussion: {e}")
-#     return confirmation
-
-# # Add id to Discussion Table
-# async def add_discussion(id):
-#     async_session = await create_async_engine_and_session()
-#     confirmation = False
-#     async with async_session() as session:
-#         try:
-#             data = {"id": id}
-#             query = insert(Discussion).values(**data)
-#             await session.execute(query)
-#             await session.commit()
-#             confirmation = True
-#             logging.info(f"add_discussion {id}")
-#         except Exception as e:
-#             logging.error(f"Failed to add id Discussion: {e}")
-#     return confirmation
-
-
-#### ECXHANGE ####
-# Read exchange
-async def get_exchange():
-    id = 1
-    async_session = await create_async_engine_and_session()
-    async with async_session() as session:
-        query = select(Exchange).filter(Exchange.id == id)
-        result = await session.execute(query)
-        data = result.scalar_one_or_none() 
-        return data or None
-
-# Add_exchange
-async def add_exchange(data):
-    async_session = await create_async_engine_and_session()
-    confirmation = False
-    async with async_session() as session:
-        try:
-            query = insert(Exchange).values(**data)
-            await session.execute(query)
-            await session.commit()
-            confirmation = True
-            logging.info("Add_exchange")
-        except Exception as e:
-            logging.error(f"Failed to add Excheange rait: {e}")
-    return confirmation
-
-
-# Update_exchange 
-async def update_exchange(id, updated_data):
-    async_session = await create_async_engine_and_session()
-    confirmation = False
-    async with async_session() as session:
-        try:
-            query = update(Exchange).where(Exchange.id == id).values(**updated_data)
-            await session.execute(query)
-            await session.commit()
-            confirmation = True
-            logging.info("Update_exchange")
-        except Exception as e:
-            logging.error(f"Failed to update Exchange rait: {e}")
-    return confirmation
-
-
-
-
 #### STATISTICS ####
 # Add statistics
 async def add_statistic(data):
@@ -228,12 +111,12 @@ async def add_statistic(data):
 
 
 # Read Statistics on id all 30 line
-async def get_last_30_statistics(id):
+async def get_last_30_statistics(username_table_stat):
     async_session = await create_async_engine_and_session()
     async with async_session() as session:
         query = (
             select(Statistics)
-            .filter(Statistics.users_telegram_id == id)
+            .filter(Statistics.username_table_stat == username_table_stat)
             .order_by(Statistics.time.desc())  # Сортировка по убыванию даты
             .limit(100)  # Ограничение на количество строк
         )

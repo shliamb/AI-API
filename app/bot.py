@@ -1,7 +1,7 @@
 # Base
 import logging
-# logging.getLogger('aiogram').propagate = True # Блокировка логирование aiogram до его импорта
-# logging.basicConfig(level=logging.INFO, filename='log/app.log', filemode='a', format='%(levelname)s - %(asctime)s - %(name)s - %(message)s',) # При деплое активировать логирование в файл
+# logging.getLogger('aiogram').propagate = False # Блокировка логирование aiogram до его импорта
+logging.basicConfig(level=logging.INFO, filename='./log/app.log', filemode='a', format='%(levelname)s - %(asctime)s - %(name)s - %(message)s',) # При деплое активировать логирование в файл
 import re
 import random
 import os
@@ -64,13 +64,13 @@ async def gen_username(about):
 
 
 
-# Вернуть известную версию аиограм, что бы логирование работало
-# Добавить условия проверки баланса
+
 # Статистика минимальная и вычитание суммы
 # Очистка базы - два варианта, от клиентов мертвых, от старой статистики
 # Кнопка в админке забрать лог, чистка логов
 # Восстановление базы
 # Ключ от Gemini получил, теперь ее тоже можно прикрутить и попробовать.
+# Передача сигнала телеграмм боту, администратору
 
 
 
@@ -539,8 +539,8 @@ if __name__ == "__main__":
     try:
         asyncio.run(main_bot())
     except Exception as e:
-        #logging.error(f"An error occurred: {e}. Restarting after a delay...")
-        print(f"An error occurred: {e}. Restarting after a delay...")
+        logging.error(f"An error occurred: {e}.")
+        print(f"An error occurred: {e}.")
 
 
 

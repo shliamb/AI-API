@@ -1,31 +1,20 @@
+import logging
 # Base
 import asyncio
 from pydantic import BaseModel
-# OpenAI
-# from openai import AsyncOpenAI, RateLimitError, OpenAIError
 # Fasapi
 from fastapi import FastAPI, Header, Depends, HTTPException, status
 import uvicorn
 import gunicorn
 # Service
-# from keys import api_key_openai
 from worker_db import get_user_by_username, update_user
 from general_functions import day_utcnow, unformat_date
 from mod_openai import mod_openai
+from config import limit_trying, timeout_after_error_username, waiting_time, time_correction
 
-# client = AsyncOpenAI(api_key=api_key_openai)
+
 app = FastAPI()
 
-
-
-
-
-#### CONFIG ####
-
-limit_trying = 5
-timeout_after_error_username = 5 # sec.
-waiting_time = 15 # min/
-time_correction = +3 # Moscow
 
 
 #### OPENAI TEXT ####
@@ -93,6 +82,12 @@ async def verify_user_appkey(username: str, appkey: str):
             detail=f"Invalid API Key, valid attempts have ended, sorry, try again in {waiting_time} minutes.",
         )
 
+    if data_by_username.money <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail="Insufficient funds. Please add funds to your account.",
+        )
+
     if appkey == str(data_by_username.appkey) and data_by_username.is_failed != 0:
         updated_data = {"is_failed": 0}
         await update_user(data_by_username.id, updated_data)
@@ -124,13 +119,9 @@ async def hello_api():
     return {"response": "https://t.me/myapi_aibot"}
 
 
-
-
 # TEXT OPENAI Endpoint
 @app.post("/api/chat/", status_code=status.HTTP_200_OK)
 async def chat(user_input: UserInput, appkey: str = Header(...)):
-
-    # try:
 
     # Verify user and her appkey
     username = user_input.username
@@ -139,14 +130,14 @@ async def chat(user_input: UserInput, appkey: str = Header(...)):
         raise
 
     # Working with OpenAI
-    confirm_openai = await mod_openai(user_input)
+    confirm_openai = await mod_openai(username, user_input)
+
+    if confirm_openai == "Error: There is no money for OpenAI account.":
+        logging.info("There is no money for OpenAI account.")
+        # Передача сигнала телеграмм боту, администратору
+
     return confirm_openai
 
-    # except:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    #         detail="HTTP_500_INTERNAL_SERVER_ERROR.",
-    #     )
 
 
 
