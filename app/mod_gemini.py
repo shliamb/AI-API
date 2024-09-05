@@ -10,7 +10,7 @@ genai.configure(api_key=api_key_gemini)
 
 
 
-async def mod_gemini(user_input):
+async def mod_gemini(username, user_input):
     model = genai.GenerativeModel(user_input.model) # gemini-1.5-flash-001  "gemini-1.5-flash"
     response = model.generate_content(user_input.user_content)
     print(response.text)
