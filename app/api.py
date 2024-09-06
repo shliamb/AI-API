@@ -143,7 +143,7 @@ async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...)):
 # Model Gemini Text
 class UserInput_Gemini(BaseModel):
     user_content: str
-    system_instruction: str
+    system_content: str
     username: str
     model: str
     tools: str

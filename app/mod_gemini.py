@@ -12,9 +12,18 @@ genai.configure(api_key=api_key_gemini)
 
 async def mod_gemini(username, user_input):
     try:
-        model = genai.GenerativeModel(model_name=user_input.model, tools=user_input.tools or None, system_instruction=user_input.system_instruction or None) # "tools": "code_execution",
-
+        model = genai.GenerativeModel(model_name=user_input.model, tools=user_input.tools or None, system_content=user_input.system_instruction or None) # "tools": "code_execution",
         response = model.generate_content(user_input.user_content)
+
+        # Tokens:
+        print(response.usage_metadata[0], response.usage_metadata[1], response.usage_metadata[2])
+        all_tokens = response.usage_metadata[2] # ( prompt_token_count: 11, candidates_token_count: 73, total_token_count: 84 )
+        print("all tokens:", all_tokens)
+
+
+
+
+
         return {"response": response.text}
     
     except Exception as e:

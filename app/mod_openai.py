@@ -29,7 +29,7 @@ async def mod_openai(username, user_input):
                 model=user_input.model,
         )
         
-        # STATISTIC:
+        # TOKENS:
         # Извлечение ответа статистики из результата
         if chat_completion:
             response_content = chat_completion.choices[0].message.content
@@ -43,6 +43,7 @@ async def mod_openai(username, user_input):
         # Расчет потраченых денег на токены
         data = await calculation(price, model_version, used_tokens)
 
+        # STATISTIC:
         # Сбор данных
         data_stat = {
             "username_table_stat": username,
