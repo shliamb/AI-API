@@ -20,6 +20,7 @@ async def mod_openai(username, user_input):
 
 
     try:
+        #OPENAI:
         chat_completion = await client.chat.completions.create(
             messages=[
                 {"role": "system", "content": user_input.system_content}, # Определение роли AI
@@ -28,17 +29,19 @@ async def mod_openai(username, user_input):
                 model=user_input.model,
         )
         
+        # STATISTIC:
         # Извлечение ответа статистики из результата
         if chat_completion:
             response_content = chat_completion.choices[0].message.content
             model_version = chat_completion.model
-            used_tokens = chat_completion.usage.total_tokens
             prompt_tokens = chat_completion.usage.prompt_tokens
+            used_tokens = chat_completion.usage.total_tokens + prompt_tokens
         else:
+            logging.error("No response from openai")
             raise
         
         # Расчет потраченых денег на токены
-        data = await calculation(price, model_version, used_tokens, prompt_tokens)
+        data = await calculation(price, model_version, used_tokens)
 
         # Сбор данных
         data_stat = {
@@ -49,7 +52,8 @@ async def mod_openai(username, user_input):
             "price_1_tok": data[0],
             "total_price": data[2],
         }
-        # Save statistic
+
+        # SAVE STATISTIC TO DB:
         await add_statistic(data_stat)
         # Получаю данные пользователя
         user_data = await get_user_by_username(username)
@@ -69,7 +73,7 @@ async def mod_openai(username, user_input):
         error_code_match = re.search(r"Error code: (\d+)", error_message)
         error_code = error_code_match.group(1) if error_code_match else "No code provided"
         if error_code == '429':
-           print(f"Error {error_code}: {error_message}, There are not enough funds for OpenAI. Administrators are notified automatically. We will restore everything in the near future.") 
+           logging.error(f"Error {error_code}: {error_message}, There are not enough funds for OpenAI. Administrators are notified automatically. We will restore everything in the near future.") 
         no_money_openai = "Error: There is no money for OpenAI account."
         return no_money_openai
 
@@ -77,5 +81,5 @@ async def mod_openai(username, user_input):
     except OpenAIError as e:
         # Обработка других ошибок OpenAI
         error_message = str(e)
-        print(f"Error: {error_message}")
+        logging.error(f"Error: {error_message}")
         return error_message

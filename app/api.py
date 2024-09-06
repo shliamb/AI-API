@@ -30,6 +30,7 @@ async def verify_user_appkey(username: str, appkey: str):
     
     if data_by_username is None:
         await asyncio.sleep(timeout_after_error_username)
+        logging.error("Invalid UserName in Body! After a failed attempt, a 5-second wait is activated.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid UserName in Body! After a failed attempt, a 5-second wait is activated. To register - https://t.me/myapi_aibot",
@@ -45,6 +46,7 @@ async def verify_user_appkey(username: str, appkey: str):
         un_time = un_date_now[1] - un_date_block[1]
 
         if un_date_now[0] == un_date_block[0] and un_time < un_waiting_time:
+            logging.error(f"Sorry, the user is blocked for {waiting_time} minutes, after {limit_trying} unsuccessful attempts.")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=f"Sorry, the user is blocked for {waiting_time} minutes, after {limit_trying} unsuccessful attempts.",
@@ -53,6 +55,7 @@ async def verify_user_appkey(username: str, appkey: str):
         if un_date_now[0] != un_date_block[0] or un_time >= un_waiting_time:
             updated_data = {"is_block": False, "is_failed": 0}
             await update_user(data_by_username.id, updated_data)
+            logging.error("Congratulations! The time for blocking the user has passed, try again to access the API with the correct data.")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Congratulations! The time for blocking the user has passed, try again to access the API with the correct data.",
@@ -62,6 +65,7 @@ async def verify_user_appkey(username: str, appkey: str):
         new_limit = data_by_username.is_failed + 1
         updated_data = {"is_failed": new_limit}
         await update_user(data_by_username.id, updated_data)
+        logging.error(f"Invalid API Key, {new_limit} attempt out of {limit_trying}.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid API Key, {new_limit} attempt out of {limit_trying}.",
@@ -70,12 +74,14 @@ async def verify_user_appkey(username: str, appkey: str):
     if appkey != str(data_by_username.appkey) and data_by_username.is_failed >= limit_trying:
         updated_data = {"is_block": True, "date_block":  await day_utcnow(time_correction) } 
         await update_user(data_by_username.id, updated_data)
+        logging.error(f"Invalid API Key, valid attempts have ended, sorry, try again in {waiting_time} minutes.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid API Key, valid attempts have ended, sorry, try again in {waiting_time} minutes.",
         )
 
     if data_by_username.money <= 0:
+        logging.error("Insufficient funds. Please add funds to your account.")
         raise HTTPException(
             status_code=status.HTTP_402_PAYMENT_REQUIRED,
             detail="Insufficient funds. Please add funds to your account.",
@@ -84,12 +90,14 @@ async def verify_user_appkey(username: str, appkey: str):
     if appkey == str(data_by_username.appkey) and data_by_username.is_failed != 0:
         updated_data = {"is_failed": 0}
         await update_user(data_by_username.id, updated_data)
+        logging.info("The user has successfully logged in, the counters have been reset!")
         return {
             "status_code": status.HTTP_200_OK,
             "detail": "The user has successfully logged in, the counters have been reset!"
         }
     
     if appkey == str(data_by_username.appkey):
+        logging.info("The user has passed.")
         return {
             "status_code": status.HTTP_200_OK,
             "detail": "The user has passed."
@@ -135,6 +143,7 @@ async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...)):
 # Model Gemini Text
 class UserInput_Gemini(BaseModel):
     user_content: str
+    system_instruction: str
     username: str
     model: str
     tools: str
