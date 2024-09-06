@@ -22,8 +22,8 @@ async def mod_gemini(username, user_input):
         if response:
             usage_metadata = response.usage_metadata
             total_token_count = usage_metadata.total_token_count
-            logging.info("Gemini text in tokens:\n", model.count_tokens(user_input.user_content))
-            logging.info("Gemini all text tokens:", response.usage_metadata)
+            logging.info(f"Gemini text in tokens: {str(model.count_tokens(user_input.user_content))}")
+            logging.info(f"Gemini all text tokens: {str(response.usage_metadata)}")
         else:
             logging.error("No response from Google Gemini.")
             raise

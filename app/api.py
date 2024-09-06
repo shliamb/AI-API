@@ -88,7 +88,7 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
             detail="Insufficient funds. Please add funds to your account.",
         )
 
-    if model in price:
+    if model not in price:
         logging.error("Unfortunately, this model is not on the list.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
