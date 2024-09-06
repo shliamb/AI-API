@@ -60,37 +60,37 @@ async def mod_openai(username, user_input):#, image_path):
 
         # TOKENS:
         # Извлечение ответа статистики из результата
-        if chat_completion:
-            response_content = chat_completion.choices[0].message.content
-            model_version = chat_completion.model
-            prompt_tokens = chat_completion.usage.prompt_tokens
-            used_tokens = chat_completion.usage.total_tokens + prompt_tokens
-        else:
-            logging.error("No response from openai")
-            raise
+        # if chat_completion:
+        #     response_content = chat_completion.choices[0].message.content
+        #     model_version = chat_completion.model
+        #     prompt_tokens = chat_completion.usage.prompt_tokens
+        #     used_tokens = chat_completion.usage.total_tokens + prompt_tokens
+        # else:
+        #     logging.error("No response from openai")
+        #     raise
         
-        # Расчет потраченых денег на токены
-        data = await calculation(price, model_version, used_tokens)
+        # # Расчет потраченых денег на токены
+        # data = await calculation(price, model_version, used_tokens)
 
-        # STATISTIC:
-        # Сбор данных
-        data_stat = {
-            "username_table_stat": username,
-            "time": await day_utcnow(time_correction),
-            "use_model": model_version,
-            "sesion_token": data[1],
-            "price_1_tok": data[0],
-            "total_price": data[2],
-        }
+        # # STATISTIC:
+        # # Сбор данных
+        # data_stat = {
+        #     "username_table_stat": username,
+        #     "time": await day_utcnow(time_correction),
+        #     "use_model": model_version,
+        #     "sesion_token": data[1],
+        #     "price_1_tok": data[0],
+        #     "total_price": data[2],
+        # }
 
-        # SAVE STATISTIC TO DB:
-        await add_statistic(data_stat)
-        # Получаю данные пользователя
-        user_data = await get_user_by_username(username)
-        new_money = user_data.money - data[2]
-        data_money = {"money": new_money}
-        # Баланс изменили с учетом расхода
-        await update_user_by_username(username, data_money)
+        # # SAVE STATISTIC TO DB:
+        # await add_statistic(data_stat)
+        # # Получаю данные пользователя
+        # user_data = await get_user_by_username(username)
+        # new_money = user_data.money - data[2]
+        # data_money = {"money": new_money}
+        # # Баланс изменили с учетом расхода
+        # await update_user_by_username(username, data_money)
 
         return {"response": response_content}
     
