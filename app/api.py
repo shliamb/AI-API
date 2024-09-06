@@ -142,7 +142,8 @@ async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...),):#
     # with open(image_path, "wb") as buffer:
     #     shutil.copyfileobj(image.file, buffer)
 
-    image_path = "./uploads/image.jpg"  # Путь для сохранения изображения
+    #image_path = "./uploads/image.jpg"  # Путь для сохранения изображения
+    image_path = None  # Путь для сохранения изображения
 
     # Working with OpenAI
     confirm_openai = await mod_openai(username, user_input, image_path)
