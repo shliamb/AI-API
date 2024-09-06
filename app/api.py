@@ -1,4 +1,5 @@
 import logging
+logging.basicConfig(level=logging.INFO, filename='./log/app.log', filemode='a', format='%(levelname)s - %(asctime)s - %(name)s - %(message)s',) # При деплое активировать логирование в файл
 # Base
 import asyncio
 from pydantic import BaseModel
@@ -11,7 +12,7 @@ from worker_db import get_user_by_username, update_user
 from general_functions import day_utcnow, unformat_date
 from mod_openai import mod_openai
 from mod_gemini import mod_gemini
-from config import limit_trying, timeout_after_error_username, waiting_time, time_correction
+from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price
 
 
 app = FastAPI()
@@ -25,7 +26,7 @@ async def hello_api():
 
 
 # USER VERIFICATION
-async def verify_user_appkey(username: str, appkey: str):
+async def verify_user_appkey(username: str, model: str, appkey: str):
     data_by_username = await get_user_by_username(username)
     
     if data_by_username is None:
@@ -87,6 +88,13 @@ async def verify_user_appkey(username: str, appkey: str):
             detail="Insufficient funds. Please add funds to your account.",
         )
 
+    if model is not price:
+        logging.error("Unfortunately, this model is not on the list.")
+        raise HTTPException(
+            status_code=status.HTTP_204_NO_CONTENT,
+            detail="Unfortunately, this model is not on the list.",
+        )
+
     if appkey == str(data_by_username.appkey) and data_by_username.is_failed != 0:
         updated_data = {"is_failed": 0}
         await update_user(data_by_username.id, updated_data)
@@ -122,7 +130,8 @@ async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...)):
 
     # Verify user and her appkey
     username = user_input.username
-    confirm_verify = await verify_user_appkey(username, appkey)
+    model = user_input.model
+    confirm_verify = await verify_user_appkey(username, model, appkey)
     if confirm_verify["status_code"] != status.HTTP_200_OK:
         raise
 
@@ -154,7 +163,8 @@ async def gemini_api(user_input: UserInput_Gemini, appkey: str = Header(...)):
 
     # Verify user and her appkey
     username = user_input.username
-    confirm_verify = await verify_user_appkey(username, appkey)
+    model = user_input.model
+    confirm_verify = await verify_user_appkey(username, model, appkey)
     if confirm_verify["status_code"] != status.HTTP_200_OK:
         raise
 
