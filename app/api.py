@@ -137,10 +137,12 @@ async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...), im
     if confirm_verify["status_code"] != status.HTTP_200_OK:
         raise
     
-    # Сохраняем изображение на сервере
-    image_path = f"./uploads/{image.filename}"  # Путь для сохранения изображения
-    with open(image_path, "wb") as buffer:
-        shutil.copyfileobj(image.file, buffer)
+    print(type(image_path), image_path)
+    if image:
+        # Сохраняем изображение на сервере
+        image_path = f"./uploads/{image.filename}"  # Путь для сохранения изображения
+        with open(image_path, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
 
     # image_path = "./uploads/image.jpg"  # Путь для сохранения изображения
     # image_path = None  # Путь для сохранения изображения
