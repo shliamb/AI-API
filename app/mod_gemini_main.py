@@ -18,6 +18,8 @@ async def mod_gemini(username, user_input):
         model = genai.GenerativeModel(model_name=user_input.model, tools=user_input.tools or None, system_instruction=user_input.system_content or None) # "tools": "code_execution",
         response = model.generate_content(user_input.user_content)
 
+        print("1")
+
         # Tokens:
         if response:
             usage_metadata = response.usage_metadata
@@ -26,7 +28,9 @@ async def mod_gemini(username, user_input):
             logging.info(f"Gemini all text tokens: {str(response.usage_metadata)}")
         else:
             logging.error("No response from Google Gemini.")
-            raise
+            return
+
+        print(f"2:{str(response.usage_metadata)}")
 
         # Расчет потраченых денег на токены
         data = await calculation(price, user_input.model, total_token_count)

@@ -128,7 +128,7 @@ class UserInput_OpenAI(BaseModel):
 
 # TEXT OPENAI Endpoint
 @app.post("/api/openai/", status_code=status.HTTP_200_OK)
-async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...)):#, image: UploadFile = File(...),):
+async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...),):#, image: UploadFile = File(...),):
 
     # Verify user and her appkey
     username = user_input.username
@@ -176,10 +176,10 @@ async def gemini_api(user_input: UserInput_Gemini, appkey: str = Header(...)):
         raise
 
     # Working with Gemini
-    confirm_openai = await mod_gemini(username, user_input)
+    confirm_gemini = await mod_gemini(username, user_input)
 
 
-    return confirm_openai
+    return confirm_gemini
 
 
 
