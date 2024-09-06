@@ -128,7 +128,7 @@ class UserInput_OpenAI(BaseModel):
 
 # TEXT OPENAI Endpoint
 @app.post("/api/openai/", status_code=status.HTTP_200_OK)
-async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...), image: UploadFile = File(...),):
+async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...)):#, image: UploadFile = File(...),):
 
     # Verify user and her appkey
     username = user_input.username
@@ -137,13 +137,13 @@ async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...), im
     if confirm_verify["status_code"] != status.HTTP_200_OK:
         raise
     
-    # Сохраняем изображение на сервере
-    image_path = f"./uploads/{image.filename}"  # Путь для сохранения изображения
-    with open(image_path, "wb") as buffer:
-        shutil.copyfileobj(image.file, buffer)
+    # # Сохраняем изображение на сервере
+    # image_path = f"./uploads/{image.filename}"  # Путь для сохранения изображения
+    # with open(image_path, "wb") as buffer:
+    #     shutil.copyfileobj(image.file, buffer)
 
     # Working with OpenAI
-    confirm_openai = await mod_openai(username, user_input, image_path)
+    confirm_openai = await mod_openai(username, user_input)#, image_path)
 
     if confirm_openai == "Error: There is no money for OpenAI account.":
         logging.info("There is no money for OpenAI account.")

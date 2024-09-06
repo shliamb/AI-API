@@ -40,7 +40,7 @@ async def mod_openai(username, user_input, image_path):
             messages = [
                         {"role": "user", "content": [
                                                         {"type": "text", "text": user_input.system_content},
-                                                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}",}},
+                                                        #{"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}",}},
                                                     ],
                         },
                         {"role": "user", "content": user_input.user_content},
