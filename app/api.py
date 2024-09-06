@@ -5,6 +5,7 @@ import asyncio
 from pydantic import BaseModel
 import shutil
 import requests
+from typing import Optional
 # Fasapi
 from fastapi import FastAPI, Header, Depends, HTTPException, status, UploadFile, File
 from fastapi.responses import JSONResponse
@@ -128,7 +129,7 @@ class UserInput_OpenAI(BaseModel):
 
 # TEXT OPENAI Endpoint
 @app.post("/api/openai/", status_code=status.HTTP_200_OK)
-async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...), image: UploadFile = File(None)):
+async def openai_api(user_input: Optional[UserInput_OpenAI] = None, appkey: str = Header(...), image: UploadFile = File(None)):
 
     # Verify user and her appkey
     username = user_input.username
