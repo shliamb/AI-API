@@ -32,47 +32,28 @@ async def mod_openai(username, user_input, image_path):
 
     try:
 
-        if image_path is not None:
+        # Формируем список сообщений
+        messages = [
+                    {"role": "user", "content": [
+                                                    {"type": "text", "text": user_input.system_content},
+                                                ],
+                    },
+                    {"role": "user", "content": user_input.user_content},
+                    ]
+
+        # Добавляем картинку, если она существует
+        if image_message:
             # Getting the base64 string
             base64_image = await encode_image(image_path)
             image_message = {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
-        else:
-            image_message = ""
-
-
-
-        # Формируем список сообщений
-        # messages = [{"role": "user", "content": {"type": "text", "text": user_input.system_content}}]
-
-        # # Добавляем сообщение с картинкой, если оно существует
-        # if image_message:
-        #     messages[0]["content"].append(image_message)
-
-        # # Добавляем основное сообщение пользователя
-        # messages.append({"role": "user", "content": user_input.user_content})
-
-        # chat_completion = await client.chat.completions.create(
-        #     model="gpt-4o",
-        #     messages=messages,
-        #     max_tokens=300  # Ограничиваем лимит ответа в токенах
-        # )
-
-
+            # Добавляем основное сообщение пользователя
+            messages[0]["content"].append(image_message)
 
         chat_completion = await client.chat.completions.create(
-            model="gpt-4o",
-            messages = [
-                        {"role": "user", "content": [
-                                                        {"type": "text", "text": user_input.system_content},
-                                                        #{"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}",}},
-                                                    ],
-                        },
-                        {"role": "user", "content": user_input.user_content},
-                        ],
-                        max_tokens=300, # Ограничевает лимит ответа в токенах
+            model=user_input.model,
+            messages=messages,
+            # max_tokens=300  # Ограничиваем лимит ответа в токенах
         )
-
-
 
 
         # TOKENS:
