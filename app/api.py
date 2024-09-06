@@ -88,7 +88,12 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
             detail="Insufficient funds. Please add funds to your account.",
         )
 
-    if model is not price:
+    a = False
+    for key, value in price.items():
+        if key == model:
+            a = True
+
+    if a is False:
         logging.error("Unfortunately, this model is not on the list.")
         raise HTTPException(
             status_code=status.HTTP_204_NO_CONTENT,
