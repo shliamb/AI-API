@@ -42,7 +42,7 @@ async def mod_openai(username, user_input, image_path):
                     ]
 
         # Добавляем картинку, если она существует
-        if image_message:
+        if image_path:
             # Getting the base64 string
             base64_image = await encode_image(image_path)
             image_message = {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
