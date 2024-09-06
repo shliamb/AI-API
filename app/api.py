@@ -1,5 +1,5 @@
 import logging
-logging.basicConfig(level=logging.INFO, filename='./log/app.log', filemode='a', format='%(levelname)s - %(asctime)s - %(name)s - %(message)s',) # При деплое активировать логирование в файл
+logging.basicConfig(level=logging.INFO, filename='./log/api.log', filemode='a', format='%(levelname)s - %(asctime)s - %(name)s - %(message)s',) # При деплое активировать логирование в файл
 # Base
 import asyncio
 from pydantic import BaseModel
@@ -88,15 +88,10 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
             detail="Insufficient funds. Please add funds to your account.",
         )
 
-    a = False
-    for key, value in price.items():
-        if key == model:
-            a = True
-
-    if a is False:
+    if model in price:
         logging.error("Unfortunately, this model is not on the list.")
         raise HTTPException(
-            status_code=status.HTTP_204_NO_CONTENT,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Unfortunately, this model is not on the list.",
         )
 
