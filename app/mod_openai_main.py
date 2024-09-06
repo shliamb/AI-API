@@ -35,27 +35,27 @@ async def mod_openai(username, user_input):#, image_path):
         #     # Getting the base64 string
         #     base64_image = await encode_image(image_path)
 
-#         chat_completion = await client.chat.completions.create(
-#             model="gpt-4o",
-#             messages = [
-#                         {"role": "user", "content": [
-#                                                         {"type": "text", "text": user_input.system_content},
-#                                                         #{"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}",}},
-#                                                     ],
-#                         },
-#                         {"role": "user", "content": user_input.user_content},
-#                         ],
-#                         max_tokens=300,
-# )
+        chat_completion = await client.chat.completions.create(
+            model="gpt-4o",
+            messages = [
+                        {"role": "user", "content": [
+                                                        {"type": "text", "text": user_input.system_content},
+                                                        #{"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}",}},
+                                                    ],
+                        },
+                        {"role": "user", "content": user_input.user_content},
+                        ],
+                        max_tokens=300,
+)
 
         #OPENAI:
-        chat_completion = await client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": user_input.system_content}, # Определение роли AI
-                {"role": "user", "content": user_input.user_content}, # Сообщение от пользователя для AI
-                ],
-                model=user_input.model,
-        )
+        # chat_completion = await client.chat.completions.create(
+        #     messages=[
+        #         {"role": "system", "content": user_input.system_content}, # Определение роли AI
+        #         {"role": "user", "content": user_input.user_content}, # Сообщение от пользователя для AI
+        #         ],
+        #         model=user_input.model,
+        # )
 
 
         # TOKENS:
