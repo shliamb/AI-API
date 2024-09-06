@@ -137,13 +137,15 @@ async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...),):#
     if confirm_verify["status_code"] != status.HTTP_200_OK:
         raise
     
-    # # Сохраняем изображение на сервере
+    # Сохраняем изображение на сервере
     # image_path = f"./uploads/{image.filename}"  # Путь для сохранения изображения
     # with open(image_path, "wb") as buffer:
     #     shutil.copyfileobj(image.file, buffer)
 
+    image_path = "./uploads/image.jpg"  # Путь для сохранения изображения
+
     # Working with OpenAI
-    confirm_openai = await mod_openai(username, user_input)#, image_path)
+    confirm_openai = await mod_openai(username, user_input, image_path)
 
     if confirm_openai == "Error: There is no money for OpenAI account.":
         logging.info("There is no money for OpenAI account.")
