@@ -60,14 +60,14 @@ async def mod_openai(username, user_input):#, image_path):
 
         # TOKENS:
         # Извлечение ответа статистики из результата
-        # if chat_completion:
-        #     response_content = chat_completion.choices[0].message.content
-        #     model_version = chat_completion.model
-        #     prompt_tokens = chat_completion.usage.prompt_tokens
-        #     used_tokens = chat_completion.usage.total_tokens + prompt_tokens
-        # else:
-        #     logging.error("No response from openai")
-        #     raise
+        if chat_completion:
+            response_content = chat_completion.choices[0].message.content
+            model_version = chat_completion.model
+            prompt_tokens = chat_completion.usage.prompt_tokens
+            used_tokens = chat_completion.usage.total_tokens + prompt_tokens
+        else:
+            logging.error("No response from openai")
+            raise
         
         # # Расчет потраченых денег на токены
         # data = await calculation(price, model_version, used_tokens)
