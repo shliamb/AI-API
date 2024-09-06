@@ -135,10 +135,9 @@ async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...)):
 # Model Gemini Text
 class UserInput_Gemini(BaseModel):
     user_content: str
-    system_content: str
     username: str
     model: str
-    # tools: str
+    tools: str
 
 # TEXT GEMINI Endpoint
 @app.post("/api/gemini/", status_code=status.HTTP_200_OK)
