@@ -63,7 +63,7 @@ async def mod_openai(username, user_input, image_path):
             model="gpt-4o",
             messages = [
                         {"role": "user", "content": [
-                                                        {"type": "text", "text": user_input.system_content}, image_message
+                                                        {"type": "text", "text": user_input.system_content},
                                                         #{"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}",}},
                                                     ],
                         },
