@@ -4,6 +4,7 @@ import asyncio
 import re
 import base64
 import requests
+import json
 # import datetime
 # OpenAI
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
@@ -31,22 +32,48 @@ async def mod_openai(username, user_input, image_path):
 
     try:
 
-        if image_path:
+        # if image_path is not None:
+        #     # Getting the base64 string
+        #     base64_image = await encode_image(image_path)
+        #     image_to_message = f'{"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}",}}'
+
+        # chat_completion = await client.chat.completions.create(
+        #     model="gpt-4o",
+        #     messages = [
+        #                 {"role": "user", "content": [
+        #                                                 {"type": "text", "text": user_input.system_content},
+        #                                                 image_to_message
+        #                                                 #{"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}",}}
+        #                                             ],
+        #                 },
+        #                 {"role": "user", "content": user_input.user_content},
+        #                 ],
+        #                 # max_tokens=300, # Ограничевает лимит ответа в токенах
+        # )
+
+
+
+        if image_path is not None:
             # Getting the base64 string
             base64_image = await encode_image(image_path)
+            
+            # Формируем сообщение с изображением
+            image_to_message = json.dumps({
+                "type": "image_url",
+                "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}
+            })
 
         chat_completion = await client.chat.completions.create(
             model="gpt-4o",
-            messages = [
-                        {"role": "user", "content": [
-                                                        {"type": "text", "text": user_input.system_content},
-                                                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}",}},
-                                                    ],
-                        },
-                        {"role": "user", "content": user_input.user_content},
-                        ],
-                        max_tokens=300,
-)
+            messages=[
+                {
+                    "role": "user",
+                    "content": user_input.system_content + "\n" + image_to_message
+                },
+                {"role": "user", "content": user_input.user_content},
+            ],
+        )
+
 
 
 
