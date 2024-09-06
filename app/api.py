@@ -3,6 +3,7 @@ logging.basicConfig(level=logging.INFO, filename='./log/api.log', filemode='a', 
 # Base
 import asyncio
 from pydantic import BaseModel
+from typing import Optional
 import shutil
 import requests
 # Fasapi
@@ -128,7 +129,7 @@ class UserInput_OpenAI(BaseModel):
 
 # TEXT OPENAI Endpoint
 @app.post("/api/openai/", status_code=status.HTTP_200_OK)
-async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...), image: UploadFile = File(...) = None):
+async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...), image: Optional[UploadFile] = File(None)):
 
     # Verify user and her appkey
     username = user_input.username
@@ -143,6 +144,8 @@ async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...), im
         image_path = f"./uploads/{image.filename}"  # Путь для сохранения изображения
         with open(image_path, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
+    else:
+        image_path = None
 
     # image_path = "./uploads/image.jpg"  # Путь для сохранения изображения
     # image_path = None  # Путь для сохранения изображения
