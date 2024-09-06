@@ -22,7 +22,7 @@ async def mod_openai(username, user_input):
     try:
         chat_completion = await client.chat.completions.create(
             messages=[
-                {"role": "system", "content": user_input.system_content}, # Определение роли AI
+                {"role": "system", "content": user_input.system_content or None}, # Определение роли AI
                 {"role": "user", "content": user_input.user_content}, # Сообщение от пользователя для AI
                 ],
                 model=user_input.model,

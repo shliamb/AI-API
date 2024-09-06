@@ -98,32 +98,19 @@ async def verify_user_appkey(username: str, appkey: str):
 
 
 
-# Model TEXT
-class UserInput(BaseModel):
+#### OPENAI TEXT ####
+
+
+# Model OpenAi Text
+class UserInput_OpenAI(BaseModel):
     user_content: str
     system_content: str
     username: str
     model: str
-    tools: str
-
-
-#### OPENAI TEXT ####
-
-'''
-Post API Key to Heads
-    {
-        "username": "vlad", 
-        "user_content": "поясни за физику?",
-        "system_content": "ты преподаватель физики",
-        "model": "gpt-4o-mini-2024-07-18",
-
-    }
-'''
-
 
 # TEXT OPENAI Endpoint
 @app.post("/api/openai/", status_code=status.HTTP_200_OK)
-async def openai_api(user_input: UserInput, appkey: str = Header(...)):
+async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...)):
 
     # Verify user and her appkey
     username = user_input.username
@@ -142,11 +129,20 @@ async def openai_api(user_input: UserInput, appkey: str = Header(...)):
 
 
 
+
 #### GEMINI TEXT ####
+
+# Model Gemini Text
+class UserInput_Gemini(BaseModel):
+    user_content: str
+    system_content: str
+    username: str
+    model: str
+    # tools: str
 
 # TEXT GEMINI Endpoint
 @app.post("/api/gemini/", status_code=status.HTTP_200_OK)
-async def gemini_api(user_input: UserInput, appkey: str = Header(...)):
+async def gemini_api(user_input: UserInput_Gemini, appkey: str = Header(...)):
 
     # Verify user and her appkey
     username = user_input.username

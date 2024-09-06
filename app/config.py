@@ -11,7 +11,8 @@ min_pay = 1 # Minimum pay
 
 
 # Prices per 1M tokens:
-price = { 
+price = {
+    # OpenAI:
     'chatgpt-4o-latest': 40,
     'gpt-4o': 40, 
     'gpt-4o-2024-08-06': 25,
@@ -19,7 +20,14 @@ price = {
     'gpt-4o-mini': 1.5, # no vision
     'gpt-4o-mini-2024-07-18': 1.5, # no vision
     'gpt-4-turbo-2024-04-09': 80,
+    # Images:
     'DALL·E 3': 0.08,
+    # Google Gemini:
+    'gemini-1.5-flash-latest': 1.125,
+    'gemini-1.5-pro-latest': 93.75,
+    # 'gemini-1.0-pro-latest': 4,
+    'text-embedding-004': 0,
+    # 'aqa': 0,
     }
 
 
@@ -33,7 +41,7 @@ price = {
 
 """
 
-5Sep2024 OpenAI:
+5Sep2024 OpenAI 1m tokens:
 
 Model                         Input $              Output $           Total $
 
