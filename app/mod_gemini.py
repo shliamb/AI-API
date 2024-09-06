@@ -15,22 +15,22 @@ async def mod_gemini(username, user_input):
         model = genai.GenerativeModel(model_name=user_input.model, tools=user_input.tools or None, system_instruction=user_input.system_content or None) # "tools": "code_execution",
         response = model.generate_content(user_input.user_content)
 
-        print("total_tokens in: ", model.count_tokens(user_input.user_content))
+        print(model.count_tokens(user_input.user_content))
 
 
         # Tokens:
-        print(type(response.usage_metadata))
-        print(response.usage_metadata['total_token_count'])
+        # print(type(response.usage_metadata))
+        # print(response.usage_metadata['total_token_count'])
 
 
         # Получаем метаданные использования
-        # usage_metadata = response.usage_metadata
+        usage_metadata = response.usage_metadata
 
-        # # Извлекаем только total_token_count
-        # total_token_count = usage_metadata['total_token_count']
+        # Извлекаем только total_token_count
+        total_token_count = usage_metadata.total_token_count
 
-        # # Выводим результат
-        # print("all:", total_token_count)
+        # Выводим результат
+        print("all:", total_token_count)
 
 
         # print(response.usage_metadata[0], response.usage_metadata[1], response.usage_metadata[2])
