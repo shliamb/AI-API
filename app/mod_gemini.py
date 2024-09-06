@@ -12,7 +12,7 @@ genai.configure(api_key=api_key_gemini)
 
 async def mod_gemini(username, user_input):
     try:
-        model = genai.GenerativeModel(model_name=user_input.model, tools=user_input.tools or None, system_content=user_input.system_instruction or None) # "tools": "code_execution",
+        model = genai.GenerativeModel(model_name=user_input.model, tools=user_input.tools or None, system_content=user_input.system_content or None) # "tools": "code_execution",
         response = model.generate_content(user_input.user_content)
 
         # Tokens:
