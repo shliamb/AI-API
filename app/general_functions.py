@@ -23,9 +23,12 @@ async def unformat_date(date):
 # Calculation of the cost of used tokens
 async def calculation(price, model_version, used_tokens):
     one_tok_price = None
+    
     for key, value in price.items():
         if key == model_version:
             one_tok_price = value / 1000000 # Price 1 token to USD
+            return one_tok_price
+        
     if one_tok_price == None:
         logging.error(f"The model {model_version} was not found in the price list")
         raise

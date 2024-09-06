@@ -3,17 +3,19 @@ logging.basicConfig(level=logging.INFO, filename='./log/api.log', filemode='a', 
 # Base
 import asyncio
 from pydantic import BaseModel
+import shutil
+import requests
 # Fasapi
-from fastapi import FastAPI, Header, Depends, HTTPException, status
+from fastapi import FastAPI, Header, Depends, HTTPException, status, UploadFile, File
+from fastapi.responses import JSONResponse
 import uvicorn
 import gunicorn
 # Service
 from worker_db import get_user_by_username, update_user
 from general_functions import day_utcnow, unformat_date
-from mod_openai import mod_openai
-from mod_gemini import mod_gemini
+from mod_openai_main import mod_openai
+from mod_gemini_main import mod_gemini
 from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price
-
 
 app = FastAPI()
 
@@ -126,7 +128,7 @@ class UserInput_OpenAI(BaseModel):
 
 # TEXT OPENAI Endpoint
 @app.post("/api/openai/", status_code=status.HTTP_200_OK)
-async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...)):
+async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...), image: UploadFile = File(...),):
 
     # Verify user and her appkey
     username = user_input.username
@@ -134,9 +136,14 @@ async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...)):
     confirm_verify = await verify_user_appkey(username, model, appkey)
     if confirm_verify["status_code"] != status.HTTP_200_OK:
         raise
+    
+    # Сохраняем изображение на сервере
+    image_path = f"./uploads/{image.filename}"  # Путь для сохранения изображения
+    with open(image_path, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
 
     # Working with OpenAI
-    confirm_openai = await mod_openai(username, user_input)
+    confirm_openai = await mod_openai(username, user_input, image_path)
 
     if confirm_openai == "Error: There is no money for OpenAI account.":
         logging.info("There is no money for OpenAI account.")

@@ -2,6 +2,8 @@
 import logging
 import asyncio
 import re
+import base64
+import requests
 # import datetime
 # OpenAI
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
@@ -16,19 +18,39 @@ client = AsyncOpenAI(api_key=api_key_openai)
 
 
 
-async def mod_openai(username, user_input):
 
+
+
+# Function to encode the image
+async def encode_image(image_path):
+  with open(image_path, "rb") as image_file:
+    return base64.b64encode(image_file.read()).decode('utf-8')
+
+# Main OpenAI Function
+async def mod_openai(username, user_input, image_path):
 
     try:
-        #OPENAI:
+
+        if image_path:
+            # Getting the base64 string
+            base64_image = await encode_image(image_path)
+
         chat_completion = await client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": user_input.system_content}, # Определение роли AI
-                {"role": "user", "content": user_input.user_content}, # Сообщение от пользователя для AI
-                ],
-                model=user_input.model,
-        )
-        
+            model="gpt-4o",
+            messages = [
+                        {"role": "user", "content": [
+                                                        {"type": "text", "text": user_input.system_content},
+                                                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}",}},
+                                                    ],
+                        },
+                        {"role": "user", "content": user_input.user_content},
+                        ],
+                        max_tokens=300,
+)
+
+
+
+
         # TOKENS:
         # Извлечение ответа статистики из результата
         if chat_completion:
@@ -84,3 +106,54 @@ async def mod_openai(username, user_input):
         error_message = str(e)
         logging.error(f"Error: {error_message}")
         return error_message
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        #     #OPENAI:
+        # chat_completion = await client.chat.completions.create(
+        #     messages=[
+        #         {"role": "system", "content": user_input.system_content}, # Определение роли AI
+        #         {"role": "user", "content": user_input.user_content}, # Сообщение от пользователя для AI
+        #         ],
+        #         model=user_input.model,
+        # )
+
+
+
+        # with open(image_path, 'rb') as img_file:
+        #     files = {'image': img_file}
+
+
+
+
+        # messages = [
+        #     {"role": "system", "content": user_input.system_content},
+        #     {"role": "user", "content": user_input.user_content},
+        # ]
+
+        # Проверка наличия изображения
+        # if image_path:
+        #     # Getting the base64 string
+        #     base64_image = await encode_image(image_path)
+        #     messages.append({"image_url": "user", "url": f"data:image/jpeg;base64,{base64_image}"})
+
+        # chat_completion = await client.chat.completions.create(
+        #     messages=messages,
+        #     model=user_input.model,
+        # )
