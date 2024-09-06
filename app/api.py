@@ -128,7 +128,7 @@ class UserInput_OpenAI(BaseModel):
 
 # TEXT OPENAI Endpoint
 @app.post("/api/openai/", status_code=status.HTTP_200_OK)
-async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...),):#, image: UploadFile = File(...),):
+async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...), image: UploadFile = File(None)):
 
     # Verify user and her appkey
     username = user_input.username
@@ -138,12 +138,12 @@ async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...),):#
         raise
     
     # Сохраняем изображение на сервере
-    # image_path = f"./uploads/{image.filename}"  # Путь для сохранения изображения
-    # with open(image_path, "wb") as buffer:
-    #     shutil.copyfileobj(image.file, buffer)
+    image_path = f"./uploads/{image.filename}"  # Путь для сохранения изображения
+    with open(image_path, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
 
-    image_path = "./uploads/image.jpg"  # Путь для сохранения изображения
-    #image_path = None  # Путь для сохранения изображения
+    # image_path = "./uploads/image.jpg"  # Путь для сохранения изображения
+    # image_path = None  # Путь для сохранения изображения
 
     # Working with OpenAI
     confirm_openai = await mod_openai(username, user_input, image_path)
