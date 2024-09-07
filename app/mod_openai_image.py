@@ -7,7 +7,7 @@ from keys import api_key_openai
 #client = OpenAI(api_key=api_key_openai)
 client = AsyncOpenAI(api_key=api_key_openai)
 
-prompt = "A cute baby sea otter"
+prompt = "Продавщица в магазине старая"
 model = "dall-e-3"
 
 
@@ -16,7 +16,7 @@ async def mod_dall_e(username, description):
     response = await client.images.generate(
         prompt=prompt,
         model=model,
-        size="512×512",  # 1024x1024
+        size="512x512",  # 1024x1024
         n=1, # Колличество картинок
     )
 
@@ -27,7 +27,11 @@ async def mod_dall_e(username, description):
 
 
 
-
+# - '256x256'
+# - '512x512'
+# - '1024x1024'
+# - '1024x1792'
+# - '1792x1024'
 
 
 # from openai import OpenAI
