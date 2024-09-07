@@ -124,14 +124,14 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
 class UserInput_OpenAI(BaseModel):
     user_content: str
     #system_content: str
-    system_content: Optional[str] = None  # Теперь поле необязательное
+    system_content: Optional[str] = None  # Теперь поле необязательное не работает)))
     username: str
     model: str
 
 
 # TEXT OPENAI Endpoint
 @app.post("/api/openai/", status_code=status.HTTP_200_OK)
-async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...)):#, file: Optional[UploadFile] = File(None)):
+async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...), file: Optional[UploadFile] = File(None)):
 
     # Verify user and her appkey
     username = user_input.username
@@ -141,16 +141,16 @@ async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...)):#,
         raise
     
 
-    # if file:
-    #     # Сохраняем изображение на сервере
-    #     file_path = f"./uploads/{file.filename}"  # Путь для сохранения изображения
-    #     with open(file_path, "wb") as buffer:
-    #         shutil.copyfileobj(file.file, buffer)
-    # else:
-    #     file_path = None
+    if file:
+        # Сохраняем изображение на сервере
+        file_path = f"./uploads/{file.filename}"  # Путь для сохранения изображения
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    else:
+        file_path = None
 
     # file_path = None
-    file_path = "./uploads/image.jpg"
+    # file_path = "./uploads/image.jpg"
 
 
     # Working with OpenAI
