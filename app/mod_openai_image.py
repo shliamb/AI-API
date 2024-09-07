@@ -10,7 +10,7 @@ prompt = "A cute baby sea otter"
 model = "dall-e-3"
 
 
-async def mod_dall_e() -> None:
+async def mod_dall_e(username, description):
     # Generate an image based on the prompt
     response = client.images.generate(
         prompt=prompt,
