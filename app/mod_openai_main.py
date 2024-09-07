@@ -50,9 +50,6 @@ async def mod_openai(username, description, file_path):
             # Добавляем основное сообщение пользователя
             messages[0]["content"].append(file_message)
 
-
-        print(messages)
-
         chat_completion = await client.chat.completions.create(
             model=description["model"],
             messages=messages,

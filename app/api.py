@@ -17,6 +17,7 @@ from worker_db import get_user_by_username, update_user
 from general_functions import day_utcnow, unformat_date
 from mod_openai_main import mod_openai
 from mod_gemini_main import mod_gemini
+from mod_openai_image import mod_dall_e
 from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price
 
 app = FastAPI()
@@ -36,11 +37,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# # MAIN Endpoint
-# @app.get("/api/", status_code=status.HTTP_200_OK)
-# async def hello_api(): 
-#     return {"response": "https://t.me/myapi_aibot"}
 
 
 # USER VERIFICATION
@@ -152,7 +148,7 @@ async def openai_api(
 
     if file:
         # Сохраняем изображение на сервере
-        file_path = f"./uploads/{file.filename}"  # Путь для сохранения изображения
+        file_path = f"./uploads/{file.filename}"
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     else:
@@ -178,94 +174,37 @@ async def openai_api(
 
 
 
+# IMAGE OPENAI Endpoint  DALL-E
+@app.post("/api/dall-e/", status_code=status.HTTP_200_OK)
+async def dall_e_point(
+    username: str = Form(...),
+    # user_content: str = Form(...),
+    # system_content: str = Form(...),
+    model: str = Form(...),
+    appkey: str = Header(...),
+    # file: Optional[UploadFile] = File(None)
+):
 
+    # Verify user and her appkey
+    confirm_verify = await verify_user_appkey(username, model, appkey)
+    if confirm_verify["status_code"] != status.HTTP_200_OK:
+        raise
 
+    description = {
+        "username": username,
+        # "user_content": user_content,
+        # "system_content": system_content,
+        "model": model,
+    }
 
-# TEXT OPENAI Endpoint
-# @app.post("/api/openai/", status_code=status.HTTP_200_OK)
-# async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...), image: Optional[UploadFile] = File(None)):
+    # Working with OpenAI
+    confirm_dall_e = await mod_dall_e(username, description)
 
-#     # Verify user and her appkey
-#     username = user_input.username
-#     model = user_input.model
-#     confirm_verify = await verify_user_appkey(username, model, appkey)
-#     if confirm_verify["status_code"] != status.HTTP_200_OK:
-#         raise
-    
+    if confirm_dall_e == "Error: There is no money for OpenAI account.":
+        logging.info("There is no money for OpenAI account.")
+        # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
 
-#     if image:
-#         # Сохраняем изображение на сервере
-#         image_path = f"./uploads/{image.filename}"  # Путь для сохранения изображения
-#         with open(image_path, "wb") as buffer:
-#             shutil.copyfileobj(image.file, buffer)
-#     else:
-#         image_path = None
-
-
-#     # Working with OpenAI
-#     confirm_openai = await mod_openai(username, user_input, image_path)
-
-#     if confirm_openai == "Error: There is no money for OpenAI account.":
-#         logging.info("There is no money for OpenAI account.")
-#         # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
-
-#     return confirm_openai
-
-
-
-
-
-
-
-# @app.post("/api/openai/", status_code=status.HTTP_200_OK)
-# async def openai_api(
-#     file: Optional[UploadFile] = File(None),  # Необязательный файл изображения
-#     json_data: Optional[str] = Form(None),      # Необязательные данные в формате JSON
-#     appkey: str = Header(...)
-# ):
-#     if file:
-#         # Сохраняем изображение на сервере
-#         image_path = f"./uploads/{file.filename}"  # Путь для сохранения изображения
-#         with open(image_path, "wb") as buffer:
-#             shutil.copyfileobj(file.file, buffer)
-#     else:
-#         image_path = None
-
-#     if json_data:
-#         # Если вы ожидаете JSON-данные в виде строки,
-#         # возможно вам потребуется их десериализовать.
-#         pass  # Обработка данных JSON (если нужно)
-
-#     user_input = None  # Здесь должен быть механизм получения данных из json_data
-    
-#     if user_input is None:
-#         raise HTTPException(status_code=400, detail="No valid input provided.")
-
-#     username = user_input.username
-#     model = user_input.model
-    
-#     confirm_verify = await verify_user_appkey(username, model, appkey)
-    
-#     if confirm_verify["status_code"] != status.HTTP_200_OK:
-#         raise HTTPException(status_code=403, detail="Invalid app key or user.")
-
-#     confirm_openai = await mod_openai(username, user_input, image_path)
-
-#     if confirm_openai == "Error: There is no money for OpenAI account.":
-#         logging.info("There is no money for OpenAI account.")
-#         # Передача сигнала телеграмм боту или администратору.
-
-#     return confirm_openai
-
-
-
-
-
-
-
-
-
-
+    return confirm_dall_e
 
 
 
