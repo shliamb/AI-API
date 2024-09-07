@@ -16,7 +16,7 @@ async def mod_dall_e(username, description):
         prompt=prompt,
         model=model,
         size="1024x1024",
-        n=2,
+        n=1,
     )
 
     # Prints response containing a URL link to image
