@@ -149,7 +149,8 @@ async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...)):#,
     # else:
     #     file_path = None
 
-    file_path = None
+    # file_path = None
+    file_path = "./uploads/image.jpg"
 
 
     # Working with OpenAI
