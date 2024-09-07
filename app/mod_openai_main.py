@@ -28,18 +28,19 @@ async def encode_image(file_path):
     return base64.b64encode(file_path.read()).decode('utf-8')
 
 # Main OpenAI Function
-async def mod_openai(username, user_input, file_path):
+async def mod_openai(username, description, file_path):
 
     try:
 
         # Формируем список сообщений
         messages = [
                     {"role": "user", "content": [
-                                                    {"type": "text", "text": user_input.system_content},
-                                                ],
+                                                            {"type": "text", "text": description["user_content"]},
+                                                        ],
                     },
-                    {"role": "user", "content": user_input.user_content},
+                    {"role": "system", "content": description["system_content"]},
                     ]
+
 
         # Добавляем картинку, если она существует
         if file_path:
@@ -49,8 +50,11 @@ async def mod_openai(username, user_input, file_path):
             # Добавляем основное сообщение пользователя
             messages[0]["content"].append(file_message)
 
+
+        print(messages)
+
         chat_completion = await client.chat.completions.create(
-            model=user_input.model,
+            model=description["model"],
             messages=messages,
             # max_tokens=300  # Ограничиваем лимит ответа в токенах
         )

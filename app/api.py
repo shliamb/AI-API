@@ -11,6 +11,7 @@ from fastapi import FastAPI, Header, Depends, HTTPException, status, UploadFile,
 from fastapi.responses import JSONResponse
 import uvicorn
 import gunicorn
+from fastapi.middleware.cors import CORSMiddleware
 # Service
 from worker_db import get_user_by_username, update_user
 from general_functions import day_utcnow, unformat_date
@@ -22,10 +23,24 @@ app = FastAPI()
 
 
 
-# MAIN Endpoint
-@app.get("/api/", status_code=status.HTTP_200_OK)
-async def hello_api(): 
-    return {"response": "https://t.me/myapi_aibot"}
+
+
+# Разрешаем CORS только для указанных эндпоинтов и метода POST
+origins = ["*"]  # Разрешаем все источники (можно заменить на конкретные домены)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["POST"],  # Только метод POST
+    allow_headers=["*"],
+)
+
+
+# # MAIN Endpoint
+# @app.get("/api/", status_code=status.HTTP_200_OK)
+# async def hello_api(): 
+#     return {"response": "https://t.me/myapi_aibot"}
 
 
 # USER VERIFICATION
@@ -117,29 +132,23 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
 
 
 
-#### OPENAI TEXT ####
+#### OPENAI TEXT & in IMAGE ####
 
-
-# Model OpenAi Text
-class UserInput_OpenAI(BaseModel):
-    user_content: str
-    #system_content: str
-    system_content: Optional[str] = None  # Теперь поле необязательное не работает)))
-    username: str
-    model: str
-
-
-# TEXT OPENAI Endpoint
+# TEXT & in IMAGE OPENAI Endpoint
 @app.post("/api/openai/", status_code=status.HTTP_200_OK)
-async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...), file: Optional[UploadFile] = File(None)):
+async def openai_api(
+    username: str = Form(...),
+    user_content: str = Form(...),
+    system_content: str = Form(...),
+    model: str = Form(...),
+    appkey: str = Header(...),
+    file: Optional[UploadFile] = File(None)
+):
 
     # Verify user and her appkey
-    username = user_input.username
-    model = user_input.model
     confirm_verify = await verify_user_appkey(username, model, appkey)
     if confirm_verify["status_code"] != status.HTTP_200_OK:
         raise
-    
 
     if file:
         # Сохраняем изображение на сервере
@@ -149,18 +158,22 @@ async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...), fi
     else:
         file_path = None
 
-    # file_path = None
-    # file_path = "./uploads/image.jpg"
-
+    description = {
+        "username": username,
+        "user_content": user_content,
+        "system_content": system_content,
+        "model": model,
+    }
 
     # Working with OpenAI
-    confirm_openai = await mod_openai(username, user_input, file_path)
+    confirm_openai = await mod_openai(username, description, file_path)
 
     if confirm_openai == "Error: There is no money for OpenAI account.":
         logging.info("There is no money for OpenAI account.")
         # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
 
     return confirm_openai
+
 
 
 
@@ -303,4 +316,77 @@ async def gemini_api(user_input: UserInput_Gemini, appkey: str = Header(...)):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000) # При деплое переделать
+    uvicorn.run(app, host="0.0.0.0", port=8000) # При деплое переделать#### GEMINI TEXT ####
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# # Model Gemini Text
+# class UserInput_Gemini(BaseModel):
+#     user_content: str
+#     #system_content: str
+#     system_content: Optional[str] = None
+#     username: str
+#     model: str
+#     #tools: str
+#     tools: Optional[str] = None
+
+# # TEXT GEMINI Endpoint
+# @app.post("/api/gemini/", status_code=status.HTTP_200_OK)
+# async def gemini_api(user_input: UserInput_Gemini, appkey: str = Header(...)):
+
+#     # Verify user and her appkey
+#     username = user_input.username
+#     model = user_input.model
+#     confirm_verify = await verify_user_appkey(username, model, appkey)
+#     if confirm_verify["status_code"] != status.HTTP_200_OK:
+#         raise
+
+#     # Working with Gemini
+#     confirm_gemini = await mod_gemini(username, user_input)
+
+
+#     return confirm_gemini
