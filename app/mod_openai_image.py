@@ -16,7 +16,7 @@ async def mod_dall_e(username, description):
     response = await client.images.generate(
         prompt=prompt,
         model=model,
-        size="512x512",  # 1024x1024
+        size="1024x1024",  # 1024x1024
         n=1, # Колличество картинок
     )
 
