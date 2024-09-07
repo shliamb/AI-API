@@ -23,12 +23,12 @@ client = AsyncOpenAI(api_key=api_key_openai)
 
 
 # Function to encode the image
-async def encode_image(image_path):
-  with open(image_path, "rb") as image_file:
-    return base64.b64encode(image_file.read()).decode('utf-8')
+async def encode_image(file_path):
+  with open(file_path, "rb") as file_path:
+    return base64.b64encode(file_path.read()).decode('utf-8')
 
 # Main OpenAI Function
-async def mod_openai(username, user_input, image_path):
+async def mod_openai(username, user_input, file_path):
 
     try:
 
@@ -42,12 +42,12 @@ async def mod_openai(username, user_input, image_path):
                     ]
 
         # Добавляем картинку, если она существует
-        if image_path:
+        if file_path:
             # Getting the base64 string
-            base64_image = await encode_image(image_path)
-            image_message = {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+            base64_file = await encode_image(file_path)
+            file_message = {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_file}"}}
             # Добавляем основное сообщение пользователя
-            messages[0]["content"].append(image_message)
+            messages[0]["content"].append(file_message)
 
         chat_completion = await client.chat.completions.create(
             model=user_input.model,

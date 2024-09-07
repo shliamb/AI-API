@@ -7,7 +7,7 @@ from typing import Optional
 import shutil
 import requests
 # Fasapi
-from fastapi import FastAPI, Header, Depends, HTTPException, status, UploadFile, File
+from fastapi import FastAPI, Header, Depends, HTTPException, status, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 import uvicorn
 import gunicorn
@@ -123,13 +123,15 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
 # Model OpenAi Text
 class UserInput_OpenAI(BaseModel):
     user_content: str
-    system_content: str
+    #system_content: str
+    system_content: Optional[str] = None  # Теперь поле необязательное
     username: str
     model: str
 
+
 # TEXT OPENAI Endpoint
 @app.post("/api/openai/", status_code=status.HTTP_200_OK)
-async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...)):#, image: Optional[UploadFile] = File(None)):
+async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...)):#, file: Optional[UploadFile] = File(None)):
 
     # Verify user and her appkey
     username = user_input.username
@@ -139,19 +141,19 @@ async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...)):#,
         raise
     
 
-    # if image:
+    # if file:
     #     # Сохраняем изображение на сервере
-    #     image_path = f"./uploads/{image.filename}"  # Путь для сохранения изображения
-    #     with open(image_path, "wb") as buffer:
-    #         shutil.copyfileobj(image.file, buffer)
+    #     file_path = f"./uploads/{file.filename}"  # Путь для сохранения изображения
+    #     with open(file_path, "wb") as buffer:
+    #         shutil.copyfileobj(file.file, buffer)
     # else:
-    #     image_path = None
+    #     file_path = None
 
-    # image_path = "./uploads/image.jpg"  # Путь для сохранения изображения
-    image_path = None  # Путь для сохранения изображения
+    file_path = None
+
 
     # Working with OpenAI
-    confirm_openai = await mod_openai(username, user_input, image_path)
+    confirm_openai = await mod_openai(username, user_input, file_path)
 
     if confirm_openai == "Error: There is no money for OpenAI account.":
         logging.info("There is no money for OpenAI account.")
@@ -162,15 +164,110 @@ async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...)):#,
 
 
 
+
+
+
+# TEXT OPENAI Endpoint
+# @app.post("/api/openai/", status_code=status.HTTP_200_OK)
+# async def openai_api(user_input: UserInput_OpenAI, appkey: str = Header(...), image: Optional[UploadFile] = File(None)):
+
+#     # Verify user and her appkey
+#     username = user_input.username
+#     model = user_input.model
+#     confirm_verify = await verify_user_appkey(username, model, appkey)
+#     if confirm_verify["status_code"] != status.HTTP_200_OK:
+#         raise
+    
+
+#     if image:
+#         # Сохраняем изображение на сервере
+#         image_path = f"./uploads/{image.filename}"  # Путь для сохранения изображения
+#         with open(image_path, "wb") as buffer:
+#             shutil.copyfileobj(image.file, buffer)
+#     else:
+#         image_path = None
+
+
+#     # Working with OpenAI
+#     confirm_openai = await mod_openai(username, user_input, image_path)
+
+#     if confirm_openai == "Error: There is no money for OpenAI account.":
+#         logging.info("There is no money for OpenAI account.")
+#         # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
+
+#     return confirm_openai
+
+
+
+
+
+
+
+# @app.post("/api/openai/", status_code=status.HTTP_200_OK)
+# async def openai_api(
+#     file: Optional[UploadFile] = File(None),  # Необязательный файл изображения
+#     json_data: Optional[str] = Form(None),      # Необязательные данные в формате JSON
+#     appkey: str = Header(...)
+# ):
+#     if file:
+#         # Сохраняем изображение на сервере
+#         image_path = f"./uploads/{file.filename}"  # Путь для сохранения изображения
+#         with open(image_path, "wb") as buffer:
+#             shutil.copyfileobj(file.file, buffer)
+#     else:
+#         image_path = None
+
+#     if json_data:
+#         # Если вы ожидаете JSON-данные в виде строки,
+#         # возможно вам потребуется их десериализовать.
+#         pass  # Обработка данных JSON (если нужно)
+
+#     user_input = None  # Здесь должен быть механизм получения данных из json_data
+    
+#     if user_input is None:
+#         raise HTTPException(status_code=400, detail="No valid input provided.")
+
+#     username = user_input.username
+#     model = user_input.model
+    
+#     confirm_verify = await verify_user_appkey(username, model, appkey)
+    
+#     if confirm_verify["status_code"] != status.HTTP_200_OK:
+#         raise HTTPException(status_code=403, detail="Invalid app key or user.")
+
+#     confirm_openai = await mod_openai(username, user_input, image_path)
+
+#     if confirm_openai == "Error: There is no money for OpenAI account.":
+#         logging.info("There is no money for OpenAI account.")
+#         # Передача сигнала телеграмм боту или администратору.
+
+#     return confirm_openai
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #### GEMINI TEXT ####
 
 # Model Gemini Text
 class UserInput_Gemini(BaseModel):
     user_content: str
-    system_content: str
+    #system_content: str
+    system_content: Optional[str] = None
     username: str
     model: str
-    tools: str
+    #tools: str
+    tools: Optional[str] = None
 
 # TEXT GEMINI Endpoint
 @app.post("/api/gemini/", status_code=status.HTTP_200_OK)
