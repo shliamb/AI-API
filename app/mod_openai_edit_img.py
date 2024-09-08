@@ -37,10 +37,10 @@ async def mod_edit_dall_e(description, image_path, mask_path):
     print(f"2: {image_path}")
 
 
-    response = client.images.edit(
+    response = client.images.create_variation(
             image = open(image_path, "rb"),
             # mask = open(mask_path, "rb"),
-            prompt = user_content,
+            #prompt = user_content,
             model = real_name_model,
             response_format = response_format,
             n = n,
