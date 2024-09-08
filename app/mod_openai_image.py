@@ -70,7 +70,7 @@ async def mod_dall_e(description, image_path):
 
 
     # Statistic
-    used_tokens = n
+    used_tokens = n * 1000000 # У меня цены в price за 1мл токенов, а картинки то по одной
     model_version = model # exemple - dall-e-3-hd-1792
     
     # Calculation of money spent on tokens
