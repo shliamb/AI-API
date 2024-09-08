@@ -4,66 +4,47 @@ import logging
 import google.generativeai as genai
 # Service
 from keys import api_key_gemini, is_admin
-from general_functions import day_utcnow, unformat_date, calculation
-from config import price, time_correction
-from worker_db import add_statistic, get_user_by_username, update_user_by_username
+from general_functions import calculation
 
 
 genai.configure(api_key=api_key_gemini)
 
 
-
-async def mod_gemini(username, user_input):
+async def mod_gemini(username, description, image_path ):
     try:
-        model = genai.GenerativeModel(model_name=user_input.model, tools=user_input.tools or None, system_instruction=user_input.system_content or None) # "tools": "code_execution",
-        response = model.generate_content(user_input.user_content)
+
+        if not image_path:
+
+            model = genai.GenerativeModel(
+                model_name = description["model"],
+                # tools = user_input.tools or None, # "tools": "code_execution",
+                system_instruction = description["system_content"] or None
+            )
+
+        # if image_path:
+        #     # Getting the base64 string
+        #     base64_file = await encode_image(image_path)
+
+        response = model.generate_content(description["user_content"])
 
         # Tokens:
-        # if response:
-        #     usage_metadata = response.usage_metadata
-        #     total_token_count = usage_metadata.total_token_count
-        #     logging.info(f"Gemini text in tokens: {str(model.count_tokens(user_input.user_content))}")
-        #     logging.info(f"Gemini all text tokens: {str(response.usage_metadata)}")
-        # else:
-        #     logging.error("No response from Google Gemini.")
-        #     return
+        if response:
+            usage_metadata = response.usage_metadata
+            total_token_count = usage_metadata.total_token_count
+            logging.info(f"Gemini text in tokens: {str(model.count_tokens(description["user_content"]))}")
+            logging.info(f"Gemini all text tokens: {str(response.usage_metadata)}")
+        else:
+            logging.error("No response from Google Gemini.")
+            return {"response": "No response from Google Gemini."}
+        
+        # Calculation of money spent on tokens
+        expenses = await calculation(username, description["model"], total_token_count)
 
-        # # Расчет потраченых денег на токены
-        # data = await calculation(price, user_input.model, total_token_count)
-
-
-        # # STATISTIC:
-        # # Сбор данных
-        # data_stat = {
-        #     "username_table_stat": username,
-        #     "time": await day_utcnow(),
-        #     "use_model": user_input.model,
-        #     "sesion_token": data[1],
-        #     "price_1_tok": data[0],
-        #     "total_price": data[2],
-        # }
-
-        # # SAVE STATISTIC TO DB:
-        # await add_statistic(data_stat)
-        # # Получаю данные пользователя
-        # user_data = await get_user_by_username(username)
-        # new_money = user_data.money - data[2]
-        # data_money = {"money": new_money}
-        # # Баланс изменили с учетом расхода
-        # await update_user_by_username(username, data_money)
-
-
-
-
-
-
-
-
-        return {"response": response.text}
+        return {"response": response.text, "expenses": expenses, "used_tokens": total_token_count}
     
     except Exception as e:
        logging.error(f"Error is: {e}")
-       return {"error:": e}
+       return {"Error:": e}
 
 
 

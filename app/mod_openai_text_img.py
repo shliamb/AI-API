@@ -10,9 +10,8 @@ import json
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
 from keys import api_key_openai
 # Service
-from general_functions import day_utcnow, unformat_date, calculation
-from config import price, time_correction
-from worker_db import add_statistic, get_user_by_username, update_user_by_username
+from general_functions import calculation
+
 
 client = AsyncOpenAI(api_key=api_key_openai)
 
@@ -82,13 +81,15 @@ async def mod_openai_text_img(username, description, image_path):
 
 
     except RateLimitError as e:
-        no_money_openai = 0
+        no_money_openai = ""
         error_message = str(e)
         error_code_match = re.search(r"Error code: (\d+)", error_message)
         error_code = error_code_match.group(1) if error_code_match else "No code provided"
         if error_code == '429':
+           no_money_openai = "Error: There is no money for OpenAI account."
            logging.error(f"Error {error_code}: {error_message}, There are not enough funds for OpenAI. Administrators are notified automatically. We will restore everything in the near future.") 
-        no_money_openai = "Error: There is no money for OpenAI account."
+        else:
+           no_money_openai = error_message
         return no_money_openai
 
 

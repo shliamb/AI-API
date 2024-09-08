@@ -144,18 +144,17 @@ async def openai_api(
     # Verify user and her appkey
     confirm_verify = await verify_user_appkey(username, model, appkey)
     if confirm_verify["status_code"] != status.HTTP_200_OK:
-        raise
-
-
+        return confirm_verify
 
     if file:
-        # Сохраняем изображение на сервере
+        # Save img to server
         image_path = f"./uploads/{file.filename}"
         with open(image_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     else:
         image_path = None
 
+    # Collect data
     description = {
         "username": username,
         "user_content": user_content,
@@ -167,7 +166,7 @@ async def openai_api(
     confirm_openai = await mod_openai_text_img(username, description, image_path)
 
     if confirm_openai == "Error: There is no money for OpenAI account.":
-        logging.info("There is no money for OpenAI account.")
+        logging.error("There is no money for OpenAI account.")
         # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
 
     return confirm_openai
@@ -190,7 +189,7 @@ async def dall_e_point(
     # Verify user and her appkey
     confirm_verify = await verify_user_appkey(username, model, appkey)
     if confirm_verify["status_code"] != status.HTTP_200_OK:
-        raise
+        return confirm_verify
 
     description = {
         "username": username,
@@ -213,30 +212,41 @@ async def dall_e_point(
 
 
 #### GEMINI TEXT ####
-
-# Model Gemini Text
-class UserInput_Gemini(BaseModel):
-    user_content: str
-    #system_content: str
-    system_content: Optional[str] = None
-    username: str
-    model: str
-    #tools: str
-    tools: Optional[str] = None
-
 # TEXT GEMINI Endpoint
+
 @app.post("/api/gemini/", status_code=status.HTTP_200_OK)
-async def gemini_api(user_input: UserInput_Gemini, appkey: str = Header(...)):
+async def gemini_api(
+    username: str = Form(...),
+    user_content: str = Form(...),
+    system_content: str = Form(...),
+    model: str = Form(...),
+    appkey: str = Header(...),
+    file: Optional[UploadFile] = File(None)
+):
 
     # Verify user and her appkey
-    username = user_input.username
-    model = user_input.model
     confirm_verify = await verify_user_appkey(username, model, appkey)
     if confirm_verify["status_code"] != status.HTTP_200_OK:
-        raise
+        return confirm_verify
 
+    if file:
+        # Save img to server
+        image_path = f"./uploads/{file.filename}"
+        with open(image_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    else:
+        image_path = None
+
+    # Collect data
+    description = {
+        "username": username,
+        "user_content": user_content,
+        "system_content": system_content,
+        "model": model,
+    }
+    
     # Working with Gemini
-    confirm_gemini = await mod_gemini(username, user_input)
+    confirm_gemini = await mod_gemini(username, description, image_path)
 
 
     return confirm_gemini
