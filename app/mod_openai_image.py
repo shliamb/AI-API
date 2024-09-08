@@ -14,6 +14,14 @@ import base64
 
 client = AsyncOpenAI(api_key=api_key_openai)
 
+
+
+# Function to encode the image
+async def encode_image(image_path):
+  with open(image_path, "rb") as image_path:
+    return base64.b64encode(image_path.read()).decode('utf-8')
+
+
 async def mod_dall_e(description, image_path):
 
     username = description.get("username")
@@ -33,6 +41,7 @@ async def mod_dall_e(description, image_path):
     'response_format': response_format,  # url or b64_json
     }
 
+
     if not image_path:
         if real_name_model == "dall-e-3":
             params['quality'] = quality
@@ -42,31 +51,35 @@ async def mod_dall_e(description, image_path):
         if real_name_model == "dall-e-2":
             params['n'] = n
 
-
         response = await client.images.generate(**params)
 
+
     if image_path:
-        if real_name_model == "dall-e-3":
-            params['quality'] = quality
+        # if real_name_model == "dall-e-3":
+        #     params['quality'] = quality
+        #     params['style'] = style
 
 
-        if real_name_model == "dall-e-2":
-            params['n'] = n
+        # if real_name_model == "dall-e-2":
+        #     params['n'] = n
 
-        # Открываем изображение
-        with open(image_path, 'rb') as img_file:
-            image_data = img_file.read()
 
-        # Кодируем изображение в base64
-        image_base64 = base64.b64encode(image_data).decode('utf-8')
+        base64_file = await encode_image(image_path)
 
-        params['image'] = image_base64
+
+        # # Открываем изображение
+        # with open(image_path, "rb") as img_file:
+        #     image_data = img_file.read()
+        #     image_base64 = base64.b64encode(image_data).decode('utf-8')
+
+
+
+        params['image'] = base64_file
 
         # Формируем запрос к API DALL-E для редактирования изображения
         response = await client.images.edit(**params)
 
 
-    print(params)
 
 
     # Statistic
@@ -76,9 +89,7 @@ async def mod_dall_e(description, image_path):
     # Calculation of money spent on tokens
     expenses = await calculation(username, model_version, used_tokens)
 
-
-
-    return {"response": response.data[0].url, "expenses": expenses, "used_tokens": used_tokens}
+    return {"response": response.data[0].url, "expenses": expenses, "pictures": n}
 
 
 
