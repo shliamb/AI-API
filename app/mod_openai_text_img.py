@@ -28,42 +28,51 @@ async def encode_image(file_path):
     return base64.b64encode(file_path.read()).decode('utf-8')
 
 # Main OpenAI Function
-async def mod_openai(username, description, file_path):
-
+async def mod_openai_text_img(username, description, image_path):
     try:
-
-        # Формируем список сообщений
-        messages = [
-                    {"role": "user", "content": [
-                                                            {"type": "text", "text": description["user_content"]},
-                                                        ],
-                    },
-                    {"role": "system", "content": description["system_content"]},
-                    ]
-
-
-        # Добавляем картинку, если она существует
-        if file_path:
+        # From the picture
+        if image_path:
             # Getting the base64 string
-            base64_file = await encode_image(file_path)
-            file_message = {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_file}"}}
-            # Добавляем основное сообщение пользователя
-            messages[0]["content"].append(file_message)
+            base64_file = await encode_image(image_path)
 
-        chat_completion = await client.chat.completions.create(
+            response = await client.chat.completions.create(
             model=description["model"],
-            messages=messages,
-            # max_tokens=300  # Ограничиваем лимит ответа в токенах
-        )
+            messages=[
+                {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": description["user_content"]},
+                    {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": {"url": f"data:image/jpeg;base64,{base64_file}"},
+                    },
+                    },
+                ],
+                }
+            ],
+            #max_tokens=300,
+            )
+            
+        # Without a picture
+        if not image_path:
+            response = await client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": description["system_content"]},
+                    {"role": "user", "content": description["user_content"]},
+                    ],
+                    model=description["model"],
+            )
+
 
 
         # TOKENS:
         # Извлечение ответа статистики из результата
-        if chat_completion:
-            response_content = chat_completion.choices[0].message.content
-            model_version = chat_completion.model
-            prompt_tokens = chat_completion.usage.prompt_tokens
-            used_tokens = chat_completion.usage.total_tokens + prompt_tokens
+        if response:
+            response_content = response.choices[0].message.content
+            model_version = response.model
+            prompt_tokens = response.usage.prompt_tokens
+            used_tokens = response.usage.total_tokens + prompt_tokens
         else:
             logging.error("No response from openai")
             raise

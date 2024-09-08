@@ -12,15 +12,15 @@ model = "dall-e-3"
 
 
 async def mod_dall_e(username, description):
-    # Generate an image based on the prompt
+
     response = await client.images.generate(
         prompt=prompt,
         model=model,
-        size="1024x1024",  # 1024x1024
+        size="1024x1024", 
         n=1, # Колличество картинок
     )
 
-    # Prints response containing a URL link to image
+
     print(response.data[0].url)
     return response.data[0].url
 
@@ -44,3 +44,42 @@ async def mod_dall_e(username, description):
 # )
 
 # print(response.data[0].url)
+
+
+
+
+
+
+
+
+# from PIL import Image
+# import io
+# import base64
+
+# async def mod_dall_e(username, image_path, description):
+#     # Открываем изображение
+#     with open(image_path, 'rb') as img_file:
+#         image_data = img_file.read()
+    
+#     # Кодируем изображение в base64
+#     image_base64 = base64.b64encode(image_data).decode('utf-8')
+
+#     # Формируем запрос к API DALL-E для редактирования изображения
+#     response = await client.images.edit(
+#         prompt=description,
+#         image=image_base64,
+#         model='dall-e',  # Убедитесь, что используете правильную модель
+#         size="1024x1024", 
+#         n=1  # Количество картинок
+#     )
+
+#     return response['data'][0]['url']  # Возвращаем URL измененного изображения
+
+# # Пример использования функции
+# username = "example_user"
+# image_path = "path/to/your/image.jpg"
+# description = "Изменить фон на звездное небо"
+
+# # Вызов функции (в контексте асинхронного выполнения)
+# modified_image_url = await mod_dall_e(username, image_path, description)
+# print(modified_image_url)

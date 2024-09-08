@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # Service
 from worker_db import get_user_by_username, update_user
 from general_functions import day_utcnow, unformat_date
-from mod_openai_main import mod_openai
+from mod_openai_text_img import mod_openai_text_img
 from mod_gemini_main import mod_gemini
 from mod_openai_image import mod_dall_e
 from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price
@@ -146,13 +146,15 @@ async def openai_api(
     if confirm_verify["status_code"] != status.HTTP_200_OK:
         raise
 
+
+
     if file:
         # Сохраняем изображение на сервере
-        file_path = f"./uploads/{file.filename}"
-        with open(file_path, "wb") as buffer:
+        image_path = f"./uploads/{file.filename}"
+        with open(image_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     else:
-        file_path = None
+        image_path = None
 
     description = {
         "username": username,
@@ -162,7 +164,7 @@ async def openai_api(
     }
 
     # Working with OpenAI
-    confirm_openai = await mod_openai(username, description, file_path)
+    confirm_openai = await mod_openai_text_img(username, description, image_path)
 
     if confirm_openai == "Error: There is no money for OpenAI account.":
         logging.info("There is no money for OpenAI account.")
