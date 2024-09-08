@@ -84,7 +84,7 @@ async def mod_dall_e(description, image_path):
     print(f"\n\n{response}\n\n\n")
 
 
-    return response_content
+    return response.data[0].url
 
 
 
