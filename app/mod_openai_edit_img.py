@@ -34,7 +34,7 @@ async def mod_edit_dall_e(description, image_path, mask_path):
     model = description.get("model", "dall-e-2-1024")
     real_name_model = await cleaner_model(model) # dall-e-2
 
-
+    print(f"2: {image_path}")
 
 
     response = client.images.edit(
@@ -46,8 +46,6 @@ async def mod_edit_dall_e(description, image_path, mask_path):
             n = n,
             size = size
     )
-
-
 
 
 

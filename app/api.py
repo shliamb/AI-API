@@ -321,9 +321,6 @@ async def dall_e_point(
     if style:
         description["style"] = style
 
-
-    print(image_path)
-
     # Working with OpenAI
     confirm_dall_e = await mod_gen_dall_e(description, image_path)
 
@@ -424,6 +421,9 @@ async def dall_e_point(
         description["response_format"] = response_format
     if n:
         description["n"] = n
+
+
+    print(f"1: {image_path}")
 
     # Working with OpenAI
     confirm_dall_e = await mod_edit_dall_e(description, image_path, mask_path)
