@@ -55,25 +55,15 @@ async def mod_dall_e(description, image_path):
 
 
     if image_path:
-        # if real_name_model == "dall-e-3":
-        #     params['quality'] = quality
-        #     params['style'] = style
+        if real_name_model == "dall-e-3":
+            params['quality'] = quality
+            params['style'] = style
 
 
-        # if real_name_model == "dall-e-2":
-        #     params['n'] = n
-
+        if real_name_model == "dall-e-2":
+            params['n'] = n
 
         base64_file = await encode_image(image_path)
-
-
-        # # Открываем изображение
-        # with open(image_path, "rb") as img_file:
-        #     image_data = img_file.read()
-        #     image_base64 = base64.b64encode(image_data).decode('utf-8')
-
-
-
         params['image'] = base64_file
 
         # Формируем запрос к API DALL-E для редактирования изображения
