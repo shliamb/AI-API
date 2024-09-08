@@ -70,17 +70,18 @@ async def mod_dall_e(description, image_path):
         # TOKENS:
         if response:
             response_content = response.data[0].url
-            model_version = response.model
-            used_tokens = response.usage.total_tokens # + response.usage.prompt_tokens
+            # model_version = response.model
+            # used_tokens = response.usage.total_tokens # + response.usage.prompt_tokens
         else:
             logging.error("No response from openai")
-            raise
+            print("No response from openai")
+            
         
         # Calculation of money spent on tokens
         # expenses = await calculation(username, model_version, used_tokens)
 
 
-
+    print(f"\n\n{response}\n\n\n")
 
 
     return response_content
