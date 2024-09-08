@@ -16,10 +16,10 @@ client = AsyncOpenAI(api_key=api_key_openai)
 
 
 
-# # Function to encode the image
-# async def encode_image(image_path):
-#   with open(image_path, "rb") as image_path:
-#     return base64.b64encode(image_path.read()).decode('utf-8')
+# Function to encode the image
+async def encode_image(image_path):
+  with open(image_path, "rb") as image_path:
+    return base64.b64encode(image_path.read()).decode('utf-8')
 
 
 async def mod_dall_e(description, image_path):
@@ -60,8 +60,9 @@ async def mod_dall_e(description, image_path):
         print("!!!!!!!!!!!! 2")
         params['model'] = "dall-e-2"
         params['n'] = n
-        # base64_file = await encode_image(image_path)
-        params['image'] = open(image_path, "rb"),
+
+        base64_file = await encode_image(image_path)
+        params['image'] = base64_file # open(image_path, "rb"),
 
 
         print(params)
