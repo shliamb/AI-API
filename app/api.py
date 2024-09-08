@@ -135,7 +135,7 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
 async def openai_api(
     username: str = Form(...),
     user_content: str = Form(...),
-    system_content: str = Form(...),
+    system_content: str = Form(None),
     model: str = Form(...),
     appkey: str = Header(...),
     file: Optional[UploadFile] = File(None)
@@ -184,11 +184,11 @@ async def openai_api(
 async def dall_e_point(
     username: str = Form(...),
     user_content: str = Form(...),
-    size: str = Form(...),
-    quality: str = Form(...),
-    response_format: str = Form(...),
-    n: int = Form(...),
-    style: str = Form(...),
+    size: str = Form(None),
+    quality: str = Form(None),
+    response_format: str = Form(None),
+    n: int = Form(None),
+    style: str = Form(None),
     model: str = Form(...),
     appkey: str = Header(...),
     file: Optional[UploadFile] = File(None)
@@ -209,21 +209,21 @@ async def dall_e_point(
             detail="Error! Not support > 1000 simbols dall-e-2",
         )
 
-    if quality == "HD" and model == "dall-e-2":
-        print("Error! Not support hd dall-e-2.")
+    if quality and model == "dall-e-2":
+        print("Error! Not support quality dall-e-2.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Error! Not support hd dall-e-2.",
+            detail="Error! Not support quality dall-e-2.",
         )
 
-    if size == "1792x1024" and model == "dall-e-2":
+    if size and size == "1792x1024" and model == "dall-e-2":
         print("Error! Not support 1792x1024 to dall-e-2.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Error! Not support 1792x1024 to dall-e-2.",
         )
 
-    if size == "1024x1792" and model == "dall-e-2":
+    if size and size == "1024x1792" and model == "dall-e-2":
         print("Error! Not support 1024x1792 to dall-e-2.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -231,13 +231,13 @@ async def dall_e_point(
         )
 
     if model == "dall-e-3":
-        if size == "256x256" or size == "512x512":
+        if size and size == "256x256" or size and size == "512x512":
             print("Error! Not support 512x512 and 256x256 to dall-e-3.")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Error! Not support 512x512 and 256x256 to dall-e-3.",
             )
-        if n > 1:
+        if n and n > 1:
             print("Error! Not support n > 1 to dall-e-3.")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -245,7 +245,7 @@ async def dall_e_point(
             )
         
     if model == "dall-e-2":
-        if n > 10:
+        if n and n > 10:
             print("Error! Not support n > 10 to dall-e-2.")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -257,6 +257,35 @@ async def dall_e_point(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Error! Not support style to dall-e-2.",
             )
+    
+    if model and model == "dall-e-3":
+        if quality and quality == "hd":
+            if size and size == "1024x1024":
+                model = "dall-e-3-hd-1024"
+            elif size and size == "1792x1024" or size and size == "1024x1792":
+                model = "dall-e-3-hd-1792"
+            else:
+                model = "dall-e-3-hd-1792"
+        elif quality and quality == "standart":
+            if size and size == "1024x1024":
+                model = "dall-e-3-1024"
+            elif size and size == "1792x1024" or size and size == "1024x1792":
+                model = "dall-e-3-1792"
+            else:
+                model = "dall-e-3-1792"
+        else:
+            model = "dall-e-3-hd-1792"
+
+    elif model == "dall-e-2":
+        if size and size == "1024x1024":
+            model = "dall-e-2-1024"
+        elif size and size == "512x512":
+            model = "dall-e-2-512"
+        elif size and size == "256x256":
+            model = "dall-e-2-256"
+        else:
+            model = "dall-e-2-1024"
+
 
     # Verify user and her appkey
     confirm_verify = await verify_user_appkey(username, model, appkey)
