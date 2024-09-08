@@ -13,32 +13,36 @@ genai.configure(api_key=api_key_gemini)
 async def mod_gemini(username, description, image_path ):
     try:
 
+        user_content = description["user_content"]
+        system_content = description["system_content"]
+        model_name = description["model"]
+
         if not image_path:
 
             model = genai.GenerativeModel(
-                model_name = description["model"],
+                model_name = model_name,
                 # tools = user_input.tools or None, # "tools": "code_execution",
-                system_instruction = description["system_content"] or None
+                system_instruction = system_content or None
             )
 
         # if image_path:
         #     # Getting the base64 string
         #     base64_file = await encode_image(image_path)
 
-        response = model.generate_content(description["user_content"])
+        response = model.generate_content(user_content)
 
         # Tokens:
         if response:
             usage_metadata = response.usage_metadata
             total_token_count = usage_metadata.total_token_count
-            logging.info(f"Gemini text in tokens: {str(model.count_tokens(description["user_content"]))}")
+            logging.info(f"Gemini text in tokens: {str(model.count_tokens(user_content))}")
             logging.info(f"Gemini all text tokens: {str(response.usage_metadata)}")
         else:
             logging.error("No response from Google Gemini.")
             return {"response": "No response from Google Gemini."}
         
         # Calculation of money spent on tokens
-        expenses = await calculation(username, description["model"], total_token_count)
+        expenses = await calculation(username, model_name, total_token_count)
 
         return {"response": response.text, "expenses": expenses, "used_tokens": total_token_count}
     
