@@ -23,8 +23,8 @@ async def mod_dall_e(description, image_path):
     response_format = description.get("response_format", "url") # b64_json
     n = description.get("n", 1)
     style = description.get("style", "natural") # vivid ore natural
-    model = description.get("model", "dall-e-3")
-    real_name_model = await cleaner_model(model)
+    model = description.get("model", "dall-e-3-hd-1792")
+    real_name_model = await cleaner_model(model) # dall-e-3
 
     params = {
     'prompt': user_content,
@@ -66,25 +66,19 @@ async def mod_dall_e(description, image_path):
         response = await client.images.edit(**params)
 
 
+        print(params)
 
-        # TOKENS:
-        if response:
-            response_content = response.data[0].url
-            # model_version = response.model
-            # used_tokens = response.usage.total_tokens # + response.usage.prompt_tokens
-        else:
-            logging.error("No response from openai")
-            print("No response from openai")
-            
+
+        # Statistic
+        used_tokens = n
+        model_version = model # exemple - dall-e-3-hd-1792
         
         # Calculation of money spent on tokens
-        # expenses = await calculation(username, model_version, used_tokens)
+        expenses = await calculation(username, model_version, used_tokens)
 
 
-    print(f"\n\n{response}\n\n\n")
 
-
-    return response.data[0].url
+    return {"response": response.data[0].url, "expenses": expenses, "used_tokens": used_tokens}
 
 
 
