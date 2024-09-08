@@ -320,6 +320,9 @@ async def dall_e_point(
     if style:
         description["style"] = style
 
+
+    print(description)
+
     # Working with OpenAI
     confirm_dall_e = await mod_dall_e(description, image_path)
 
