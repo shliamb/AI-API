@@ -394,9 +394,13 @@ async def dall_e_point(
 
     # Save img to server
     image_path = f"./uploads/{image.filename}"
+
+    print(f"1: {image_path}")
+
     with open(image_path, "wb") as buffer:
         shutil.copyfileobj(image.file, buffer)
 
+    print(f"2: save file")
 
     if mask:
         # Save mask to server
@@ -410,7 +414,6 @@ async def dall_e_point(
     description = {
         "username": username,
         "user_content": user_content,
-        "model": model,
     }
 
     if model:
@@ -423,7 +426,7 @@ async def dall_e_point(
         description["n"] = n
 
 
-    print(f"1: {image_path}")
+    print(f"3: {image_path}")
 
     # Working with OpenAI
     confirm_dall_e = await mod_edit_dall_e(description, image_path, mask_path)
@@ -431,6 +434,8 @@ async def dall_e_point(
     # Remove file
     if image_path:
         remove = await remove_file_os(image_path)
+    if mask_path:
+        remove = await remove_file_os(mask_path)
 
     if confirm_dall_e == "Error: There is no money for OpenAI account.":
         logging.info("There is no money for OpenAI account.")
