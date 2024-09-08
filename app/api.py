@@ -18,7 +18,8 @@ from worker_db import get_user_by_username, update_user
 from general_functions import day_utcnow, unformat_date, remove_file_os
 from mod_openai_text_img import mod_openai_text_img
 from mod_gemini_main import mod_gemini
-from mod_openai_image import mod_dall_e
+from mod_openai_gen_img import mod_gen_dall_e
+from mod_openai_edit_img import mod_edit_dall_e
 from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price
 
 app = FastAPI()
@@ -181,8 +182,8 @@ async def openai_api(
 
 
 
-# IMAGE DALL-E Endpoint
-@app.post("/api/dall-e/", status_code=status.HTTP_200_OK)
+# IMAGE generate DALL-E Endpoint
+@app.post("/api/gen-dall-e/", status_code=status.HTTP_200_OK)
 async def dall_e_point(
     username: str = Form(...),
     user_content: str = Form(...),
@@ -324,7 +325,7 @@ async def dall_e_point(
     print(image_path)
 
     # Working with OpenAI
-    confirm_dall_e = await mod_dall_e(description, image_path)
+    confirm_dall_e = await mod_gen_dall_e(description, image_path)
 
     # Remove file
     if image_path:
@@ -335,6 +336,122 @@ async def dall_e_point(
         # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
 
     return confirm_dall_e
+
+
+
+
+
+
+
+
+
+
+@app.post("/api/edit-dall-e/", status_code=status.HTTP_200_OK)
+async def dall_e_point(
+    username: str = Form(...),
+    user_content: str = Form(...),
+    size: str = Form(None),
+    response_format: str = Form(None),
+    n: int = Form(None),
+    model: str = Form(None),
+    appkey: str = Header(...),
+    image: Optional[UploadFile] = File(),
+    mask: Optional[UploadFile] = File(None)
+):
+
+    # Check mistakes:
+    if model != "dall-e-2":
+        print("Error! Only Dalle-2 support edit image.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Error! Only Dalle-2 support edit image.",
+        )
+    if len(user_content) > 1000:
+        print("Error! Not support > 1000 simbol")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Error! Not support > 1000 simbol",
+        )
+    if size and size == "1792x1024" or size and size == "1024x1792":
+        print("Error! Not support size.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Error! Not support size.",
+        )
+    
+    if size and size == "1024x1024":
+        model = "dall-e-2-1024"
+    elif size and size == "512x512":
+        model = "dall-e-2-512"
+    elif size and size == "256x256":
+        model = "dall-e-2-256"
+    else:
+        model = "dall-e-2-1024"
+
+
+    # Verify user and her appkey
+    confirm_verify = await verify_user_appkey(username, model, appkey)
+    if confirm_verify["status_code"] != status.HTTP_200_OK:
+        return confirm_verify
+
+
+    # Save img to server
+    image_path = f"./uploads/{image.filename}"
+    with open(image_path, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+
+
+    if mask:
+        # Save mask to server
+        mask_path = f"./uploads/{mask.filename}"
+        with open(mask_path, "wb") as buffer:
+            shutil.copyfileobj(mask.file, buffer)
+    else:
+        mask_path = None
+
+    # Collect data
+    description = {
+        "username": username,
+        "user_content": user_content,
+        "model": model,
+    }
+
+    if model:
+        description["model"] = model
+    if size:
+        description["size"] = size
+    if response_format:
+        description["response_format"] = response_format
+    if n:
+        description["n"] = n
+
+    # Working with OpenAI
+    confirm_dall_e = await mod_edit_dall_e(description, image_path, mask_path)
+
+    # Remove file
+    if image_path:
+        remove = await remove_file_os(image_path)
+
+    if confirm_dall_e == "Error: There is no money for OpenAI account.":
+        logging.info("There is no money for OpenAI account.")
+        # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
+
+    return confirm_dall_e
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

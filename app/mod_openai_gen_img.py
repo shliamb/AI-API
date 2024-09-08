@@ -16,13 +16,7 @@ client = AsyncOpenAI(api_key=api_key_openai)
 
 
 
-# Function to encode the image
-async def encode_image(image_path):
-  with open(image_path, "rb") as image_path:
-    return base64.b64encode(image_path.read()).decode('utf-8')
-
-
-async def mod_dall_e(description, image_path):
+async def mod_gen_dall_e(description, image_path):
 
     username = description.get("username")
     user_content = description.get("user_content")
@@ -38,51 +32,20 @@ async def mod_dall_e(description, image_path):
     'prompt': user_content,
     'size': size,
     'response_format': response_format,  # url or b64_json
+    "model": real_name_model
     }
 
 
-    if not image_path:
-        print("!!!!!!!!!!!! 1")
-        if real_name_model == "dall-e-3":
-            params['model'] = real_name_model
-            params['quality'] = quality
-            params['style'] = style
+
+    if real_name_model == "dall-e-3":
+        params['quality'] = quality
+        params['style'] = style
 
 
-        if real_name_model == "dall-e-2":
-            params['model'] = real_name_model
-            params['n'] = n
-
-        response = await client.images.generate(**params)
-
-
-    if image_path:
-        print("!!!!!!!!!!!! 2")
-        params['model'] = "dall-e-2"
+    if real_name_model == "dall-e-2":
         params['n'] = n
 
-        base64_file = await encode_image(image_path)
-        params['image'] = base64_file # open(image_path, "rb"),
-
-
-        print(params)
-
-
-
-
-        # Формируем запрос к API DALL-E для редактирования изображения
-        response = await client.images.edit(**params)
-
-        # client.images.edit(
-        #                     image=open("otter.png", "rb"),
-        #                     mask=open("mask.png", "rb"),
-        #                     prompt="A cute baby sea otter wearing a beret",
-        #                     n=2,
-        #                     size="1024x1024"
-        #                     )
-
-
-
+    response = await client.images.generate(**params)
 
     # Statistic
     used_tokens = n * 1000000 # У меня цены в price за 1мл токенов, а картинки то по одной
@@ -119,41 +82,3 @@ style (str) - Стиль создаваемых изображений. Долж
 
 '''
 
-
-
-
-
-
-
-'''
-
-client.images.edit - Создает отредактированное или расширенное изображение на основе исходного изображения и подсказки.
-
-
-! image (file) - Изображение для редактирования. Должно быть действительным PNG-файлом, размером менее 4 МБ и квадратным. Если маска не указана, изображение 
-должно иметь прозрачность, которая будет использоваться в качестве маски.
-
-
-! prompt (str) - Текстовое описание желаемого изображения (изображений). Максимальная длина - 1000 символов.
-
-
-mask (file) - Дополнительное изображение, полностью прозрачные области которого (например, где альфа равна нулю) указывают на места, где изображение должно 
-быть отредактировано. Должен быть действительным PNG-файлом, размером менее 4 МБ и иметь те же размеры, что и изображение.
-
-model (str) - Модель, используемая для генерации изображений. На данный момент поддерживается только dall-e-2.
-
-
-n (int) - Количество генерируемых изображений. Должно быть от 1 до 10.
-
-
-size (str) - Размер генерируемых изображений. Должен быть одним из 256x256, 512x512 или 1024x1024.
-
-
-response_format (str) - Формат, в котором будут возвращены сгенерированные изображения. Должен быть одним из url или b64_json. 
-URL действительны только в течение 60 минут после создания изображения.
-
-
-
-
-
-'''
