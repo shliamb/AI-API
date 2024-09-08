@@ -321,8 +321,6 @@ async def dall_e_point(
         description["style"] = style
 
 
-    print(description)
-    print()
     print(image_path)
 
     # Working with OpenAI
