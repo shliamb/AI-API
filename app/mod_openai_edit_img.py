@@ -22,7 +22,7 @@ client = OpenAI(api_key=api_key_openai)
 
 
 
-async def mod_edit_dall_e(description, image_path, mask_path):
+async def mod_edit_dall_e(description, image_path):#, mask_path):
 
     username = description.get("username")
     user_content = description.get("user_content")

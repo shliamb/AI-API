@@ -352,8 +352,8 @@ async def dall_e_point(
     n: int = Form(None),
     model: str = Form(None),
     appkey: str = Header(...),
-    image: Optional[UploadFile] = File(),
-    mask: Optional[UploadFile] = File(None)
+    file: Optional[UploadFile] = File(),
+    # mask: Optional[UploadFile] = File(None)
 ):
 
     # Check mistakes:
@@ -392,23 +392,24 @@ async def dall_e_point(
         return confirm_verify
 
 
+
     # Save img to server
-    image_path = f"./uploads/{image.filename}"
+    image_path = f"./uploads/{file.filename}"
 
     print(f"1: {image_path}")
 
     with open(image_path, "wb") as buffer:
-        shutil.copyfileobj(image.file, buffer)
+        shutil.copyfileobj(file.file, buffer)
 
     print(f"2: save file")
 
-    if mask:
-        # Save mask to server
-        mask_path = f"./uploads/{mask.filename}"
-        with open(mask_path, "wb") as buffer:
-            shutil.copyfileobj(mask.file, buffer)
-    else:
-        mask_path = None
+    # if mask:
+    #     # Save mask to server
+    #     mask_path = f"./uploads/{mask.filename}"
+    #     with open(mask_path, "wb") as buffer:
+    #         shutil.copyfileobj(mask.file, buffer)
+    # else:
+    #     mask_path = None
 
     # Collect data
     description = {
@@ -429,13 +430,13 @@ async def dall_e_point(
     print(f"3: {image_path}")
 
     # Working with OpenAI
-    confirm_dall_e = await mod_edit_dall_e(description, image_path, mask_path)
+    confirm_dall_e = await mod_edit_dall_e(description, image_path)
 
     # Remove file
     if image_path:
         remove = await remove_file_os(image_path)
-    if mask_path:
-        remove = await remove_file_os(mask_path)
+    # if mask_path:
+    #     remove = await remove_file_os(mask_path)
 
     if confirm_dall_e == "Error: There is no money for OpenAI account.":
         logging.info("There is no money for OpenAI account.")
