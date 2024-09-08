@@ -42,6 +42,7 @@ async def mod_dall_e(description, image_path):
 
 
     if not image_path:
+        print("!!!!!!!!!!!! 1")
         if real_name_model == "dall-e-3":
             params['model'] = real_name_model
             params['quality'] = quality
@@ -56,6 +57,7 @@ async def mod_dall_e(description, image_path):
 
 
     if image_path:
+        print("!!!!!!!!!!!! 2")
         params['model'] = "dall-e-2"
         params['n'] = n
         # base64_file = await encode_image(image_path)

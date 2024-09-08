@@ -322,6 +322,8 @@ async def dall_e_point(
 
 
     print(description)
+    print()
+    print(image_path)
 
     # Working with OpenAI
     confirm_dall_e = await mod_dall_e(description, image_path)
