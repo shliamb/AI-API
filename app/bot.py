@@ -121,7 +121,7 @@ async def command_start_handler(message: Message) -> None:
         
         if data_by_username is None: # Зачем то перепроверяю, хз
 
-            last_act_to_base = await day_utcnow(time_correction) # Записываю дату и время
+            last_act_to_base = await day_utcnow() # Записываю дату и время
 
             user_data = {
                 "id": id,
@@ -329,7 +329,7 @@ async def get_stat_user(message: types.Message):
 
     all_static = []
     number = 0
-    all_static.append(["№", "№", "username_table_stat", "time", "use_model", "sesion_token", "price_1_tok", "total_price"]) # First a names row
+    all_static.append(["№", "№", "username_table_stat", "time", "use_model", "sesion_token", "price_1_tok", "total_price", "id telegram"]) # First a names row
     
     for it in data:
         number += 1

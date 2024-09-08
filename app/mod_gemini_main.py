@@ -36,7 +36,7 @@ async def mod_gemini(username, user_input):
         # # Сбор данных
         # data_stat = {
         #     "username_table_stat": username,
-        #     "time": await day_utcnow(time_correction),
+        #     "time": await day_utcnow(),
         #     "use_model": user_input.model,
         #     "sesion_token": data[1],
         #     "price_1_tok": data[0],

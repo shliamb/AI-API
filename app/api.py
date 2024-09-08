@@ -55,7 +55,7 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
 
         un_waiting_time = float(0.01 * float(waiting_time))
 
-        date_now = await day_utcnow(time_correction)
+        date_now = await day_utcnow()
         un_date_now = await unformat_date(date_now)
         un_date_block = await unformat_date(data_by_username.date_block)
         un_time = un_date_now[1] - un_date_block[1]
@@ -87,7 +87,7 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
         )
     
     if appkey != str(data_by_username.appkey) and data_by_username.is_failed >= limit_trying:
-        updated_data = {"is_block": True, "date_block":  await day_utcnow(time_correction) } 
+        updated_data = {"is_block": True, "date_block":  await day_utcnow() } 
         await update_user(data_by_username.id, updated_data)
         logging.error(f"Invalid API Key, valid attempts have ended, sorry, try again in {waiting_time} minutes.")
         raise HTTPException(

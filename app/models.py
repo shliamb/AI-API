@@ -52,8 +52,8 @@ class Statistics(Base):
     __tablename__ = 'statistics'
     id = Column(sqlalchemy.Integer, primary_key=True)
     time = Column(sqlalchemy.DateTime, nullable=True) 
-    use_model = Column(sqlalchemy.String(50), nullable=False) # Использованная модель
-    sesion_token = Column(sqlalchemy.Integer, default=0, server_default="0",  nullable=False) # Использованно токенов
+    use_model = Column(sqlalchemy.String(100), nullable=False) # Использованная модель
+    sesion_token = Column(sqlalchemy.BigInteger, default=0, server_default="0",  nullable=False) # Использованно токенов
     price_1_tok = Column(sqlalchemy.Float, default=0, server_default="0", nullable=False) # Цена токена, если менялась, то будет видно
     total_price = Column(sqlalchemy.Float, default=0, server_default="0", nullable=False) #  Вся цена
     ###
