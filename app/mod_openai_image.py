@@ -66,15 +66,15 @@ async def mod_dall_e(description, image_path):
         response = await client.images.edit(**params)
 
 
-        print(params)
+    print(params)
 
 
-        # Statistic
-        used_tokens = n
-        model_version = model # exemple - dall-e-3-hd-1792
-        
-        # Calculation of money spent on tokens
-        expenses = await calculation(username, model_version, used_tokens)
+    # Statistic
+    used_tokens = n
+    model_version = model # exemple - dall-e-3-hd-1792
+    
+    # Calculation of money spent on tokens
+    expenses = await calculation(username, model_version, used_tokens)
 
 
 
