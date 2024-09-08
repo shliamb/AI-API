@@ -4,24 +4,24 @@ logging.basicConfig(level=logging.INFO, filename='./log/api.log', filemode='a', 
 import asyncio
 from pydantic import BaseModel
 from typing import Optional
+import os
 import shutil
 import requests
 # Fasapi
 from fastapi import FastAPI, Header, Depends, HTTPException, status, UploadFile, File, Form
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import gunicorn
-from fastapi.middleware.cors import CORSMiddleware
 # Service
 from worker_db import get_user_by_username, update_user
-from general_functions import day_utcnow, unformat_date
+from general_functions import day_utcnow, unformat_date, remove_file_os
 from mod_openai_text_img import mod_openai_text_img
 from mod_gemini_main import mod_gemini
 from mod_openai_image import mod_dall_e
 from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price
 
 app = FastAPI()
-
 
 
 
@@ -163,7 +163,11 @@ async def openai_api(
     }
 
     # Working with OpenAI
-    confirm_openai = await mod_openai_text_img(username, description, image_path)
+    confirm_openai = await mod_openai_text_img(description, image_path)
+
+    # Remove file
+    if image_path:
+        remove = await remove_file_os(image_path)
 
     if confirm_openai == "Error: There is no money for OpenAI account.":
         logging.error("There is no money for OpenAI account.")
@@ -175,31 +179,116 @@ async def openai_api(
 
 
 
-# IMAGE OPENAI Endpoint  DALL-E
+# IMAGE DALL-E Endpoint
 @app.post("/api/dall-e/", status_code=status.HTTP_200_OK)
 async def dall_e_point(
     username: str = Form(...),
-    # user_content: str = Form(...),
-    # system_content: str = Form(...),
+    user_content: str = Form(...),
+    size: str = Form(...),
+    quality: str = Form(...),
+    response_format: str = Form(...),
+    n: int = Form(...),
+    style: str = Form(...),
     model: str = Form(...),
     appkey: str = Header(...),
-    # file: Optional[UploadFile] = File(None)
+    file: Optional[UploadFile] = File(None)
 ):
+    
+    # Check mistakes:
+    if len(user_content) > 4000 and model == "dall-e-3":
+        print("Error! Not support > 4000 simbol")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Error! Not support > 4000 simbol",
+        )
+
+    if len(user_content) > 1000 and model == "dall-e-2":
+        print("Error! Not support > 1000 simbols dall-e-2")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Error! Not support > 1000 simbols dall-e-2",
+        )
+
+    if quality == "HD" and model == "dall-e-2":
+        print("Error! Not support hd dall-e-2.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Error! Not support hd dall-e-2.",
+        )
+
+    if size == "1792x1024" and model == "dall-e-2":
+        print("Error! Not support 1792x1024 to dall-e-2.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Error! Not support 1792x1024 to dall-e-2.",
+        )
+
+    if size == "1024x1792" and model == "dall-e-2":
+        print("Error! Not support 1024x1792 to dall-e-2.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Error! Not support 1024x1792 to dall-e-2.",
+        )
+
+    if model == "dall-e-3":
+        if size == "256x256" or size == "512x512":
+            print("Error! Not support 512x512 and 256x256 to dall-e-3.")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Error! Not support 512x512 and 256x256 to dall-e-3.",
+            )
+        if n > 1:
+            print("Error! Not support n > 1 to dall-e-3.")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Error! Not support n > 1 to dall-e-3.",
+            )
+        
+    if model == "dall-e-2":
+        if n > 10:
+            print("Error! Not support n > 10 to dall-e-2.")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Error! Not support n > 10 to dall-e-2.",
+            )
+        if style:
+            print("Error! Not support style to dall-e-2.")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Error! Not support style to dall-e-2.",
+            )
 
     # Verify user and her appkey
     confirm_verify = await verify_user_appkey(username, model, appkey)
     if confirm_verify["status_code"] != status.HTTP_200_OK:
         return confirm_verify
 
+    if file:
+        # Save img to server
+        image_path = f"./uploads/{file.filename}"
+        with open(image_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    else:
+        image_path = None
+
+    # Collect data
     description = {
         "username": username,
-        # "user_content": user_content,
-        # "system_content": system_content,
+        "user_content": user_content,
+        "size": size,
+        "quality": quality,
+        "response_format": response_format,
+        "n": n,
+        "style": style,
         "model": model,
     }
 
     # Working with OpenAI
-    confirm_dall_e = await mod_dall_e(username, description)
+    confirm_dall_e = await mod_dall_e(description, image_path)
+
+    # Remove file
+    if image_path:
+        remove = await remove_file_os(image_path)
 
     if confirm_dall_e == "Error: There is no money for OpenAI account.":
         logging.info("There is no money for OpenAI account.")
@@ -246,8 +335,11 @@ async def gemini_api(
     }
     
     # Working with Gemini
-    confirm_gemini = await mod_gemini(username, description, image_path)
+    confirm_gemini = await mod_gemini(description, image_path)
 
+    # Remove file
+    if image_path:
+        remove = await remove_file_os(image_path)
 
     return confirm_gemini
 

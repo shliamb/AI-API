@@ -1,5 +1,7 @@
 from datetime import datetime, timezone, timedelta
 import logging
+import os
+import re
 from config import price, time_correction
 from worker_db import add_statistic, get_user_by_username, update_user_by_username
 
@@ -61,3 +63,25 @@ async def calculation(username, model_version, used_tokens):
     await update_user_by_username(username, data_money)
 
     return total_price
+
+
+# Remove File OS
+async def remove_file_os(file_path):
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        print(f"The {file_path} file was successfully deleted.")
+        logging.info(f"The {file_path} file was successfully deleted.")
+        return True
+    else:
+        print(f"The {file_path} file does not exist.")
+        logging.error(f"The {file_path} file does not exist.")
+        return False
+    
+
+# Cleaner model AI
+async def cleaner_model(name_model):
+    pattern = r"(dall-e-\d)"
+    match = re.search(pattern, name_model)
+    if match:
+        match = match.group(1)
+    return match

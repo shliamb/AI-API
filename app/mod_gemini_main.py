@@ -10,9 +10,10 @@ from general_functions import calculation
 genai.configure(api_key=api_key_gemini)
 
 
-async def mod_gemini(username, description, image_path ):
+async def mod_gemini(description, image_path ):
     try:
 
+        username = description["username"]
         user_content = description["user_content"]
         system_content = description["system_content"]
         model_name = description["model"]

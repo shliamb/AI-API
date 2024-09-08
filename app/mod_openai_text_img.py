@@ -27,7 +27,16 @@ async def encode_image(file_path):
     return base64.b64encode(file_path.read()).decode('utf-8')
 
 # Main OpenAI Function
-async def mod_openai_text_img(username, description, image_path):
+async def mod_openai_text_img(description, image_path):
+
+
+
+    username = description.get("username")
+    user_content = description.get("user_content")
+    system_content = description.get("system_content", "Ты личный помошник, с отличным чувством юмора")
+    model_name = description.get("model")
+
+
     try:
         # 1. From the picture
         if image_path:
@@ -35,12 +44,12 @@ async def mod_openai_text_img(username, description, image_path):
             base64_file = await encode_image(image_path)
 
             response = await client.chat.completions.create(
-            model=description["model"],
+            model=model_name,
             messages=[
                 {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": description["user_content"]},
+                    {"type": "text", "text": user_content},
                     {
                     "type": "image_url",
                     "image_url": {
@@ -57,10 +66,10 @@ async def mod_openai_text_img(username, description, image_path):
         if not image_path:
             response = await client.chat.completions.create(
                 messages=[
-                    {"role": "system", "content": description["system_content"]},
-                    {"role": "user", "content": description["user_content"]},
+                    {"role": "system", "content": system_content},
+                    {"role": "user", "content": user_content},
                     ],
-                    model=description["model"],
+                    model=model_name,
             )
 
         # TOKENS:

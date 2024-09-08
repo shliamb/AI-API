@@ -7,7 +7,9 @@ waiting_time = 15 # min/
 time_correction = +3 # Moscow
 money_to_start = 1 # 1$ to start work
 my_app_key = "appkey" # Key to API Key
-min_pay = 1 # Minimum pay 
+min_pay = 1 # Minimum pay
+ai_default_model = "gpt-4o-mini-2024-07-18"
+
 
 
 # Prices per 1M tokens:
@@ -21,8 +23,18 @@ price = {
     'gpt-4o-mini': 1.5, # no vision
     'gpt-4o-mini-2024-07-18': 1.5, # no vision
     'gpt-4-turbo-2024-04-09': 80,
+
     # Images:
-    'DALL·E 3': 0.08,
+    'dall-e-3-1024': 0.08,
+    'dall-e-3-1792': 0.16,
+
+    'dall-e-3-hd-1024': 0.16,
+    'dall-e-3-hd-1792': 0.24,
+
+    'dall-e-2-1024': 0.04,
+    'dall-e-2-512': 0.036,
+    'dall-e-2-256': 0.032,
+
     # Google Gemini:
     'gemini-1.5-pro-latest': 93.75,
     'gemini-1.5-flash-latest': 1.125,
@@ -30,10 +42,6 @@ price = {
     # 'text-embedding-004': 0, # Free  хз пока что как ее пользовать
     # 'aqa': 0,
     }
-
-
-
-
 
 
 
@@ -61,9 +69,41 @@ gpt-4-turbo-2024-04-09            10                  30                 40
 
 
 
-Model         Quality           Resolution       Price     
+Model                   Quality                       Resolution                      Price     
 
-DALL·E 3      Standart          1024*1024        0.04$/image
+dall-e-3                Standart                      1024×1024                       0.04$ / image
+dall-e-3                Standart                      1024×1792, 1792×1024            0.080$ / image     
+
+dall-e-3                HD                            1024×1024                       0.080$ / image
+dall-e-3                HD                            1024×1792, 1792×1024            0.120$ / image 
+
+dall-e-2                                              1024×1024                       0.020$ / image
+dall-e-2                                              512×512                         0.018$ / image 
+dall-e-2                                              256×256                         0.016$ / image 
+
+
+
+dall-e-3-1024       0.04
+dall-e-3-1792       0.08
+
+dall-e-3-hd-1024    0.08
+dall-e-3-hd-1792    0.12
+
+dall-e-2-1024       0.02
+dall-e-2-512        0.018
+dall-e-2-256        0.016
+
+
+'dall-e-3-1024': 0.04,
+'dall-e-3-1792': 0.08,
+
+'dall-e-3-hd-1024': 0.08,
+'dall-e-3-hd-1792': 0.12,
+
+'dall-e-2-1024': 0.02,
+'dall-e-2-512': 0.018,
+'dall-e-2-256': 0.016,
+
 
 
 

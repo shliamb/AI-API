@@ -40,6 +40,7 @@ MarkupSafe==2.1.5
 multidict==6.0.5
 openai==1.43.0
 packaging==24.1
+pillow==10.4.0
 proto-plus==1.24.0
 protobuf==4.25.4
 psycopg2-binary==2.9.9
