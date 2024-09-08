@@ -158,9 +158,11 @@ async def openai_api(
     description = {
         "username": username,
         "user_content": user_content,
-        "system_content": system_content,
         "model": model,
     }
+
+    if system_content:
+        description["system_content"] = system_content
 
     # Working with OpenAI
     confirm_openai = await mod_openai_text_img(description, image_path)
@@ -266,7 +268,7 @@ async def dall_e_point(
                 model = "dall-e-3-hd-1792"
             else:
                 model = "dall-e-3-hd-1792"
-        elif quality and quality == "standart":
+        elif quality and quality == "standard":
             if size and size == "1024x1024":
                 model = "dall-e-3-1024"
             elif size and size == "1792x1024" or size and size == "1024x1792":
@@ -304,13 +306,19 @@ async def dall_e_point(
     description = {
         "username": username,
         "user_content": user_content,
-        "size": size,
-        "quality": quality,
-        "response_format": response_format,
-        "n": n,
-        "style": style,
         "model": model,
     }
+
+    if size:
+        description["size"] = size
+    if quality:
+        description["quality"] = quality
+    if response_format:
+        description["response_format"] = response_format
+    if n:
+        description["n"] = n
+    if style:
+        description["style"] = style
 
     # Working with OpenAI
     confirm_dall_e = await mod_dall_e(description, image_path)
