@@ -45,7 +45,7 @@ async def mod_openai_text_img(username, description, image_path):
                     {
                     "type": "image_url",
                     "image_url": {
-                        "url": {"url": f"data:image/jpeg;base64,{base64_file}"},
+                        "url": f"data:image/jpeg;base64,{base64_file}",
                     },
                     },
                 ],
@@ -53,7 +53,7 @@ async def mod_openai_text_img(username, description, image_path):
             ],
             #max_tokens=300,
             )
-            
+
         # Without a picture
         if not image_path:
             response = await client.chat.completions.create(
