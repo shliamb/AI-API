@@ -49,12 +49,10 @@ async def mod_gemini(description, image_path):
         used_tokens = total_token_count
 
 
-        print(username, model_version, used_tokens, response.text)
-
         # Calculation of money spent on tokens
-        # expenses = await calculation(username, model_version, used_tokens, input_data="text")
+        expenses = await calculation(username, model_version, used_tokens, input_data="text")
 
-        return response.text  #{"response": response.text, "expenses": expenses, "used_tokens": total_token_count}
+        return {"response": response.text, "expenses": expenses, "used_tokens": used_tokens}
     
     except Exception as e:
        logging.error(f"Error is: {e}")
