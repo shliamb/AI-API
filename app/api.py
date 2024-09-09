@@ -20,6 +20,7 @@ from mod_openai_text_img import mod_openai_text_img
 from mod_gemini_main import mod_gemini
 from mod_openai_gen_img import mod_gen_dall_e
 from mod_openai_edit_img import mod_edit_dall_e
+from mod_openai_varions_img import variations_dall_e
 from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price
 
 app = FastAPI()
@@ -341,12 +342,95 @@ async def dall_e_point(
 
 
 
+# Create image variation dall-e-2
+@app.post("/api/variations-dall-e/", status_code=status.HTTP_200_OK)
+async def variations_dall_e_func(
+    username: str = Form(...),                      #
+    size: str = Form(None),                         # 256x256, 512x512, or 1024x1024
+    response_format: str = Form(None),              # url or b64_json
+    n: int = Form(None),                            # 1 and 10
+    model: str = Form(None),                        # Only dall-e-2
+    appkey: str = Header(...),                      #
+    file: Optional[UploadFile] = File(),            # ! PNG < 4mb square image
+):
+
+    # Check mistakes:
+    if model != "dall-e-2":
+        print("Error! Only Dalle-2 support variation image.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Error! Only Dalle-2 support variation image.",
+        )
+
+    if size and size == "1792x1024" or size and size == "1024x1792":
+        print("Error! Not support size.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Error! Not support size.",
+        )
+
+    if size and size == "1792x1024" or size and size == "1024x1792":
+        print("Error! Not support size.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Error! Not support size.",
+        )
+
+    if size and size == "1024x1024":
+        model = "dall-e-2-1024"
+    elif size and size == "512x512":
+        model = "dall-e-2-512"
+    elif size and size == "256x256":
+        model = "dall-e-2-256"
+
+    # Verify user and her appkey
+    confirm_verify = await verify_user_appkey(username, model, appkey)
+    if confirm_verify["status_code"] != status.HTTP_200_OK:
+        return confirm_verify
+
+    # Save img to server
+    image_path = f"./uploads/{file.filename}"
+    with open(image_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    # Collect data
+    description = {
+        "username": username,
+    }
+
+    if model:
+        description["model"] = model
+    if size:
+        description["size"] = size
+    if response_format:
+        description["response_format"] = response_format
+    if n:
+        description["n"] = n
+
+    # Working with OpenAI
+    confirm_dall_e = await variations_dall_e(description, image_path)
+
+    # Remove file
+    if image_path:
+        remove = await remove_file_os(image_path)
+
+    if confirm_dall_e == "Error: There is no money for OpenAI account.":
+        logging.info("There is no money for OpenAI account.")
+        # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
+
+    return confirm_dall_e
+
+
+
+
+
+
 
 
 @app.post("/api/edit-dall-e/", status_code=status.HTTP_200_OK)
 async def dall_e_point(
     username: str = Form(...),
-    user_content: str = Form(...),
+    user_content: str = Form(None),
     size: str = Form(None),
     response_format: str = Form(None),
     n: int = Form(None),
@@ -443,9 +527,6 @@ async def dall_e_point(
         # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
 
     return confirm_dall_e
-
-
-
 
 
 
