@@ -23,7 +23,7 @@ async def mod_gemini(description, image_path):
 
         if not image_path:
 
-            model = await genai.GenerativeModel(
+            model = genai.GenerativeModel(
                 model_name = model_name,
                 # tools = user_input.tools or None, # "tools": "code_execution",
                 system_instruction = system_content or None
@@ -36,23 +36,23 @@ async def mod_gemini(description, image_path):
         response = model.generate_content(user_content)
 
         # Tokens:
-        if response:
-            usage_metadata = response.usage_metadata
-            total_token_count = usage_metadata.total_token_count
-            logging.info(f"Gemini text in tokens: {str(model.count_tokens(user_content))}")
-            logging.info(f"Gemini all text tokens: {str(response.usage_metadata)}")
-        else:
-            logging.error("No response from Google Gemini.")
-            return {"response": "No response from Google Gemini."}
+        # if response:
+        #     usage_metadata = response.usage_metadata
+        #     total_token_count = usage_metadata.total_token_count
+        #     logging.info(f"Gemini text in tokens: {str(model.count_tokens(user_content))}")
+        #     logging.info(f"Gemini all text tokens: {str(response.usage_metadata)}")
+        # else:
+        #     logging.error("No response from Google Gemini.")
+        #     return {"response": "No response from Google Gemini."}
         
-        model_version = model_name
-        used_tokens = total_token_count
+        # model_version = model_name
+        # used_tokens = total_token_count
 
 
-        print(username, model_version, used_tokens, response.text)
+        # print(username, model_version, used_tokens, response.text)
 
         # Calculation of money spent on tokens
-        expenses = await calculation(username, model_version, used_tokens, input_data="text")
+        # expenses = await calculation(username, model_version, used_tokens, input_data="text")
 
         return {"response": response.text, "expenses": expenses, "used_tokens": total_token_count}
     
