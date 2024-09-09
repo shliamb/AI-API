@@ -40,6 +40,8 @@ async def variations_dall_e(description, image_path):
 
 
 '''
+Условия API на стороне OpenAI:
+
 
 client.images.edit - Создает отредактированное или расширенное изображение на основе исходного изображения и подсказки.
 

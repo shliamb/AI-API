@@ -6,17 +6,12 @@ from general_functions import cleaner_model
 from general_functions import calculation
 
 
-from PIL import Image
-import io
-import base64
-
-
 
 client = AsyncOpenAI(api_key=api_key_openai)
 
 
-
-async def mod_gen_dall_e(description, image_path):
+#### Create image
+async def mod_gen_dall_e(description):
 
     username = description.get("username")
     user_content = description.get("user_content")
@@ -35,20 +30,17 @@ async def mod_gen_dall_e(description, image_path):
     "model": real_name_model
     }
 
-
-
     if real_name_model == "dall-e-3":
         params['quality'] = quality
         params['style'] = style
 
-
-    if real_name_model == "dall-e-2":
+    elif real_name_model == "dall-e-2":
         params['n'] = n
 
     response = await client.images.generate(**params)
 
     # Statistic
-    used_tokens = n * 1000000 # У меня цены в price за 1мл токенов, а картинки то по одной
+    used_tokens = n
     model_version = model # exemple - dall-e-3-hd-1792
     
     # Calculation of money spent on tokens
@@ -60,6 +52,8 @@ async def mod_gen_dall_e(description, image_path):
 
 
 '''
+
+Условия использования API OpenAI:
 
 client.images.generate - Генерация нового изображения
 

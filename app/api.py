@@ -183,19 +183,18 @@ async def openai_api(
 
 
 
-# IMAGE generate DALL-E Endpoint
+#### Create image DALL-E Endpoint
 @app.post("/api/gen-dall-e/", status_code=status.HTTP_200_OK)
 async def dall_e_point(
-    username: str = Form(...),
-    user_content: str = Form(...),
-    size: str = Form(None),
-    quality: str = Form(None),
-    response_format: str = Form(None),
-    n: int = Form(None),
-    style: str = Form(None),
-    model: str = Form(...),
-    appkey: str = Header(...),
-    file: Optional[UploadFile] = File(None)
+    username: str = Form(...),              # !
+    user_content: str = Form(...),          # !  dall-e-3 < 4000 and  dall-e-2 < 1000
+    size: str = Form(None),                 # 1792 Only dall-e-3 and  512, 256 only dall-e-2
+    quality: str = Form(None),              # Only dall-e-3 support hd, standard
+    response_format: str = Form(None),      # url or b64_json
+    n: int = Form(None),                    # dall-e-3 only 1 and dall-e-2 1 - 10
+    style: str = Form(None),                # Only dall-e-3 support vivid ore natural
+    model: str = Form(None),                # 
+    appkey: str = Header(...),              # !
 ):
     
     # Check mistakes:
@@ -261,7 +260,8 @@ async def dall_e_point(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Error! Not support style to dall-e-2.",
             )
-    
+        
+    # Choosing a price list
     if model and model == "dall-e-3":
         if quality and quality == "hd":
             if size and size == "1024x1024":
@@ -269,18 +269,18 @@ async def dall_e_point(
             elif size and size == "1792x1024" or size and size == "1024x1792":
                 model = "dall-e-3-hd-1792"
             else:
-                model = "dall-e-3-hd-1792"
+                model = "dall-e-3-hd-1024"
         elif quality and quality == "standard":
             if size and size == "1024x1024":
                 model = "dall-e-3-1024"
             elif size and size == "1792x1024" or size and size == "1024x1792":
                 model = "dall-e-3-1792"
             else:
-                model = "dall-e-3-1792"
+                model = "dall-e-3-1024"
         else:
-            model = "dall-e-3-hd-1792"
+            model = "dall-e-3-1024"
 
-    elif model == "dall-e-2":
+    elif model and model == "dall-e-2":
         if size and size == "1024x1024":
             model = "dall-e-2-1024"
         elif size and size == "512x512":
@@ -289,6 +289,8 @@ async def dall_e_point(
             model = "dall-e-2-256"
         else:
             model = "dall-e-2-1024"
+    else:
+        model = "dall-e-3-1024"
 
 
     # Verify user and her appkey
@@ -296,21 +298,14 @@ async def dall_e_point(
     if confirm_verify["status_code"] != status.HTTP_200_OK:
         return confirm_verify
 
-    if file:
-        # Save img to server
-        image_path = f"./uploads/{file.filename}"
-        with open(image_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-    else:
-        image_path = None
-
     # Collect data
     description = {
         "username": username,
         "user_content": user_content,
-        "model": model,
     }
 
+    if model:
+        description["model"] = model
     if size:
         description["size"] = size
     if quality:
@@ -323,11 +318,7 @@ async def dall_e_point(
         description["style"] = style
 
     # Working with OpenAI
-    confirm_dall_e = await mod_gen_dall_e(description, image_path)
-
-    # Remove file
-    if image_path:
-        remove = await remove_file_os(image_path)
+    confirm_dall_e = await mod_gen_dall_e(description)
 
     if confirm_dall_e == "Error: There is no money for OpenAI account.":
         logging.info("There is no money for OpenAI account.")
@@ -342,20 +333,20 @@ async def dall_e_point(
 
 
 
-# Create image variation dall-e-2
+#### Create image variation dall-e-2:
 @app.post("/api/variations-dall-e/", status_code=status.HTTP_200_OK)
 async def variations_dall_e_func(
-    username: str = Form(...),                      #
+    username: str = Form(...),                      # !
     size: str = Form(None),                         # 256x256, 512x512, or 1024x1024
     response_format: str = Form(None),              # url or b64_json
     n: int = Form(None),                            # 1 and 10
     model: str = Form(None),                        # Only dall-e-2
-    appkey: str = Header(...),                      #
+    appkey: str = Header(...),                      # !
     file: Optional[UploadFile] = File(),            # ! PNG < 4mb square image
 ):
 
     # Check mistakes:
-    if model != "dall-e-2":
+    if model and model != "dall-e-2":
         print("Error! Only Dalle-2 support variation image.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -369,19 +360,22 @@ async def variations_dall_e_func(
             detail="Error! Not support size.",
         )
 
-    if size and size == "1792x1024" or size and size == "1024x1792":
+    elif size and size == "1792x1024" or size and size == "1024x1792":
         print("Error! Not support size.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Error! Not support size.",
         )
-
+    
+    # Choosing a price list
     if size and size == "1024x1024":
         model = "dall-e-2-1024"
     elif size and size == "512x512":
         model = "dall-e-2-512"
     elif size and size == "256x256":
         model = "dall-e-2-256"
+    else:
+        model = "dall-e-2-1024"
 
     # Verify user and her appkey
     confirm_verify = await verify_user_appkey(username, model, appkey)
@@ -396,10 +390,9 @@ async def variations_dall_e_func(
     # Collect data
     description = {
         "username": username,
+        "model": model
     }
 
-    if model:
-        description["model"] = model
     if size:
         description["size"] = size
     if response_format:
