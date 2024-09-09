@@ -1,7 +1,5 @@
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
-# from openai import OpenAI
 import logging
-# from openai import OpenAI
 from keys import api_key_openai
 from general_functions import cleaner_model
 from general_functions import calculation
@@ -10,7 +8,7 @@ from general_functions import calculation
 client = AsyncOpenAI(api_key=api_key_openai)
 
 
-
+# Dall-e 2 variations img:
 async def variations_dall_e(description, image_path):
 
     username = description.get("username")
@@ -28,17 +26,14 @@ async def variations_dall_e(description, image_path):
             size = size
     )
 
-
-
-
     # Statistic
-    used_tokens = n * 1000000 # У меня цены в price за 1мл токенов, а картинки то по одной
+    used_tokens = n
     model_version = model # exemple - dall-e-3-hd-1792
     
     # Calculation of money spent on tokens
-    expenses = await calculation(username, model_version, used_tokens)
+    expenses = await calculation(username, model_version, used_tokens, input_data="img")
 
-    return {"response": response.data[0].url}#, "expenses": expenses, "pictures": n}
+    return {"response": response.data[0].url, "expenses": expenses, "pictures": n}
 
 
 

@@ -26,13 +26,17 @@ async def unformat_date(date):
 
 
 # Calculation of the cost of used tokens
-async def calculation(username, model_version, used_tokens):
+async def calculation(username, model_version, used_tokens, input_data):
     one_tok_price = None
     
     for key, value in price.items():
         if key == model_version:
-            one_tok_price = value / 1000000 # Price 1 token to USD
-            break
+            if input_data == "text":
+                one_tok_price = value / 1000000 # Price 1 token to USD
+                break
+            if input_data == "img":
+                one_tok_price = value
+                break
         
     if one_tok_price == None:
         print(f"The model {model_version} was not found in the price list")
@@ -69,11 +73,11 @@ async def calculation(username, model_version, used_tokens):
 async def remove_file_os(file_path):
     if os.path.exists(file_path):
         os.remove(file_path)
-        print(f"The {file_path} file was successfully deleted.")
+        #print(f"The {file_path} file was successfully deleted.")
         logging.info(f"The {file_path} file was successfully deleted.")
         return True
     else:
-        print(f"The {file_path} file does not exist.")
+        #print(f"The {file_path} file does not exist.")
         logging.error(f"The {file_path} file does not exist.")
         return False
     

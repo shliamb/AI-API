@@ -34,7 +34,6 @@ async def mod_edit_dall_e(description, image_path):#, mask_path):
     model = description.get("model", "dall-e-2-1024")
     real_name_model = await cleaner_model(model) # dall-e-2
 
-    print(f"2: {image_path}")
 
 
     response = client.images.create_variation(
@@ -55,7 +54,7 @@ async def mod_edit_dall_e(description, image_path):#, mask_path):
     # model_version = model # exemple - dall-e-3-hd-1792
     
     # # Calculation of money spent on tokens
-    # expenses = await calculation(username, model_version, used_tokens)
+    # expenses = await calculation(username, model_version, used_tokens, input_data="img")
 
     return {"response": response.data[0].url}#, "expenses": expenses, "pictures": n}
 

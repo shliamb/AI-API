@@ -82,7 +82,7 @@ async def mod_openai_text_img(description, image_path):
             raise
         
         # Calculation of money spent on tokens
-        expenses = await calculation(username, model_version, used_tokens)
+        expenses = await calculation(username, model_version, used_tokens, input_data="text")
 
         return {"response": response_content, "expenses": expenses, "used_tokens": used_tokens}
     
