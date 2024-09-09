@@ -33,6 +33,9 @@ async def mod_gemini(description, image_path):
         #     # Getting the base64 string
         #     base64_file = await encode_image(image_path)
 
+
+
+
         response = model.generate_content(user_content)
 
         # Tokens:
@@ -54,7 +57,7 @@ async def mod_gemini(description, image_path):
         # Calculation of money spent on tokens
         # expenses = await calculation(username, model_version, used_tokens, input_data="text")
 
-        return {"response": response.text, "expenses": expenses, "used_tokens": total_token_count}
+        return response.text  #{"response": response.text, "expenses": expenses, "used_tokens": total_token_count}
     
     except Exception as e:
        logging.error(f"Error is: {e}")

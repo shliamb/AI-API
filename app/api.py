@@ -579,6 +579,9 @@ async def gemini_api(
     if system_content:
         description["system_content"] = system_content
     
+
+    print(description)
+
     # Working with Gemini
     confirm_gemini = await mod_gemini(description, file_path)
 
