@@ -2,14 +2,14 @@ import logging
 logging.basicConfig(level=logging.INFO, filename='./log/api.log', filemode='a', format='%(levelname)s - %(asctime)s - %(name)s - %(message)s',) # При деплое активировать логирование в файл
 # Base
 import asyncio
-from pydantic import BaseModel
+# from pydantic import BaseModel
 from typing import Optional
-import os
+# import os
 import shutil
-import requests
+# import requests
 # Fasapi
 from fastapi import FastAPI, Header, Depends, HTTPException, status, UploadFile, File, Form
-from fastapi.responses import JSONResponse
+# from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import gunicorn
@@ -548,11 +548,13 @@ async def dall_e_point(
 async def gemini_api(
     username: str = Form(...),
     user_content: str = Form(...),
-    system_content: str = Form(...),
-    model: str = Form(...),
+    system_content: str = Form(None),
+    model: str = Form(None),
     appkey: str = Header(...),
     file: Optional[UploadFile] = File(None)
 ):
+    if not model:
+        model = "gemini-1.5-flash-latest"
 
     # Verify user and her appkey
     confirm_verify = await verify_user_appkey(username, model, appkey)
@@ -560,27 +562,29 @@ async def gemini_api(
         return confirm_verify
 
     if file:
-        # Save img to server
-        image_path = f"./uploads/{file.filename}"
-        with open(image_path, "wb") as buffer:
+        # Save file to server
+        file_path = f"./uploads/{file.filename}"
+        with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     else:
-        image_path = None
+        file_path = None
 
     # Collect data
     description = {
         "username": username,
         "user_content": user_content,
-        "system_content": system_content,
         "model": model,
     }
+
+    if system_content:
+        description["system_content"] = system_content
     
     # Working with Gemini
-    confirm_gemini = await mod_gemini(description, image_path)
+    confirm_gemini = await mod_gemini(description, file_path)
 
     # Remove file
-    if image_path:
-        remove = await remove_file_os(image_path)
+    if file_path:
+        remove = await remove_file_os(file_path)
 
     return confirm_gemini
 

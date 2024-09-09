@@ -1,5 +1,6 @@
 # Base
 import logging
+import asyncio
 # Google
 import google.generativeai as genai
 # Service
@@ -10,17 +11,19 @@ from general_functions import calculation
 genai.configure(api_key=api_key_gemini)
 
 
-async def mod_gemini(description, image_path ):
-    try:
+# Main Text Google Function
+async def mod_gemini(description, image_path):
 
-        username = description["username"]
-        user_content = description["user_content"]
-        system_content = description["system_content"]
-        model_name = description["model"]
+    try:
+        username = description.get("username")
+        user_content = description.get("user_content")
+        system_content = description.get("system_content")
+        model_name = description.get("model")
+        # tools = description.get("tools")
 
         if not image_path:
 
-            model = genai.GenerativeModel(
+            model = await genai.GenerativeModel(
                 model_name = model_name,
                 # tools = user_input.tools or None, # "tools": "code_execution",
                 system_instruction = system_content or None
@@ -42,8 +45,11 @@ async def mod_gemini(description, image_path ):
             logging.error("No response from Google Gemini.")
             return {"response": "No response from Google Gemini."}
         
+        model_version = model_name
+        used_tokens = total_token_count
+
         # Calculation of money spent on tokens
-        expenses = await calculation(username, model_name, total_token_count)
+        expenses = await calculation(username, model_version, used_tokens, input_data="text")
 
         return {"response": response.text, "expenses": expenses, "used_tokens": total_token_count}
     
