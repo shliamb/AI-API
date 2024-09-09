@@ -44,7 +44,7 @@ async def mod_gen_dall_e(description):
     model_version = model # exemple - dall-e-3-hd-1792
     
     # Calculation of money spent on tokens
-    expenses = await calculation(username, model_version, used_tokens, input_data="text")
+    expenses = await calculation(username, model_version, used_tokens, input_data="img")
 
     return {"response": response.data[0].url, "expenses": expenses, "pictures": n}
 

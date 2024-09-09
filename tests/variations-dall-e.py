@@ -6,18 +6,18 @@ url = "http://137.184.87.156:8000/api/variations-dall-e/"
 # url = "http://localhost:8000/api/openai/"
 
 data = {
-        "username": "Shliamb10", # !
-        "size": "1024x1024", # !
-        #"response_format": "url",
-        #"n": 1,
-        "model": "dall-e-2" # !
+        "username": "Shliamb10",        # !
+        "size": "1024x1024",            # 
+        "response_format": "url",       #
+        "n": 1,                         #
+        "model": "dall-e-2"             # 
 
 }
 
 
 # Данные для отправки
 files = {
-    'file': ('image45.png', open('./uploads/image45.png', 'rb')), 
+    'file': ('image45.png', open('./uploads/image45.png', 'rb')),   # !
 }
 
 # files = None

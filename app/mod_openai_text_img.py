@@ -1,46 +1,30 @@
 # Base
 import logging
-import asyncio
 import re
-import base64
-import requests
-import json
 # import datetime
 # OpenAI
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
 from keys import api_key_openai
 # Service
-from general_functions import calculation
+from general_functions import calculation, encode_image
+
 
 
 client = AsyncOpenAI(api_key=api_key_openai)
 
 
 
-
-
-
-
-# Function to encode the image
-async def encode_image(file_path):
-  with open(file_path, "rb") as file_path:
-    return base64.b64encode(file_path.read()).decode('utf-8')
-
-# Main OpenAI Function
+# Main Text OpenAI Function
 async def mod_openai_text_img(description, image_path):
-
-
 
     username = description.get("username")
     user_content = description.get("user_content")
-    system_content = description.get("system_content", "Ты личный помошник, с отличным чувством юмора")
+    system_content = description.get("system_content", "")
     model_name = description.get("model")
-
 
     try:
         # 1. From the picture
         if image_path:
-            # Getting the base64 string
             base64_file = await encode_image(image_path)
 
             response = await client.chat.completions.create(
@@ -53,7 +37,7 @@ async def mod_openai_text_img(description, image_path):
                     {
                     "type": "image_url",
                     "image_url": {
-                        "url": f"data:image/jpeg;base64,{base64_file}",
+                        "url": f"data:image/jpeg;base64,{base64_file}",  # Так можно накидать много картинок, хз хз за чем..
                     },
                     },
                 ],
@@ -112,8 +96,47 @@ async def mod_openai_text_img(description, image_path):
 
 
 
+'''
+
+Условия API Openai:
 
 
+messages: !
+
+1. Request body:
+{"role": "system", "name": "RoboCop", "content": ..
+{"role": "user", "name": "Alex", "content": "Hello!"}
+        image_url 
+            url
+            detail..
+
+Массив частей содержимого с определенным типом, каждая из которых 
+может иметь тип text или image_url при передаче изображений. Вы 
+можете передать несколько изображений, добавив несколько частей 
+содержимого image_url. Ввод изображений поддерживается только при 
+использовании модели gpt-4o.
+
+2. Assistant message:
+leter..
+
+3. Tool message:
+leter..
+
+4. max_tokens integer или null Необязательно 
+Максимальное количество лексем, которые могут быть сгенерированы 
+в завершении чата. Общая длина входных и сгенерированных лексем 
+ограничена длиной контекста модели. Пример Python-кода для подсчета 
+токенов.
+
+... 
+Там очень много всего, я хз.
+
+
+
+
+
+
+'''
 
 
 

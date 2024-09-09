@@ -45,7 +45,8 @@ price = {
 
 
 
-
+# Instruction API OpenAI: https://platform.openai.com/docs/api-reference/chat/create
+# Price OpenAI: https://openai.com/api/pricing/
 
 
 

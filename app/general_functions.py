@@ -2,6 +2,7 @@ from datetime import datetime, timezone, timedelta
 import logging
 import os
 import re
+import base64
 from config import price, time_correction
 from worker_db import add_statistic, get_user_by_username, update_user_by_username
 
@@ -34,7 +35,7 @@ async def calculation(username, model_version, used_tokens, input_data):
             if input_data == "text":
                 one_tok_price = value / 1000000 # Price 1 token to USD
                 break
-            if input_data == "img":
+            elif input_data == "img":
                 one_tok_price = value
                 break
         
@@ -89,3 +90,10 @@ async def cleaner_model(name_model):
     if match:
         match = match.group(1)
     return match
+
+
+
+# Encode the image
+async def encode_image(file_path):
+  with open(file_path, "rb") as file_path:
+    return base64.b64encode(file_path.read()).decode('utf-8')

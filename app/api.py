@@ -130,18 +130,23 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
 
 
 
-#### OPENAI TEXT & in IMAGE ####
 
-# TEXT & in IMAGE OPENAI Endpoint
-@app.post("/api/openai/", status_code=status.HTTP_200_OK)
+# Create chat completion & IMAGE OPENAI Endpoint
+@app.post("/api/openai_chat/", status_code=status.HTTP_200_OK)
 async def openai_api(
-    username: str = Form(...),
-    user_content: str = Form(...),
-    system_content: str = Form(None),
-    model: str = Form(...),
-    appkey: str = Header(...),
-    file: Optional[UploadFile] = File(None)
+    username: str = Form(...),                      # !
+    # user_name   -->  {"role": "system", "name": "Alex", "content":
+    # system_name
+    user_content: str = Form(...),                  # !
+    system_content: str = Form(None),               #
+    model: str = Form(None),                        #
+    appkey: str = Header(...),                      # !
+    file: Optional[UploadFile] = File(None)         #
 ):
+
+    # Choosing a price list
+    if not model:
+        model = "gpt-4o-mini"
 
     # Verify user and her appkey
     confirm_verify = await verify_user_appkey(username, model, appkey)
@@ -291,7 +296,6 @@ async def dall_e_point(
             model = "dall-e-2-1024"
     else:
         model = "dall-e-3-1024"
-
 
     # Verify user and her appkey
     confirm_verify = await verify_user_appkey(username, model, appkey)

@@ -2,7 +2,7 @@ import requests
 import json
 
 
-url = "http://137.184.87.156:8000/api/openai/"
+url = "http://137.184.87.156:8000/api/openai_chat/"
 
 data = {
         "username": "Shliamb10",
