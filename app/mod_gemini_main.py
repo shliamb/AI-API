@@ -48,6 +48,9 @@ async def mod_gemini(description, image_path):
         model_version = model_name
         used_tokens = total_token_count
 
+
+        print(username, model_version, used_tokens, response.text)
+
         # Calculation of money spent on tokens
         expenses = await calculation(username, model_version, used_tokens, input_data="text")
 
