@@ -80,10 +80,11 @@ async def mod_gemini(description, image_path):
 
             # Tokens:
             if response:
-                usage_metadata = response.usage_metadata
-                total_token_count = usage_metadata.total_token_count
+                total_token_count = response['usageMetadata']['totalTokenCount']
+                #usage_metadata = response.usage_metadata
+                #total_token_count = usage_metadata.total_token_count
                 # logging.info(f"Gemini text in tokens: {str(model.count_tokens(user_content))}")
-                logging.info(f"Gemini all text tokens: {str(usage_metadata)}")
+                #logging.info(f"Gemini all text tokens: {str(usage_metadata)}")
             else:
                 logging.error("No response from Google Gemini.")
                 return {"response": "No response from Google Gemini."}
