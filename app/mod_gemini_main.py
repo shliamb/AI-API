@@ -117,14 +117,14 @@ async def mod_gemini(description, image_path): # description, image_path
 
     data = {
                 "contents": [
-                    # {
-                    #     "role": "system",
-                    #     "parts": [
-                    #         {
-                    #             "text": system_content
-                    #         }
-                    #     ]
-                    # },
+                    {
+                        "role": "system",
+                        "parts": [
+                            {
+                                "text": system_content
+                            }
+                        ]
+                    },
                     {
                         "role": "model",
                         "parts": [
