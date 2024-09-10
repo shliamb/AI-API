@@ -88,7 +88,7 @@ async def mod_gemini(description, image_path): # description, image_path
 
 
     # URL API
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY_GEMINI}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={API_KEY_GEMINI}" # gemini-1.5-flash
 
     headers = {
         'Content-Type': 'application/json'
@@ -99,56 +99,79 @@ async def mod_gemini(description, image_path): # description, image_path
     with open(img_path, 'rb') as image_file:
         encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
 
+    data = {
+
+        "system_instruction": {
+            "parts": {
+                "text": system_content
+            }
+        },
+        "contents": [{
+            "parts": [
+                {"text": user_content},
+                {
+                    "inline_data": {
+                        "mime_type": "image/jpeg",
+                        "data": encoded_image
+                    }
+                }
+            ]
+        }]
+    }
+
+
     # data = {
-    #     "contents": [{
-    #         "parts": [
-    #             {"text": user_content},
-    #             {
-    #                 "inline_data": {
-    #                     "mime_type": "image/jpeg",
-    #                     "data": encoded_image
-    #                 }
-    #             }
-    #         ]
-    #     }]
+    #     "system_instruction": {
+    #         "parts": {
+    #             "text": "You are Neko the cat respond like one"
+    #         }
+    #     },
+    #     "contents": {
+    #         "parts": {
+    #             "text": "Good morning! How are you?"
+    #         }
+    #     }
     # }
 
 
 
-    data = {
-                "contents": [
-                    {
-                        "role": "system",
-                        "parts": [
-                            {
-                                "text": system_content
-                            }
-                        ]
-                    },
-                    {
-                        "role": "model",
-                        "parts": [
-                            {
-                                "text": model_name
-                            },
-                        ]
-                    },
-                    {
-                        "role": "user",
-                        "parts": [
-                            {
-                                "text": user_content
-                            },
-                            {
-                                "inline_data": {
-                                    "mime_type": "image/jpeg",
-                                    "data": encoded_image
-                                }
-                            }
-                        ]
-                    }
-                ]
-            }
+
+
+    # Цепочка общения, можно собирать цепочку общения и сохранять посыл разобранного общения.
+    # data = {
+    #             "contents": [
+    #                 {
+    #                     "role": "user",
+    #                     "parts": [
+    #                         {
+    #                             "text": ""
+    #                         }
+    #                     ]
+    #                 },
+    #                 {
+    #                     "role": "model",
+    #                     "parts": [
+    #                         {
+    #                             "text": ""
+    #                         },
+    #                     ]
+    #                 },
+    #                 {
+    #                     "role": "user",
+    #                     "parts": [
+    #                         {
+    #                             "text": user_content
+    #                         },
+    #                         {
+    #                             "inline_data": {
+    #                                 "mime_type": "image/jpeg",
+    #                                 "data": encoded_image
+    #                             }
+    #                         }
+    #                     ]
+    #                 }
+    #             ]
+    #         }
 
 
 
