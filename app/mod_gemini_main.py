@@ -11,7 +11,8 @@ import base64
 # import PIL.Image
 # Service
 from keys import API_KEY_GEMINI, is_admin
-from general_functions import calculation
+# from general_functions import calculation
+from general_functions import calculation, encode_image
 
 
 
@@ -31,33 +32,33 @@ async def mod_gemini(description, image_path):
         'Content-Type': 'application/json'
     }
 
-    print(image_path)
-
     # is IMAGE:
     if image_path:
 
-        with open(image_path, 'rb') as image_file:
-            encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+        # with open(image_path, 'rb') as image_file:
+        #     encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
 
-            data = {
+        encoded_image = await encode_image(image_path)
+        
+        data = {
 
-                "system_instruction": {
-                    "parts": {
-                        "text": system_content
-                    }
-                },
-                "contents": [{
-                    "parts": [
-                        {"text": user_content},
-                        {
-                            "inline_data": {
-                                "mime_type": "image/jpeg",
-                                "data": encoded_image
-                            }
+            "system_instruction": {
+                "parts": {
+                    "text": system_content
+                }
+            },
+            "contents": [{
+                "parts": [
+                    {"text": user_content},
+                    {
+                        "inline_data": {
+                            "mime_type": "image/jpeg",
+                            "data": encoded_image
                         }
-                    ]
-                }]
-            }
+                    }
+                ]
+            }]
+        }
 
     # No IMAGE:
     elif not image_path:
