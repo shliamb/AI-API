@@ -1,4 +1,5 @@
 # https://github.com/google-gemini/generative-ai-python/blob/main/google/generativeai/answer.py
+# https://ai.google.dev/api/generate-content?hl=ru#text_gen_multimodal_one_image_prompt-SHELL
 
 # Base
 import logging
@@ -11,6 +12,129 @@ import base64
 # Service
 from keys import API_KEY_GEMINI, is_admin
 from general_functions import calculation
+
+
+
+
+# Main Text Google Function
+async def mod_gemini(description, image_path):
+
+    username = description.get("username")
+    user_content = description.get("user_content")
+    system_content = description.get("system_content")
+    model_name = description.get("model")
+    # tools = description.get("tools")
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={API_KEY_GEMINI}"
+
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    # is IMAGE:
+    if image_path:
+
+        img_path = image_path
+        with open(img_path, 'rb') as image_file:
+            encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+
+        data = {
+
+            "system_instruction": {
+                "parts": {
+                    "text": system_content
+                }
+            },
+            "contents": [{
+                "parts": [
+                    {"text": user_content},
+                    {
+                        "inline_data": {
+                            "mime_type": "image/jpeg",
+                            "data": encoded_image
+                        }
+                    }
+                ]
+            }]
+        }
+
+    # No IMAGE:
+    if not image_path:
+
+        data = {
+            "system_instruction": {
+                "parts": {
+                    "text": system_content
+                }
+            },
+            "contents": {
+                "parts": {
+                    "text": user_content
+                }
+            }
+        }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, json=data, headers=headers) as response:
+            response = await response.json()
+
+            # Tokens:
+            if response:
+                usage_metadata = response.usage_metadata
+                total_token_count = usage_metadata.total_token_count
+                # logging.info(f"Gemini text in tokens: {str(model.count_tokens(user_content))}")
+                logging.info(f"Gemini all text tokens: {str(usage_metadata)}")
+            else:
+                logging.error("No response from Google Gemini.")
+                return {"response": "No response from Google Gemini."}
+
+            model_version = model_name
+            used_tokens = total_token_count
+
+            # Calculation of money spent on tokens
+            expenses = await calculation(username, model_version, used_tokens, input_data="text")
+
+            return {"response": response.text, "expenses": expenses, "used_tokens": used_tokens}
+
+
+if __name__ == "__main__":
+    asyncio.run(mod_gemini())
+
+
+
+
+
+
+
+'''
+https://ai.google.dev/api/files?hl=ru#v1beta.media.upload
+
+
+Gemini 1.5 Pro и 1.5 Flash поддерживают максимум 3600 файлов изображений.
+
+Изображения должны относиться к одному из следующих типов MIME данных изображения:
+
+PNG - image/png
+JPEG — image/jpeg
+WEBP — image/webp
+HEIC — image/heic
+HEIF - image/heif
+Каждое изображение эквивалентно 258 токенам.
+
+
+
+'''
+
+
+
+
+
+
+
+
+
+
+
 
 
 # genai.configure(api_key=api_key_gemini)
@@ -69,74 +193,6 @@ from general_functions import calculation
 
 
 
-
-
-
-
-
-
-# Main Text Google Function
-async def mod_gemini(description, image_path): # description, image_path
-
-
-    username = description.get("username")
-    user_content = description.get("user_content")
-    system_content = description.get("system_content")
-    model_name = description.get("model")
-    # tools = description.get("tools")
-
-
-
-    # URL API
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={API_KEY_GEMINI}" # gemini-1.5-flash
-
-    headers = {
-        'Content-Type': 'application/json'
-    }
-
-    img_path = image_path
-
-    with open(img_path, 'rb') as image_file:
-        encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
-
-    data = {
-
-        "system_instruction": {
-            "parts": {
-                "text": system_content
-            }
-        },
-        "contents": [{
-            "parts": [
-                {"text": user_content},
-                {
-                    "inline_data": {
-                        "mime_type": "image/jpeg",
-                        "data": encoded_image
-                    }
-                }
-            ]
-        }]
-    }
-
-
-    # data = {
-    #     "system_instruction": {
-    #         "parts": {
-    #             "text": "You are Neko the cat respond like one"
-    #         }
-    #     },
-    #     "contents": {
-    #         "parts": {
-    #             "text": "Good morning! How are you?"
-    #         }
-    #     }
-    # }
-
-
-
-
-
     # Цепочка общения, можно собирать цепочку общения и сохранять посыл разобранного общения.
     # data = {
     #             "contents": [
@@ -172,65 +228,6 @@ async def mod_gemini(description, image_path): # description, image_path
     #                 }
     #             ]
     #         }
-
-
-
-
-
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, json=data, headers=headers) as response:
-            print(await response.json())
-            return await response.json()
-
-if __name__ == "__main__":
-    asyncio.run(mod_gemini())
-
-
-
-
-
-
-
-'''
-https://ai.google.dev/api/files?hl=ru#v1beta.media.upload
-
-
-Gemini 1.5 Pro и 1.5 Flash поддерживают максимум 3600 файлов изображений.
-
-Изображения должны относиться к одному из следующих типов MIME данных изображения:
-
-PNG - image/png
-JPEG — image/jpeg
-WEBP — image/webp
-HEIC — image/heic
-HEIF - image/heif
-Каждое изображение эквивалентно 258 токенам.
-
-
-
-'''
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
