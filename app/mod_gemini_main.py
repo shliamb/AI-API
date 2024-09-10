@@ -34,8 +34,7 @@ async def mod_gemini(description, image_path):
     # is IMAGE:
     if image_path:
 
-        img_path = image_path
-        with open(img_path, 'rb') as image_file:
+        with open(image_path, 'rb') as image_file:
             encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
 
         data = {
@@ -59,7 +58,7 @@ async def mod_gemini(description, image_path):
         }
 
     # No IMAGE:
-    if not image_path:
+    elif image_path is None:
 
         data = {
             "system_instruction": {
