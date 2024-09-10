@@ -76,7 +76,7 @@ from general_functions import calculation
 
 
 # Main Text Google Function
-async def gemini_text(description, image_path): # description, image_path
+async def mod_gemini(description, image_path): # description, image_path
 
 
     username = description.get("username")
@@ -160,7 +160,7 @@ async def gemini_text(description, image_path): # description, image_path
             return await response.json()
 
 if __name__ == "__main__":
-    asyncio.run(gemini_text())
+    asyncio.run(mod_gemini())
 
 
 
