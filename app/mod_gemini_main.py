@@ -31,34 +31,36 @@ async def mod_gemini(description, image_path):
         'Content-Type': 'application/json'
     }
 
+    print(image_path)
+
     # is IMAGE:
     if image_path:
 
         with open(image_path, 'rb') as image_file:
             encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
 
-        data = {
+            data = {
 
-            "system_instruction": {
-                "parts": {
-                    "text": system_content
-                }
-            },
-            "contents": [{
-                "parts": [
-                    {"text": user_content},
-                    {
-                        "inline_data": {
-                            "mime_type": "image/jpeg",
-                            "data": encoded_image
-                        }
+                "system_instruction": {
+                    "parts": {
+                        "text": system_content
                     }
-                ]
-            }]
-        }
+                },
+                "contents": [{
+                    "parts": [
+                        {"text": user_content},
+                        {
+                            "inline_data": {
+                                "mime_type": "image/jpeg",
+                                "data": encoded_image
+                            }
+                        }
+                    ]
+                }]
+            }
 
     # No IMAGE:
-    elif image_path is None:
+    elif not image_path:
 
         data = {
             "system_instruction": {
