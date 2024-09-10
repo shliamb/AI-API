@@ -7,15 +7,15 @@ url = "http://137.184.87.156:8000/api/gemini/"
 
 data = {
         "username": "Shliamb10", # !
-        "user_content": "Привет, сегодня классная погода.", # !
-        "system_content": "Ты крутой юморист, каждое слово - шутка",
+        "user_content": "Что нарисованно на рисунке?", # !
+        #"system_content": "Ты крутой юморист, каждое слово - шутка",
         "model": "gemini-1.5-flash-latest",
 }
 
 # Данные для отправки
-# files = {
-#     'file': ('image.jpg', open('./uploads/image.jpg', 'rb')),  # Необязательно
-# }
+files = {
+    'file': ('image.jpg', open('./uploads/image.jpg', 'rb')),  # Необязательно
+}
 
 #files = None
 
@@ -25,7 +25,7 @@ headers = {
 }
 
 # Отправка POST-запроса
-response = requests.post(url, headers=headers, data=data)#, files=files)
+response = requests.post(url, headers=headers, data=data, files=files)
 
 
 # Проверка статуса ответа и вывод результата
