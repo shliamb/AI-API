@@ -80,6 +80,7 @@ async def mod_gemini(description, image_path):
 
             # Tokens:
             if response:
+                response_text = response['candidates'][0]['content']['parts'][0]['text']
                 total_token_count = response['usageMetadata']['totalTokenCount']
                 #usage_metadata = response.usage_metadata
                 #total_token_count = usage_metadata.total_token_count
@@ -95,7 +96,7 @@ async def mod_gemini(description, image_path):
             # Calculation of money spent on tokens
             expenses = await calculation(username, model_version, used_tokens, input_data="text")
 
-            return {"response": response.text, "expenses": expenses, "used_tokens": used_tokens}
+            return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
 
 
 if __name__ == "__main__":
