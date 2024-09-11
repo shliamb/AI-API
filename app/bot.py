@@ -329,7 +329,7 @@ async def get_stat_user(message: types.Message):
 
     all_static = []
     number = 0
-    all_static.append(["№", "№", "username_table_stat", "time", "use_model", "sesion_token", "price_1_tok", "total_price", "id telegram"]) # First a names row
+    all_static.append(["№", "№", "username_table_stat", "time", "use_model", "sesion_token/img", "price_1_tok/img", "total_price", "id telegram"]) # First a names row
     
     for it in data:
         number += 1

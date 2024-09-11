@@ -1,21 +1,13 @@
-# from openai import AsyncOpenAI, RateLimitError, OpenAIError
-from openai import OpenAI
+from openai import AsyncOpenAI, RateLimitError, OpenAIError
 import logging
-# from openai import OpenAI
 from keys import api_key_openai
 from general_functions import cleaner_model
 from general_functions import calculation
 
 
-# from PIL import Image
-# import io
-# import base64
 
 
-
-# client = AsyncOpenAI(api_key=api_key_openai)
-
-client = OpenAI(api_key=api_key_openai)
+client = AsyncOpenAI(api_key=api_key_openai)
 
 
 
@@ -35,7 +27,7 @@ async def mod_edit_dall_e(description, image_path, mask_path):
 
 
     if mask_path:
-        response = client.images.edit(
+        response = await client.images.edit(
                 image = open(image_path, "rb"),
                 mask = open(mask_path, "rb"),
                 prompt = user_content,
@@ -45,7 +37,7 @@ async def mod_edit_dall_e(description, image_path, mask_path):
                 size = size
         )
     elif not mask_path:
-        response = client.images.edit(
+        response = await client.images.edit(
                 image = open(image_path, "rb"),
                 prompt = user_content,
                 model = real_name_model,
