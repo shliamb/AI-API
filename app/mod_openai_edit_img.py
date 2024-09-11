@@ -44,15 +44,15 @@ async def mod_edit_dall_e(description, image_path, mask_path):
                 n = n,
                 size = size
         )
-    elif not mask_path:
-        response = client.images.edit(
-                image = open(image_path, "rb"),
-                prompt = user_content,
-                model = real_name_model,
-                response_format = response_format,
-                n = n,
-                size = size
-        )
+    # elif not mask_path:
+    #     response = client.images.edit(
+    #             image = open(image_path, "rb"),
+    #             prompt = user_content,
+    #             model = real_name_model,
+    #             response_format = response_format,
+    #             n = n,
+    #             size = size
+    #     )
 
     # Statistic
     used_tokens = n

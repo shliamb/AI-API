@@ -482,13 +482,6 @@ async def edit_dall_e_point(
     else:
         mask_path = None
 
-
-    print(image_path)
-    print(mask_path)
-
-
-
-
     # Collect data
     description = {
         "username": username,
