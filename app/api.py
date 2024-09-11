@@ -24,7 +24,8 @@ from mod_openai_varions_img import variations_dall_e
 from mod_openai_text_to_audio import speech_to_audio_openai
 from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price
 
-import base64
+#import base64
+from general_functions import encode_file
 
 
 app = FastAPI()
@@ -572,12 +573,13 @@ async def point_speech_to_audio_openai(
     #return #confirm_openai
 
     # Читаем файл и кодируем его в Base64
-    with open(confirm_openai, "rb") as audio_file:
-        encoded_string = base64.b64encode(audio_file.read()).decode('utf-8')
+    # with open(confirm_openai, "rb") as audio_file:
+    #     encoded_string = base64.b64encode(audio_file.read()).decode('utf-8')
+
+    encoded_string = await encode_file(confirm_openai)
 
     # Возвращаем результат в формате JSON
     return {"b64_json": encoded_string}
-
 
 ####
 
