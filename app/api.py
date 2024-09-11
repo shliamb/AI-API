@@ -24,6 +24,8 @@ from mod_openai_varions_img import variations_dall_e
 from mod_openai_text_to_audio import speech_to_audio_openai
 from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price
 
+import base64
+
 
 app = FastAPI()
 
@@ -562,13 +564,19 @@ async def point_speech_to_audio_openai(
     # Working with OpenAI
     confirm_openai = await speech_to_audio_openai(description)
 
-    print(f"Файл сохранён: {confirm_openai}")
 
     # if confirm_openai == "Error: There is no money for OpenAI account.":
     #     logging.error("There is no money for OpenAI account.")
     #     # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
 
-    return #confirm_openai
+    #return #confirm_openai
+
+    # Читаем файл и кодируем его в Base64
+    with open(confirm_openai, "rb") as audio_file:
+        encoded_string = base64.b64encode(audio_file.read()).decode('utf-8')
+
+    # Возвращаем результат в формате JSON
+    return {"b64_json": encoded_string}
 
 
 ####
