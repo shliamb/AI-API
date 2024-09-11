@@ -35,25 +35,38 @@ async def mod_edit_dall_e(description, image_path, mask_path):
     real_name_model = await cleaner_model(model) # dall-e-2
 
 
-    if mask_path:
-        response = client.images.edit(
-                image = open(image_path, "rb"),
-                mask = open(mask_path, "rb"),
-                prompt = user_content,
-                model = real_name_model,
-                response_format = response_format,
-                n = n,
-                size = size
-        )
-    elif not mask_path:
-        response = client.images.edit(
-                image = open(image_path, "rb"),
-                prompt = user_content,
-                model = real_name_model,
-                response_format = response_format,
-                n = n,
-                size = size
-        )
+
+
+    response = client.images.edit(
+            image = open(image_path, "rb"),
+            mask = open(mask_path, "rb"),
+            prompt = user_content,
+            n = n,
+            size = size
+    )
+
+
+
+
+    # if mask_path:
+    #     response = client.images.edit(
+    #             image = open(image_path, "rb"),
+    #             mask = open(mask_path, "rb"),
+    #             prompt = user_content,
+    #             model = real_name_model,
+    #             response_format = response_format,
+    #             n = n,
+    #             size = size
+    #     )
+    # elif not mask_path:
+    #     response = client.images.edit(
+    #             image = open(image_path, "rb"),
+    #             prompt = user_content,
+    #             model = real_name_model,
+    #             response_format = response_format,
+    #             n = n,
+    #             size = size
+    #     )
 
 
 

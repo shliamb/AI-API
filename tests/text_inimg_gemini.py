@@ -1,5 +1,6 @@
 import requests
 
+files = None
 
 # URL API
 url = "http://137.184.87.156:8000/api/gemini/"
@@ -7,17 +8,15 @@ url = "http://137.184.87.156:8000/api/gemini/"
 
 data = {
         "username": "Shliamb10", # !
-        "user_content": "Что нарисованно на рисунке?", # !
-        #"system_content": "Ты крутой юморист, каждое слово - шутка",
+        "user_content": "Как называется ее стрижка? Хотя бы примерно.", # !
+        "system_content": "Ответь по русски.",
         "model": "gemini-1.5-flash-latest",
 }
 
 # Данные для отправки
 files = {
-    'file': ('image.jpg', open('./uploads/image.jpg', 'rb')),  # Необязательно
+    'file': ('image45.png', open('./uploads/image45.png', 'rb')),  # Необязательно
 }
-
-#files = None
 
 # Заголовки запроса multipart/form-data, Content-Type выставляет библиотека request автоматом
 headers = {
