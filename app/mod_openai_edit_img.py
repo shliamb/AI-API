@@ -22,7 +22,7 @@ client = OpenAI(api_key=api_key_openai)
 
 
 
-async def mod_edit_dall_e(description, image_path):#, mask_path):
+async def mod_edit_dall_e(description, image_path, mask_path):
 
     username = description.get("username")
     user_content = description.get("user_content")
@@ -35,26 +35,52 @@ async def mod_edit_dall_e(description, image_path):#, mask_path):
     real_name_model = await cleaner_model(model) # dall-e-2
 
 
-
-    response = client.images.create_variation(
-            image = open(image_path, "rb"),
-            # mask = open(mask_path, "rb"),
-            #prompt = user_content,
-            model = real_name_model,
-            response_format = response_format,
-            n = n,
-            size = size
-    )
-
+    if mask_path:
+        response = client.images.edit(
+                image = open(image_path, "rb"),
+                mask = open(mask_path, "rb"),
+                prompt = user_content,
+                model = real_name_model,
+                response_format = response_format,
+                n = n,
+                size = size
+        )
+    elif not mask_path:
+        response = client.images.edit(
+                image = open(image_path, "rb"),
+                prompt = user_content,
+                model = real_name_model,
+                response_format = response_format,
+                n = n,
+                size = size
+        )
 
 
 
     # # Statistic
     # used_tokens = n * 1000000 # У меня цены в price за 1мл токенов, а картинки то по одной
-    # model_version = model # exemple - dall-e-3-hd-1792
+    # model_version = model # exemple - dall-e-2-1024
     
     # # Calculation of money spent on tokens
     # expenses = await calculation(username, model_version, used_tokens, input_data="img")
+
+
+
+        # # TOKENS:
+        # if response:
+        #     response_content = response.choices[0].message.content
+        #     model_version = response.model
+        #     used_tokens = response.usage.total_tokens + response.usage.prompt_tokens
+        # else:
+        #     logging.error("No response from openai")
+        #     raise
+        
+        # # Calculation of money spent on tokens
+        # expenses = await calculation(username, model_version, used_tokens, input_data="text")
+
+        # return {"response": response_content, "expenses": expenses, "used_tokens": used_tokens}
+
+    
 
     return {"response": response.data[0].url}#, "expenses": expenses, "pictures": n}
 

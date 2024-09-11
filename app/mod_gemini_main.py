@@ -11,7 +11,6 @@ import base64
 # import PIL.Image
 # Service
 from keys import API_KEY_GEMINI, is_admin
-# from general_functions import calculation
 from general_functions import calculation, encode_image
 
 
@@ -34,12 +33,8 @@ async def mod_gemini(description, image_path):
 
     # is IMAGE:
     if image_path:
-
-        # with open(image_path, 'rb') as image_file:
-        #     encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
-
         encoded_image = await encode_image(image_path)
-        
+
         data = {
 
             "system_instruction": {
@@ -83,11 +78,7 @@ async def mod_gemini(description, image_path):
             # Tokens:
             if response:
                 response_text = response['candidates'][0]['content']['parts'][0]['text']
-                total_token_count = response['usageMetadata']['totalTokenCount']
-                #usage_metadata = response.usage_metadata
-                #total_token_count = usage_metadata.total_token_count
-                # logging.info(f"Gemini text in tokens: {str(model.count_tokens(user_content))}")
-                #logging.info(f"Gemini all text tokens: {str(usage_metadata)}")
+                total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
             else:
                 logging.error("No response from Google Gemini.")
                 return {"response": "No response from Google Gemini."}
@@ -111,6 +102,9 @@ if __name__ == "__main__":
 
 
 '''
+
+
+
 https://ai.google.dev/api/files?hl=ru#v1beta.media.upload
 
 
@@ -124,6 +118,26 @@ WEBP — image/webp
 HEIC — image/heic
 HEIF - image/heif
 Каждое изображение эквивалентно 258 токенам.
+
+Общее количество токенов (текст, картинка, видео) как на входе, так и на выходе ( total_token_count )
+все будет посчитано и переданно в этот параметр.
+
+Считается, что изображения имеют фиксированный размер, поэтому они потребляют фиксированное количество 
+токенов (в настоящее время 258 токенов), независимо от их отображения или размера файла.
+
+Видео- и аудиофайлы конвертируются в токены по следующим фиксированным скоростям: видео — 263 токена 
+в секунду, аудио — 32 токена в секунду.
+
+https://ai.google.dev/gemini-api/docs/tokens?hl=ru&lang=python
+
+
+Видео или аудио файлы
+Аудио и видео конвертируются в токены по следующим фиксированным ставкам:
+
+Видео: 263 токена в секунду
+Аудио: 32 токена в секунду
+
+
 
 
 
@@ -275,343 +289,6 @@ HEIF - image/heif
 # # Запуск асинхронной функции
 # if __name__ == "__main__":
 #     asyncio.run(generate_content())
-
-
-
-
-
-
-
-
-# import os
-# import subprocess
-# import requests
-# import json
-
-# # Задайте переменные
-# IMG_PATH_2 = './uploads/image.jpg'  # Путь к изображению
-# BASE_URL = 'https://your_base_url.com'  # URL вашей базы
-# GOOGLE_API_KEY = api_key_gemini  # Ваш Google API ключ
-
-# # Получение MIME типа и количества байт
-# MIME_TYPE = subprocess.check_output(['file', '-b', '--mime-type', IMG_PATH_2]).decode('utf-8').strip()
-# NUM_BYTES = os.path.getsize(IMG_PATH_2)
-# DISPLAY_NAME = "TEXT"
-
-# # Начальная резюмируемая просьба, определяющая метаданные.
-# headers_start = {
-#     "X-Goog-Upload-Protocol": "resumable",
-#     "X-Goog-Upload-Command": "start",
-#     "X-Goog-Upload-Header-Content-Length": str(NUM_BYTES),
-#     "X-Goog-Upload-Header-Content-Type": MIME_TYPE,
-#     "Content-Type": "application/json"
-# }
-
-# data_start = json.dumps({'file': {'display_name': DISPLAY_NAME}})
-
-# response_start = requests.post(
-#     f"{BASE_URL}/upload/v1beta/files?key={GOOGLE_API_KEY}",
-#     headers=headers_start,
-#     data=data_start
-# )
-
-# upload_url = response_start.headers.get("X-Goog-Upload-URL")
-
-# # Загрузка фактических байтов.
-# headers_upload = {
-#     "Content-Length": str(NUM_BYTES),
-#     "X-Goog-Upload-Offset": "0",
-#     "X-Goog-Upload-Command": "upload, finalize"
-# }
-
-# with open(IMG_PATH_2, 'rb') as img_file:
-#     response_upload = requests.post(upload_url, headers=headers_upload, data=img_file)
-
-# # Получение URI файла из ответа загрузки.
-# file_info_json = response_upload.json()
-# file_uri = file_info_json['file']['uri']
-# print(f"file_uri={file_uri}")
-
-# # Теперь генерируем контент с использованием этого файла.
-# generate_content_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GOOGLE_API_KEY}"
-# data_generate_content = {
-#     "contents": [{
-#         "parts": [
-#             {"text": "Can you tell me about the instruments in this photo?"},
-#             {"file_data": {"mime_type": MIME_TYPE, "file_uri": file_uri}}
-#         ]
-#     }]
-# }
-
-# response_generate_content = requests.post(generate_content_url, headers={'Content-Type': 'application/json'}, json=data_generate_content)
-# response_json = response_generate_content.json()
-
-# print(json.dumps(response_json, indent=4))  # Печать всего ответа в читаемом виде.
-
-# if 'candidates' in response_json:
-#     for candidate in response_json['candidates']:
-#         for part in candidate['content']['parts']:
-#             if 'text' in part:
-#                 print(part['text'])  # Печать текста кандидатов.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#         model = genai.GenerativeModel(
-#             model_name = model_name,
-#             # tools = user_input.tools or None, # "tools": "code_execution",
-#             system_instruction = system_content or None
-#         )
-
-#         if not image_path:
-#             response = model.generate_content(user_content)
-
-
-
-
-
-
-
-
-
-
-
-
-
-# async def generate_content():
-#     url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
-#     api_key = api_key_gemini
-    
-#     # Подготовка текстовой части запроса
-#     # text_data = {
-#     #     "contents": [{
-#     #         "parts": [{"text": "Write a story about a magic backpack."}]
-#     #     }]
-#     # }
-
-
-#     text_data = "Write a story about a magic backpack."
-
-#     # Подготовка файла изображения
-#     # image_path = './uploads/image.jpg'  # Укажите путь к вашему изображению
-
-
-
-#     async with aiohttp.ClientSession() as session:
-#         # with open(image_path, 'rb') as image_file:
-#         #     form_data = aiohttp.FormData()
-#         #     form_data.add_field('json', 
-#         #                         value=aiohttp.JsonPayload(text_data), 
-#         #                         content_type='application/json')
-#         #     form_data.add_field('file', 
-#         #                         image_file, 
-#         #                         filename='image.jpg',
-#         #                         content_type='image/jpeg')
-
-#         form_data = aiohttp.FormData()
-#         form_data.add_field('contents', 
-#                             value="dfdfgd", 
-#                             content_type='multipart/form-data')
-#         # form_data.add_field('contents', 
-#         #                     value=aiohttp.JsonPayload(text_data), 
-#         #                     content_type='multipart/form-data')
-
-#         async with session.post(f"{url}?key={api_key}", contents=form_data) as response:
-#             if response.status == 200:
-#                 result = await response.json()
-#                 print(result)
-#             else:
-#                 print(f"Error: {response.status} - {await response.text()}")
-
-# # Запуск асинхронной функции
-# if __name__ == "__main__":
-#     asyncio.run(generate_content())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# async def generate_content():
-#     url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
-#     api_key = api_key_gemini
-    
-#     # Подготовка текстовой части запроса
-#     text_data = {
-#         "contents": [{
-#             "parts": [{"text": "Write a story about a magic backpack."}]
-#         }]
-#     }
-
-#     # Подготовка файла изображения
-#     image_path = './uploads/image.jpg'  # Укажите путь к вашему изображению
-
-#     async with aiohttp.ClientSession() as session:
-#         with open(image_path, 'rb') as image_file:
-#             form_data = aiohttp.FormData()
-#             form_data.add_field('json', 
-#                                 value=str(text_data), 
-#                                 content_type='application/json')
-#             form_data.add_field('file', 
-#                                 image_file, 
-#                                 filename=image_path,
-#                                 content_type='image/jpeg')
-
-#             async with session.post(f"{url}?key={api_key}", data=form_data) as response:
-#                 if response.status == 200:
-#                     result = await response.json()
-#                     print(result)
-#                 else:
-#                     print(f"Error: {response.status} - {await response.text()}")
-
-# # Запуск асинхронной функции
-# if __name__ == "__main__":
-#     asyncio.run(generate_content())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # Base
-# import logging
-# import aiohttp
-# import asyncio
-# # Google
-# import google.generativeai as genai
-# # Service
-# from keys import api_key_gemini, is_admin
-# from general_functions import calculation
-
-
-# genai.configure(api_key=api_key_gemini)
-
-
-# # Main Text Google Function
-# async def mod_gemini(description, image_path):
-
-#     try:
-#         username = description.get("username")
-#         user_content = description.get("user_content")
-#         system_content = description.get("system_content")
-#         model_name = description.get("model")
-#         # tools = description.get("tools")
-
-#         if not image_path:
-
-#             model = genai.GenerativeModel(
-#                 model_name = model_name,
-#                 # tools = user_input.tools or None, # "tools": "code_execution",
-#                 system_instruction = system_content or None
-#             )
-
-#         # if image_path:
-#         #     # Getting the base64 string
-#         #     base64_file = await encode_image(image_path)
-
-#         response = model.generate_content(user_content)
-
-#         # Tokens:
-#         if response:
-#             usage_metadata = response.usage_metadata
-#             total_token_count = usage_metadata.total_token_count
-#             logging.info(f"Gemini text in tokens: {str(model.count_tokens(user_content))}")
-#             logging.info(f"Gemini all text tokens: {str(response.usage_metadata)}")
-#         else:
-#             logging.error("No response from Google Gemini.")
-#             return {"response": "No response from Google Gemini."}
-        
-#         model_version = model_name
-#         used_tokens = total_token_count
-
-
-#         # Calculation of money spent on tokens
-#         expenses = await calculation(username, model_version, used_tokens, input_data="text")
-
-#         return {"response": response.text, "expenses": expenses, "used_tokens": used_tokens}
-    
-#     except Exception as e:
-#        logging.error(f"Error is: {e}")
-#        return {"Error:": e} # Ни одну ошибку не показывает тварь!!!
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

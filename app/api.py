@@ -23,9 +23,9 @@ from mod_openai_edit_img import mod_edit_dall_e
 from mod_openai_varions_img import variations_dall_e
 from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price
 
+
+
 app = FastAPI()
-
-
 
 
 # Разрешаем CORS только для указанных эндпоинтов и метода POST
@@ -41,7 +41,7 @@ app.add_middleware(
 
 
 
-# USER VERIFICATION
+# USER VERIFICATION:
 async def verify_user_appkey(username: str, model: str, appkey: str):
     data_by_username = await get_user_by_username(username)
     
@@ -126,12 +126,15 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
             "status_code": status.HTTP_200_OK,
             "detail": "The user has passed."
         }
+####
 
 
 
 
 
-# Create chat completion & IMAGE OPENAI Endpoint
+#### OPEN AI ####
+
+# TEXT & IMAGE OPENAI Endpoint:
 @app.post("/api/openai_chat/", status_code=status.HTTP_200_OK)
 async def openai_api(
     username: str = Form(...),                      # !
@@ -187,8 +190,7 @@ async def openai_api(
 
 
 
-
-#### Create image DALL-E Endpoint
+#Create image DALL-E Endpoint:
 @app.post("/api/gen-dall-e/", status_code=status.HTTP_200_OK)
 async def dall_e_point(
     username: str = Form(...),              # !
@@ -334,9 +336,6 @@ async def dall_e_point(
 
 
 
-
-
-
 #### Create image variation dall-e-2:
 @app.post("/api/variations-dall-e/", status_code=status.HTTP_200_OK)
 async def variations_dall_e_func(
@@ -421,24 +420,22 @@ async def variations_dall_e_func(
 
 
 
-
-
-
+#### Edits IMAGE Dall-e 2 :
 @app.post("/api/edit-dall-e/", status_code=status.HTTP_200_OK)
-async def dall_e_point(
+async def edit_dall_e_point(
     username: str = Form(...),
-    user_content: str = Form(None),
-    size: str = Form(None),
-    response_format: str = Form(None),
-    n: int = Form(None),
-    model: str = Form(None),
+    user_content: str = Form(...),                   # ! < 1000
+    size: str = Form(None),                          # Only 256x256, 512x512, or 1024x1024
+    response_format: str = Form(None),               # url or b64_json
+    n: int = Form(None),                             # 1 and 10
+    model: str = Form(None),                         # only Dall-e 2
     appkey: str = Header(...),
-    file: Optional[UploadFile] = File(),
-    # mask: Optional[UploadFile] = File(None)
+    image: Optional[UploadFile] = File(),            # ! PNG ALFA IN < 4mb square image  - Если маска не указана, изображение должно иметь прозрачность, которая будет использоваться в качестве маски.
+    mask: Optional[UploadFile] = File(None)          # PNG & ALFA OUT < 4mb square image & size image = size mask - это изображение внедряется в пустое место картинки image
 ):
 
     # Check mistakes:
-    if model != "dall-e-2":
+    if model and model != "dall-e-2":
         print("Error! Only Dalle-2 support edit image.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -466,31 +463,24 @@ async def dall_e_point(
     else:
         model = "dall-e-2-1024"
 
-
     # Verify user and her appkey
     confirm_verify = await verify_user_appkey(username, model, appkey)
     if confirm_verify["status_code"] != status.HTTP_200_OK:
         return confirm_verify
 
-
-
     # Save img to server
-    image_path = f"./uploads/{file.filename}"
-
-    print(f"1: {image_path}")
+    image_path = f"./uploads/{image.filename}"
 
     with open(image_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        shutil.copyfileobj(image.file, buffer)
 
-    print(f"2: save file")
-
-    # if mask:
-    #     # Save mask to server
-    #     mask_path = f"./uploads/{mask.filename}"
-    #     with open(mask_path, "wb") as buffer:
-    #         shutil.copyfileobj(mask.file, buffer)
-    # else:
-    #     mask_path = None
+    if mask:
+        # Save mask to server
+        mask_path = f"./uploads/{mask.filename}"
+        with open(mask_path, "wb") as buffer:
+            shutil.copyfileobj(mask.file, buffer)
+    else:
+        mask_path = None
 
     # Collect data
     description = {
@@ -507,43 +497,28 @@ async def dall_e_point(
     if n:
         description["n"] = n
 
-
-    print(f"3: {image_path}")
-
     # Working with OpenAI
-    confirm_dall_e = await mod_edit_dall_e(description, image_path)
+    confirm_dall_e = await mod_edit_dall_e(description, image_path, mask_path)
 
     # Remove file
     if image_path:
         remove = await remove_file_os(image_path)
-    # if mask_path:
-    #     remove = await remove_file_os(mask_path)
+    if mask_path:
+        remove = await remove_file_os(mask_path)
 
     if confirm_dall_e == "Error: There is no money for OpenAI account.":
         logging.info("There is no money for OpenAI account.")
         # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
 
     return confirm_dall_e
+####
 
 
 
 
+#### GEMINI ####
 
-
-
-
-
-
-
-
-
-
-
-
-
-#### GEMINI TEXT ####
-# TEXT GEMINI Endpoint
-
+# TEXT & IMG GEMINI Endpoint
 @app.post("/api/gemini/", status_code=status.HTTP_200_OK)
 async def gemini_api(
     username: str = Form(...),
