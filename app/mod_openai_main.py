@@ -47,7 +47,7 @@ async def mod_openai_text_img(description, image_path):
             )
 
         # 2. Without a picture
-        if not file:
+        if not image_path:
             response = await client.chat.completions.create(
                 messages=[
                     {"role": "system", "content": system_content},
