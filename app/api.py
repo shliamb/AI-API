@@ -532,8 +532,8 @@ async def point_speech_to_audio_openai(
     voice: str = Form(None),                        # type voice: alloy, echo, fable, onyx, nova, and shimmer
     model: str = Form(None),                        # tts-1 or tts-1-hd
     response_format: str = Form(None),              # output format audio mp3, opus, aac, flac, wav, and pcm
-    speed: int = Form(None),                        # speed 0.25 to 4.0. default - 1.0
-    appkey: float = Header(...),                    # !
+    speed: float = Form(None),                      # speed 0.25 to 4.0. default - 1.0
+    appkey: str = Header(...),                      # !
 ):
 
     # Choosing a price list.
