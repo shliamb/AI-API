@@ -562,11 +562,13 @@ async def point_speech_to_audio_openai(
     # Working with OpenAI
     confirm_openai = await speech_to_audio_openai(description)
 
-    if confirm_openai == "Error: There is no money for OpenAI account.":
-        logging.error("There is no money for OpenAI account.")
-        # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
+    print(f"Файл сохранён: {confirm_openai}")
 
-    return confirm_openai
+    # if confirm_openai == "Error: There is no money for OpenAI account.":
+    #     logging.error("There is no money for OpenAI account.")
+    #     # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
+
+    return #confirm_openai
 
 
 ####

@@ -2,6 +2,11 @@ from pathlib import Path
 from openai import OpenAI
 from keys import api_key_openai
 
+
+
+
+
+
 openai = OpenAI(api_key=api_key_openai)
 
 
@@ -19,8 +24,10 @@ async def speech_to_audio_openai(description):
 
 
 
+    # speech_file_path = Path(__file__).parent / "speech.mp3" speech_file_path = Path(__file__).parent / 'audio' / 'speech.mp3'
+    speech_file_path = Path('./audio/speech.mp3')
 
-    speech_file_path = Path('./audio/speech.mp3') # speech_file_path = Path(__file__).parent / "speech.mp3" speech_file_path = Path(__file__).parent / 'audio' / 'speech.mp3'
+
     response = openai.audio.speech.create(
         model = model,
         voice = voice,
@@ -29,11 +36,41 @@ async def speech_to_audio_openai(description):
         input = user_content
     )
 
-    #response.stream_to_file(speech_file_path)
-    print(speech_file_path)
-    # return response.with_streaming_response.method(speech_file_path)
-    return response.stream_to_file(speech_file_path)
+    # Сохраняем полученные данные в файл
+    with open(speech_file_path, 'wb') as audio_file:
+        audio_file.write(response['data'])  # Предполагается, что ответ содержит бинарные данные
 
+
+    return speech_file_path
+
+    # return response.stream_to_file(speech_file_path)
+
+
+
+
+    # import requests
+
+
+    # url = "https://api.openai.com/v1/audio/speech"
+    # headers = {
+    #     "Authorization": f"Bearer {api_key_openai}",
+    #     "Content-Type": "application/json",
+    # }
+
+    # data = {
+    #     "model": "tts-1",
+    #     "input": "Привет чувак",
+    #     "voice": "alloy"
+    # }
+
+    # response = requests.post(url, headers=headers, json=data)
+
+    # if response.status_code == 200:
+    #     with open("speech.mp3", "wb") as f:
+    #         f.write(response.content)
+    #     print("Audio saved as speech.mp3")
+    # else:
+    #     print(f"Error: {response.status_code} - {response.text}")
 
 
 
