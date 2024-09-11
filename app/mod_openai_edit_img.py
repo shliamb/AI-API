@@ -54,31 +54,15 @@ async def mod_edit_dall_e(description, image_path, mask_path):
                 size = size
         )
 
-
-
     # Statistic
     used_tokens = n
     model_version = model # exemple - dall-e-2-1024
+    used_tokens = response.usage.total_tokens
     
     # Calculation of money spent on tokens
     expenses = await calculation(username, model_version, used_tokens, input_data="img")
 
-
-    # TOKENS:
-    if response:
-        response_content = response.choices[0].message.content
-        model_version = response.model
-        used_tokens = response.usage.total_tokens
-    else:
-        logging.error("No response from openai")
-        raise
-    
-    # Calculation of money spent on tokens
-    expenses = await calculation(username, model_version, used_tokens, input_data="img")
-
-    return {"response": response_content, "expenses": expenses, "used_tokens": used_tokens}
-
-
+    return {"response": response.data[0].url, "expenses": expenses, "pictures": n, "used_tokens": used_tokens}
 
 
 
