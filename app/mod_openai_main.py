@@ -15,7 +15,7 @@ client = AsyncOpenAI(api_key=api_key_openai)
 
 
 # Main Text OpenAI Function .
-async def mod_openai_text_img(description, file):
+async def mod_openai_text_img(description, image_path):
 
     username = description.get("username")
     user_content = description.get("user_content")
@@ -24,8 +24,8 @@ async def mod_openai_text_img(description, file):
 
     try:
         # 1. From the file
-        if file:
-            base64_file = await encode_file(file)
+        if image_path:
+            base64_file = await encode_file(image_path)
 
             response = await client.chat.completions.create(
             model=model_name,

@@ -24,7 +24,6 @@ from mod_openai_varions_img import variations_dall_e
 from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price
 
 
-
 app = FastAPI()
 
 
@@ -144,7 +143,7 @@ async def openai_api(
     system_content: str = Form(None),               #
     model: str = Form(None),                        #
     appkey: str = Header(...),                      # !
-    file: Optional[UploadFile] = File(None)         # # jpg, png проверенно
+    image: Optional[UploadFile] = File(None)         # # jpg, png проверенно
 ):
 
     # Choosing a price list.
@@ -156,13 +155,13 @@ async def openai_api(
     if confirm_verify["status_code"] != status.HTTP_200_OK:
         return confirm_verify
 
-    if file:
+    if image:
         # Save img to server
-        file = f"./uploads/{file.filename}"
-        with open(file, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        image_path = f"./uploads/{image.filename}"
+        with open(image_path, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
     else:
-        file = None
+        image_path = None
 
     # Collect data
     description = {
@@ -175,11 +174,11 @@ async def openai_api(
         description["system_content"] = system_content
 
     # Working with OpenAI
-    confirm_openai = await mod_openai_text_img(description, file)
+    confirm_openai = await mod_openai_text_img(description, image_path)
 
     # Remove file
-    if file:
-        remove = await remove_file_os(file)
+    if image:
+        remove = await remove_file_os(image_path)
 
     if confirm_openai == "Error: There is no money for OpenAI account.":
         logging.error("There is no money for OpenAI account.")
