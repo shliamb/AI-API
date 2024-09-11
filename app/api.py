@@ -16,7 +16,7 @@ import gunicorn
 # Service
 from worker_db import get_user_by_username, update_user
 from general_functions import day_utcnow, unformat_date, remove_file_os
-from mod_openai_text_img import mod_openai_text_img
+from mod_openai_main import mod_openai_text_img
 from mod_gemini_main import mod_gemini
 from mod_openai_gen_img import mod_gen_dall_e
 from mod_openai_edit_img import mod_edit_dall_e
@@ -144,7 +144,7 @@ async def openai_api(
     system_content: str = Form(None),               #
     model: str = Form(None),                        #
     appkey: str = Header(...),                      # !
-    file: Optional[UploadFile] = File(None)         #
+    file: Optional[UploadFile] = File(None)         # # jpg, png проверенно
 ):
 
     # Choosing a price list
@@ -156,13 +156,16 @@ async def openai_api(
     if confirm_verify["status_code"] != status.HTTP_200_OK:
         return confirm_verify
 
-    if file:
-        # Save img to server
-        image_path = f"./uploads/{file.filename}"
-        with open(image_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-    else:
-        image_path = None
+    # if file:
+    #     # Save img to server
+    #     file = f"./uploads/{file.filename}"
+    #     with open(file, "wb") as buffer:
+    #         shutil.copyfileobj(file.file, buffer)
+    # else:
+    #     file = None
+
+    # if not file:
+    #     file = None
 
     # Collect data
     description = {
@@ -175,11 +178,11 @@ async def openai_api(
         description["system_content"] = system_content
 
     # Working with OpenAI
-    confirm_openai = await mod_openai_text_img(description, image_path)
+    confirm_openai = await mod_openai_text_img(description, file)
 
-    # Remove file
-    if image_path:
-        remove = await remove_file_os(image_path)
+    # # Remove file
+    # if file:
+    #     remove = await remove_file_os(file)
 
     if confirm_openai == "Error: There is no money for OpenAI account.":
         logging.error("There is no money for OpenAI account.")
@@ -590,7 +593,14 @@ if __name__ == "__main__":
 
 
 
-
+# # Function to translate text using OpenAI
+# def translate_text(text, target_language='Spanish'):
+#     response = openai.Completion.create(
+#         model="text-davinci-003",  # or the latest model you want to use
+#         prompt=f"Translate the following English text to {target_language}: {text}",
+#         max_tokens=60
+#     )
+#     return response.choices[0].text.strip()
 
 
 

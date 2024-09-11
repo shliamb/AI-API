@@ -11,7 +11,7 @@ import base64
 # import PIL.Image
 # Service
 from keys import API_KEY_GEMINI, is_admin
-from general_functions import calculation, encode_image
+from general_functions import calculation, encode_file
 
 
 
@@ -33,7 +33,7 @@ async def mod_gemini(description, image_path):
 
     # is IMAGE:
     if image_path:
-        encoded_image = await encode_image(image_path)
+        encoded_image = await encode_file(image_path)
 
         data = {
 

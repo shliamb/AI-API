@@ -94,6 +94,6 @@ async def cleaner_model(name_model):
 
 
 # Encode the image
-async def encode_image(file_path):
+async def encode_file(file_path):
   with open(file_path, "rb") as file_path:
     return base64.b64encode(file_path.read()).decode('utf-8')
