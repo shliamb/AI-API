@@ -21,6 +21,7 @@ from mod_gemini_main import mod_gemini
 from mod_openai_gen_img import mod_gen_dall_e
 from mod_openai_edit_img import mod_edit_dall_e
 from mod_openai_varions_img import variations_dall_e
+from mod_openai_text_to_audio import speech_to_audio_openai
 from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price
 
 
@@ -510,7 +511,88 @@ async def edit_dall_e_point(
         # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
 
     return confirm_dall_e
+
+
+
+
+
+
+
+
+
+
+#### AUDIO ####
+
+
+# Audio from the input text. OPENAI Endpoint:
+@app.post("/api/speech-to-audio-openai/", status_code=status.HTTP_200_OK)
+async def point_speech_to_audio_openai(
+    username: str = Form(...),                      # !
+    user_content: str = Form(...),                  # ! text < 4096
+    voice: str = Form(None),                        # type voice: alloy, echo, fable, onyx, nova, and shimmer
+    model: str = Form(None),                        # tts-1 or tts-1-hd
+    response_format: str = Form(None),              # output format audio mp3, opus, aac, flac, wav, and pcm
+    speed: int = Form(None),                        # speed 0.25 to 4.0. default - 1.0
+    appkey: float = Header(...),                    # !
+):
+
+    # Choosing a price list.
+    if not model:
+        model = "tts-1"
+
+    # Verify user and her appkey
+    confirm_verify = await verify_user_appkey(username, model, appkey)
+    if confirm_verify["status_code"] != status.HTTP_200_OK:
+        return confirm_verify
+
+    # Collect data
+    description = {
+        "username": username,
+        "user_content": user_content,
+    }
+    if model:
+        description["model"] = model
+    if voice:
+        description["voice"] = voice
+    if response_format:
+        description["response_format"] = response_format
+    if speed:
+        description["speed"] = speed
+
+    # Working with OpenAI
+    confirm_openai = await speech_to_audio_openai(description)
+
+    if confirm_openai == "Error: There is no money for OpenAI account.":
+        logging.error("There is no money for OpenAI account.")
+        # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
+
+    return confirm_openai
+
+
 ####
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

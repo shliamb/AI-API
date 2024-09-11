@@ -15,7 +15,7 @@ ai_default_model = "gpt-4o-mini-2024-07-18"
 # Prices per 1M tokens:
 # Важно, нужно размещать выше дорогие однокоренные модели, что бы не хитрили
 price = {
-    # OpenAI:
+    # OpenAI to 1M tokes:
     'chatgpt-4o-latest': 40,
     'gpt-4o': 40,
     'gpt-4o-2024-05-13': 40,
@@ -24,7 +24,7 @@ price = {
     'gpt-4o-mini-2024-07-18': 1.5, # no vision
     'gpt-4-turbo-2024-04-09': 80,
 
-    # Images:
+    # Images to one img:
     'dall-e-3-1024': 0.08,
     'dall-e-3-1792': 0.16,
 
@@ -35,7 +35,11 @@ price = {
     'dall-e-2-512': 0.036,
     'dall-e-2-256': 0.032,
 
-    # Google Gemini:
+    # Audio to 1M characters:
+    'tts-1': 30,
+    'tts-1-hd': 60,
+
+    # Google Gemini to 1M tokens:
     'gemini-1.5-pro-latest': 93.75,
     'gemini-1.5-flash-latest': 1.125,
     'gemini-1.0-pro-latest': 4,
