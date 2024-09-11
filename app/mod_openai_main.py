@@ -14,7 +14,7 @@ client = AsyncOpenAI(api_key=api_key_openai)
 
 
 
-# Main Text OpenAI Function
+# Main Text OpenAI Function .
 async def mod_openai_text_img(description, file):
 
     username = description.get("username")

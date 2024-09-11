@@ -147,7 +147,7 @@ async def openai_api(
     file: Optional[UploadFile] = File(None)         # # jpg, png проверенно
 ):
 
-    # Choosing a price list
+    # Choosing a price list.
     if not model:
         model = "gpt-4o-mini"
 
