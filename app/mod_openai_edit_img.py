@@ -20,8 +20,6 @@ client = OpenAI(api_key=api_key_openai)
 
 
 
-
-
 async def mod_edit_dall_e(description, image_path, mask_path):
 
     username = description.get("username")
@@ -37,15 +35,24 @@ async def mod_edit_dall_e(description, image_path, mask_path):
 
 
 
+    # response = client.images.edit(
+    #         image = open(image_path, "rb"),
+    #         mask = open(mask_path, "rb"),
+    #         prompt = user_content,
+    #         n = n,
+    #         size = size
+    # )
+
+
+
+
     response = client.images.edit(
-            image = open(image_path, "rb"),
-            mask = open(mask_path, "rb"),
-            prompt = user_content,
-            n = n,
-            size = size
+        image=open("./uploads/edit.png", "rb"),
+        mask=open("./uploads/lips.png", "rb"),
+        prompt="нарисуй губы",
+        n=1,
+        size="1024x1024"
     )
-
-
 
 
     # if mask_path:
