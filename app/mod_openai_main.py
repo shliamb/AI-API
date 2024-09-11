@@ -1,13 +1,12 @@
 # Base
 import logging
 import re
-import shutil
 # import datetime
 # OpenAI
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
 from keys import api_key_openai
 # Service
-from general_functions import calculation, encode_file, remove_file_os
+from general_functions import calculation, encode_file
 
 
 
@@ -22,16 +21,6 @@ async def mod_openai_text_img(description, file):
     user_content = description.get("user_content")
     system_content = description.get("system_content", "")
     model_name = description.get("model")
-
-    # Save file:
-    if file:
-        # Save img to server
-        file = f"./uploads/{file.filename}"
-        with open(file, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-
-    else:
-        file = None
 
     try:
         # 1. From the file
@@ -66,11 +55,6 @@ async def mod_openai_text_img(description, file):
                     ],
                     model=model_name,
             )
-
-
-        # Remove file
-        if file:
-            remove = await remove_file_os(file)
 
         # TOKENS:
         if response:

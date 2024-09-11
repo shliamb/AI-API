@@ -156,16 +156,13 @@ async def openai_api(
     if confirm_verify["status_code"] != status.HTTP_200_OK:
         return confirm_verify
 
-    # if file:
-    #     # Save img to server
-    #     file = f"./uploads/{file.filename}"
-    #     with open(file, "wb") as buffer:
-    #         shutil.copyfileobj(file.file, buffer)
-    # else:
-    #     file = None
-
-    # if not file:
-    #     file = None
+    if file:
+        # Save img to server
+        file = f"./uploads/{file.filename}"
+        with open(file, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    else:
+        file = None
 
     # Collect data
     description = {
@@ -180,9 +177,9 @@ async def openai_api(
     # Working with OpenAI
     confirm_openai = await mod_openai_text_img(description, file)
 
-    # # Remove file
-    # if file:
-    #     remove = await remove_file_os(file)
+    # Remove file
+    if file:
+        remove = await remove_file_os(file)
 
     if confirm_openai == "Error: There is no money for OpenAI account.":
         logging.error("There is no money for OpenAI account.")
