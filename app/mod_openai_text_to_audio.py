@@ -36,12 +36,19 @@ async def speech_to_audio_openai(description):
         input = user_content
     )
 
+    # # Сохраняем полученные данные в файл
+    # with open(speech_file_path, 'wb') as audio_file:
+    #     audio_file.write(response['data'])  # Предполагается, что ответ содержит бинарные данные
+
+
     # Сохраняем полученные данные в файл
     with open(speech_file_path, 'wb') as audio_file:
-        audio_file.write(response['data'])  # Предполагается, что ответ содержит бинарные данные
-
+        audio_file.write(response.content)  # Используем content для получения данных
 
     return speech_file_path
+
+
+
 
     # return response.stream_to_file(speech_file_path)
 
