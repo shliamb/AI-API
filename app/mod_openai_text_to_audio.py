@@ -1,9 +1,8 @@
 from pathlib import Path
-import openai
+from openai import OpenAI
+from keys import api_key_openai
 
-
-
-
+openai = OpenAI(api_key=api_key_openai)
 
 
 
@@ -32,7 +31,8 @@ async def speech_to_audio_openai(description):
 
     #response.stream_to_file(speech_file_path)
     print(speech_file_path)
-    return response.with_streaming_response.method(speech_file_path)
+    # return response.with_streaming_response.method(speech_file_path)
+    return response.stream_to_file(speech_file_path)
 
 
 

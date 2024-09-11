@@ -1,6 +1,7 @@
 import time
 from pathlib import Path
 
+
 from openai import OpenAI
 
 # gets OPENAI_API_KEY from your environment variables
