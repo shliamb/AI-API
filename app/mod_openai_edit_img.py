@@ -34,46 +34,34 @@ async def mod_edit_dall_e(description, image_path, mask_path):
 
 
 
-
     # response = client.images.edit(
-    #         image = open(image_path, "rb"),
-    #         mask = open(mask_path, "rb"),
-    #         prompt = user_content,
-    #         n = n,
-    #         size = size
+    #     image=open("./uploads/edit.png", "rb"),
+    #     mask=open("./uploads/lips.png", "rb"),
+    #     prompt="нарисуй губы",
+    #     n=1,
+    #     size="1024x1024"
     # )
 
 
-
-
-    response = client.images.edit(
-        image=open("./uploads/edit.png", "rb"),
-        mask=open("./uploads/lips.png", "rb"),
-        prompt="нарисуй губы",
-        n=1,
-        size="1024x1024"
-    )
-
-
-    # if mask_path:
-    #     response = client.images.edit(
-    #             image = open(image_path, "rb"),
-    #             mask = open(mask_path, "rb"),
-    #             prompt = user_content,
-    #             model = real_name_model,
-    #             response_format = response_format,
-    #             n = n,
-    #             size = size
-    #     )
-    # elif not mask_path:
-    #     response = client.images.edit(
-    #             image = open(image_path, "rb"),
-    #             prompt = user_content,
-    #             model = real_name_model,
-    #             response_format = response_format,
-    #             n = n,
-    #             size = size
-    #     )
+    if mask_path:
+        response = client.images.edit(
+                image = open(image_path, "rb"),
+                mask = open(mask_path, "rb"),
+                prompt = user_content,
+                model = real_name_model,
+                response_format = response_format,
+                n = n,
+                size = size
+        )
+    elif not mask_path:
+        response = client.images.edit(
+                image = open(image_path, "rb"),
+                prompt = user_content,
+                model = real_name_model,
+                response_format = response_format,
+                n = n,
+                size = size
+        )
 
 
 
