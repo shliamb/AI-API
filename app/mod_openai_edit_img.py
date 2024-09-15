@@ -31,9 +31,12 @@ async def mod_edit_dall_e(description, image_path, mask_path):
         with open(image_path, 'rb') as image_file, \
             open(mask_path, 'rb') as mask_file:
 
+            image = image_file.read()
+            mask = mask_file.read()
+
             response = await client.images.edit(
-                    image = open(image_file, "rb"),
-                    mask = open(mask_file, "rb"),
+                    image = image,
+                    mask = mask,
                     prompt = user_content,
                     model = real_name_model,
                     response_format = response_format,
@@ -45,8 +48,10 @@ async def mod_edit_dall_e(description, image_path, mask_path):
 
         with open(image_path, 'rb') as image_file:
 
+            image = image_file.read()
+
             response = await client.images.edit(
-                    image = open(image_file, "rb"),
+                    image = image,
                     prompt = user_content,
                     model = real_name_model,
                     response_format = response_format,
