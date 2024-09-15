@@ -20,9 +20,10 @@ async def variations_dall_e(description, image_path):
 
 
     with open(image_path, "rb") as image_res:
+        content = image_res.read()
 
         response = await client.images.create_variation(
-                image = open(image_res, "rb"),
+                image = content,
                 model = real_name_model,
                 response_format = response_format,
                 n = n,
