@@ -3,7 +3,6 @@ import logging
 from keys import api_key_openai
 from general_functions import cleaner_model
 from general_functions import calculation
-import aiofiles
 
 
 client = AsyncOpenAI(api_key=api_key_openai)
@@ -20,12 +19,10 @@ async def variations_dall_e(description, image_path):
     real_name_model = await cleaner_model(model) # dall-e-2
 
 
-    async with aiofiles.open(image_path, "rb") as image_res:
-
-        image = await image_res.read(),
+    with open(image_path, "rb") as image_res:
 
         response = await client.images.create_variation(
-                image = image,
+                image = open(image_res, "rb"),
                 model = real_name_model,
                 response_format = response_format,
                 n = n,
