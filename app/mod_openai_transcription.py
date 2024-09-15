@@ -1,6 +1,6 @@
 from pathlib import Path
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
-import aiofiles
+# import aiofiles
 
 from keys import api_key_openai
 
@@ -29,7 +29,7 @@ async def transcription_openai(description, audio_path):
     # async with aiofiles.open(audio_path, "rb") as file:
     #     content = await file.read()  # Читаем содержимое файла
 
-    with aiofiles.open(audio_path, "rb") as content:
+    with open(audio_path, "rb") as content:
 
         transcript = await client.audio.transcriptions.create(
             model = model,
