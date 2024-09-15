@@ -626,7 +626,7 @@ async def point_transcription_openai(
         audio_path = None
 
     # Working with OpenAI
-    confirm_openai = await transcription_openai(description, audio)
+    confirm_openai = await transcription_openai(description, audio_path)
 
     # Remove file
     if audio_path:

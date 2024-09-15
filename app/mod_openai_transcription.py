@@ -8,7 +8,7 @@ from keys import api_key_openai
 client = AsyncOpenAI(api_key=api_key_openai)
 
 
-async def transcription_openai(description, audio):
+async def transcription_openai(description, audio_path):
 
     username = description.get("username")
     prompt = description.get("prompt")
@@ -16,7 +16,7 @@ async def transcription_openai(description, audio):
     model = description.get("model", "whisper-1") # whisper-1 only now
     response_format = description.get("response_format", "text") # json, text, srt, verbose_json, or vtt
 
-    audio_file = open(audio, "rb")
+    audio_file = open(audio_path, "rb")
 
     transcript = await client.audio.transcriptions.create(
         model = model,
