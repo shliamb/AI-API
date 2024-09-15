@@ -27,24 +27,32 @@ async def mod_edit_dall_e(description, image_path, mask_path):
 
 
     if mask_path:
-        response = await client.images.edit(
-                image = open(image_path, "rb"),
-                mask = open(mask_path, "rb"),
-                prompt = user_content,
-                model = real_name_model,
-                response_format = response_format,
-                n = n,
-                size = size
-        )
+
+        with open(image_path, 'rb') as image_file, \
+            open(mask_path, 'rb') as mask_file:
+
+            response = await client.images.edit(
+                    image = await image_file.read(),
+                    mask = await mask_file.read(),
+                    prompt = user_content,
+                    model = real_name_model,
+                    response_format = response_format,
+                    n = n,
+                    size = size
+            )
+
     elif not mask_path:
-        response = await client.images.edit(
-                image = open(image_path, "rb"),
-                prompt = user_content,
-                model = real_name_model,
-                response_format = response_format,
-                n = n,
-                size = size
-        )
+
+        with open(image_path, 'rb') as image_file:
+
+            response = await client.images.edit(
+                    image = await image_file.read(),
+                    prompt = user_content,
+                    model = real_name_model,
+                    response_format = response_format,
+                    n = n,
+                    size = size
+            )
 
     # Statistic
     used_tokens = n
