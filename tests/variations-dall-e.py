@@ -13,15 +13,17 @@ data = {
 
 }
 
-files = {
-    'file': ('image45.png', open('./uploads/image45.png', 'rb')),   # !
-}
-
 headers = {
     'appkey': '72d3d8e8-74c4-4ff6-9033-91e8670b3708',
 }
 
-response = requests.post(url, headers=headers, data=data, files=files)
+with open('./uploads/image45.png', 'rb') as image:
+
+    files = {
+        'file': ('image45.png', image),   # !
+    }
+
+    response = requests.post(url, headers=headers, data=data, files=files)
 
 if response.status_code == 200:
     print(response.json())

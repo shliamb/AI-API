@@ -631,14 +631,7 @@ async def point_transcription_openai(
     # Remove file
     if audio_path:
         remove = await remove_file_os(audio_path)
-
-    # if confirm_openai == "Error: There is no money for OpenAI account.":
-    #     logging.error("There is no money for OpenAI account.")
-    #     # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
-
-    #encoded_string = await encode_file(confirm_openai)
-
-    # Возвращаем результат в формате JSON
+        
     return confirm_openai
 
 

@@ -13,16 +13,20 @@ data = {
         #"model": "dall-e-2"
 }
 
-image = {
-    'image': ('edit.png', open('./uploads/edit.png', 'rb')),    # !
-    'mask': ('lips.png', open('./uploads/lips.png', 'rb')),     # это странно себя ведет, не понятно пока что..
-}
-
 headers = {
     'appkey': '72d3d8e8-74c4-4ff6-9033-91e8670b3708',
 }
 
-response = requests.post(url, headers=headers, data=data, files=image)
+# Используем менеджер контекста for открытия файлов
+with open('./uploads/edit.png', 'rb') as edit_file, \
+     open('./uploads/lips.png', 'rb') as lips_file:
+    
+    image = {
+        'image': ('edit.png', edit_file),
+        'mask': ('lips.png', lips_file),
+    }
+
+    response = requests.post(url, headers=headers, data=data, files=image)
 
 if response.status_code == 200:
     print(response.json())
