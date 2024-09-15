@@ -16,7 +16,7 @@ async def transcription_openai(description, audio_path):
     model = description.get("model", "whisper-1") # whisper-1 only now
     response_format = description.get("response_format", "text") # json, text, srt, verbose_json, or vtt
 
-    with open(audio_path, "rb") as audio_file:
+    async with aiofiles.open(audio_path, "rb") as audio_file:
 
         transcript = await client.audio.transcriptions.create(
             model = model,

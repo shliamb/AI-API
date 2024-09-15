@@ -148,7 +148,7 @@ async def openai_api(
     system_content: str = Form(None),               #
     model: str = Form(None),                        #
     appkey: str = Header(...),                      # !
-    image: Optional[UploadFile] = File(None)         # # jpg, png проверенно
+    image: Optional[UploadFile] = File(None)        # # jpg, png проверенно
 ):
 
     # Choosing a price list.
@@ -474,7 +474,6 @@ async def edit_dall_e_point(
 
     # Save img to server
     image_path = f"./uploads/{image.filename}"
-
     with open(image_path, "wb") as buffer:
         shutil.copyfileobj(image.file, buffer)
 
@@ -631,7 +630,7 @@ async def point_transcription_openai(
     # Remove file
     if audio_path:
         remove = await remove_file_os(audio_path)
-        
+
     return confirm_openai
 
 
