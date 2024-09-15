@@ -22,6 +22,7 @@ from mod_openai_gen_img import mod_gen_dall_e
 from mod_openai_edit_img import mod_edit_dall_e
 from mod_openai_varions_img import variations_dall_e
 from mod_openai_text_to_audio import speech_to_audio_openai
+from mod_openai_transcription import transcription_openai
 from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price
 
 #import base64
@@ -553,6 +554,7 @@ async def point_speech_to_audio_openai(
         "username": username,
         "user_content": user_content,
     }
+    
     if model:
         description["model"] = model
     if voice:
@@ -570,16 +572,79 @@ async def point_speech_to_audio_openai(
     #     logging.error("There is no money for OpenAI account.")
     #     # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
 
-    #return #confirm_openai
-
-    # Читаем файл и кодируем его в Base64
-    # with open(confirm_openai, "rb") as audio_file:
-    #     encoded_string = base64.b64encode(audio_file.read()).decode('utf-8')
-
     encoded_string = await encode_file(confirm_openai)
 
     # Возвращаем результат в формате JSON
     return {"b64_json": encoded_string}
+
+
+
+
+
+
+# Create transcription OPENAI Endpoint:
+@app.post("/api/transcription-openai/", status_code=status.HTTP_200_OK)
+async def point_transcription_openai(
+    username: str = Form(...),                      # !
+    language: str = Form(None),                     # input language in ISO-639-1, will improve accuracy and latency
+    model: str = Form(None),                        # Only whisper-1 is free code
+    response_format: str = Form(None),              # output format json, text, srt, verbose_json, or vtt.
+    prompt: str = Form(None),                       # The prompt should match the audio language.
+    appkey: str = Header(...),                      # !
+    audio: Optional[UploadFile] = File(),           # ! flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav или webm. In Telegram ogg.
+):
+
+    # Choosing a price list.
+    if not model:
+        model = "whisper-1"
+
+    # Verify user and her appkey
+    confirm_verify = await verify_user_appkey(username, model, appkey)
+    if confirm_verify["status_code"] != status.HTTP_200_OK:
+        return confirm_verify
+
+    # Collect data
+    description = {
+        "username": username,
+    }
+    
+    if model:
+        description["model"] = model
+    if language:
+        description["language"] = language
+    if response_format:
+        description["response_format"] = response_format
+    if prompt:
+        description["prompt"] = prompt
+
+    if audio:
+        # Save audio to server
+        audio_path = f"./uploads/{audio.filename}"
+        with open(audio_path, "wb") as buffer:
+            shutil.copyfileobj(audio.file, buffer)
+    else:
+        audio_path = None
+
+    # Working with OpenAI
+    confirm_openai = await transcription_openai(description, audio)
+
+    # Remove file
+    if audio_path:
+        remove = await remove_file_os(audio_path)
+
+    # if confirm_openai == "Error: There is no money for OpenAI account.":
+    #     logging.error("There is no money for OpenAI account.")
+    #     # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
+
+    #encoded_string = await encode_file(confirm_openai)
+
+    # Возвращаем результат в формате JSON
+    return confirm_openai
+
+
+
+
+
 
 ####
 

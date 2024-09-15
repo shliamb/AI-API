@@ -27,9 +27,6 @@ async def speech_to_audio_openai(description):
         input = user_content
     )
 
-    # with open(speech_file_path, 'wb') as audio_file:
-    #     audio_file.write(response.content)
-
     async with aiofiles.open(speech_file_path, 'wb') as audio_file:
         await audio_file.write(response.content)
 

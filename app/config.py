@@ -24,6 +24,13 @@ price = {
     'gpt-4o-mini-2024-07-18': 1.5, # no vision
     'gpt-4-turbo-2024-04-09': 80,
 
+    # New:
+    'o1-preview': 150,
+    'o1-preview-2024-09-12': 150,
+
+    'o1-mini': 30,
+    'o1-mini-2024-09-12': 30,
+
     # Images to one img:
     'dall-e-3-1024': 0.08,
     'dall-e-3-1792': 0.16,
@@ -38,6 +45,7 @@ price = {
     # Audio to 1M characters:
     'tts-1': 30,
     'tts-1-hd': 60,
+    'whisper-1': 0.012, # minute (rounded to the nearest second)
 
     # Google Gemini to 1M tokens:
     'gemini-1.5-pro-latest': 93.75,
@@ -70,6 +78,10 @@ gpt-4o-2024-05-13                 5                   15                 20
 gpt-4o-mini                       0.15                0.6                0.75
 gpt-4o-mini-2024-07-18            0.15                0.6                0.75
 gpt-4-turbo-2024-04-09            10                  30                 40
+o1-preview                        15                  60                 75
+o1-preview-2024-09-12             15                  60                 75
+o1-mini                           3                   12                 15
+o1-mini-2024-09-12                3                   12                 15
 
 
 
@@ -85,6 +97,7 @@ dall-e-3                HD                            1024×1792, 1792×1024    
 dall-e-2                                              1024×1024                       0.020$ / image
 dall-e-2                                              512×512                         0.018$ / image 
 dall-e-2                                              256×256                         0.016$ / image 
+
 
 
 
