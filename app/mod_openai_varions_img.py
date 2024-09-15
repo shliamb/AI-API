@@ -22,8 +22,10 @@ async def variations_dall_e(description, image_path):
 
     async with aiofiles.open(image_path, "rb") as image_res:
 
+        content = await image_res.read()  # Читаем содержимое файла
+
         response = await client.images.create_variation(
-                image = image_res,
+                image = content,
                 model = real_name_model,
                 response_format = response_format,
                 n = n,
