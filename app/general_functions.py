@@ -73,29 +73,29 @@ async def calculation(username, model_version, used_tokens, input_data):
 
 
 # Remove File OS
-# async def remove_file_os(file_path):
-#     if os.path.exists(file_path):
-#         os.remove(file_path)
-#         #print(f"The {file_path} file was successfully deleted.")
-#         logging.info(f"The {file_path} file was successfully deleted.")
-#         return True
-#     else:
-#         #print(f"The {file_path} file does not exist.")
-#         logging.error(f"The {file_path} file does not exist.")
-#         return False
-
-async def remove_file_os(file_path):  # перепроверить, не уверен что будет работать нормально...
-    loop = asyncio.get_running_loop()
-    
-    if await loop.run_in_executor(None, os.path.exists, file_path):
-        await loop.run_in_executor(None, os.remove, file_path)
-        print(f"The {file_path} file was successfully deleted.")
+async def remove_file_os(file_path):
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        #print(f"The {file_path} file was successfully deleted.")
         logging.info(f"The {file_path} file was successfully deleted.")
         return True
     else:
-        print(f"The {file_path} file does not exist.")
+        #print(f"The {file_path} file does not exist.")
         logging.error(f"The {file_path} file does not exist.")
         return False
+
+# async def remove_file_os(file_path):  # перепроверить, не уверен что будет работать нормально...
+#     loop = asyncio.get_running_loop()
+    
+#     if await loop.run_in_executor(None, os.path.exists, file_path):
+#         await loop.run_in_executor(None, os.remove, file_path)
+#         print(f"The {file_path} file was successfully deleted.")
+#         logging.info(f"The {file_path} file was successfully deleted.")
+#         return True
+#     else:
+#         print(f"The {file_path} file does not exist.")
+#         logging.error(f"The {file_path} file does not exist.")
+#         return False
     
 
 # Cleaner model AI
