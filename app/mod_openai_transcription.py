@@ -18,6 +18,8 @@ async def transcription_openai(description, audio_path):
 
     async with aiofiles.open(audio_path, "rb") as audio_file:
 
+        content = await audio_file.read()  # Читаем содержимое файла
+
         transcript = await client.audio.transcriptions.create(
             model = model,
             prompt = prompt,
@@ -25,7 +27,7 @@ async def transcription_openai(description, audio_path):
             response_format = response_format,
             # timestamp_granularities=["word"],
             # timestamp_granularities=["segment"]
-            file=audio_file
+            file=content
         )
 
     return transcript

@@ -3,6 +3,8 @@ import logging
 import os
 import re
 import base64
+import aiofiles
+import asyncio
 from config import price, time_correction
 from worker_db import add_statistic, get_user_by_username, update_user_by_username
 
@@ -81,6 +83,17 @@ async def remove_file_os(file_path):
         #print(f"The {file_path} file does not exist.")
         logging.error(f"The {file_path} file does not exist.")
         return False
+
+# async def remove_file_os(file_path):  перепроверить, не уверен что будет работать нормально...
+#     loop = asyncio.get_running_loop()
+    
+#     if await loop.run_in_executor(None, os.path.exists, file_path):
+#         await loop.run_in_executor(None, os.remove, file_path)
+#         logging.info(f"The {file_path} file was successfully deleted.")
+#         return True
+#     else:
+#         logging.error(f"The {file_path} file does not exist.")
+#         return False
     
 
 # Cleaner model AI
@@ -95,5 +108,6 @@ async def cleaner_model(name_model):
 
 # Encode the image
 async def encode_file(file_path):
-  with open(file_path, "rb") as file_path:
-    return base64.b64encode(file_path.read()).decode('utf-8')
+  async with aiofiles.open(file_path, "rb") as file:
+    content = await file.read()
+    return base64.b64encode(content).decode('utf-8')
