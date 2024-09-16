@@ -63,6 +63,7 @@ async def transcription_openai(description, audio_file_path):
 
     headers = {
         "Authorization": f"Bearer {API_KEY_OPENAI}",
+        "Content-Type": "multipart/form-data",
     }
 
 
@@ -72,7 +73,8 @@ async def transcription_openai(description, audio_file_path):
             # Создаем объект FormData
             form = FormData()
 
-            file_data = await audio_file.read()
+            # file_data = await audio_file.read()
+            file_data = audio_file._file
             
             # # Добавляем файлы в FormData
             # for file_key, file_value in file_data.items():
@@ -81,9 +83,9 @@ async def transcription_openai(description, audio_file_path):
             # Добавляем дополнительные данные в FormData
             form.add_field('file', file_data)
             form.add_field('model', model)
-            form.add_field('language', language)
-            form.add_field('prompt', prompt)
-            form.add_field('response_format', response_format)
+            # form.add_field('language', language)
+            # form.add_field('prompt', prompt)
+            # form.add_field('response_format', response_format)
 
 
             async with session.post(url, headers=headers, data=form) as response:
