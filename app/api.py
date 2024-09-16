@@ -2,6 +2,7 @@ import logging
 logging.basicConfig(level=logging.INFO, filename='./log/api.log', filemode='a', format='%(levelname)s - %(asctime)s - %(name)s - %(message)s',) # При деплое активировать логирование в файл
 # Base
 import asyncio
+import aiofiles
 # from pydantic import BaseModel
 from typing import Optional
 # import os
@@ -619,8 +620,12 @@ async def point_transcription_openai(
     if audio:
         # Save audio to server
         audio_path = f"./uploads/{audio.filename}"
-        with open(audio_path, "wb") as buffer:
-            shutil.copyfileobj(audio.file, buffer)
+        
+        async with aiofiles.open(audio_path, "wb") as buffer:
+            while content := await audio.read(1024):  # Читаем файл порциями по 1024 байта
+                await buffer.write(content)
+        # with open(audio_path, "wb") as buffer:
+        #     shutil.copyfileobj(audio.file, buffer)
     else:
         audio_path = None
 
@@ -632,9 +637,6 @@ async def point_transcription_openai(
         remove = await remove_file_os(audio_path)
 
     return confirm_openai
-
-
-
 
 
 

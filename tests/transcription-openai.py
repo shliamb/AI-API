@@ -17,9 +17,11 @@ headers = {
 }
 
 with open('./audio/in_audio_2.ogg', 'rb') as f:
+    
     file = {
         'audio': ('in_audio_2.ogg', f)
     }
+
     response = requests.post(url, headers=headers, data=data, files=file)
 
 # Проверка статуса ответа и вывод результата
