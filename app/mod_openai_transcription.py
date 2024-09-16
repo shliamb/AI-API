@@ -25,23 +25,25 @@ async def transcription_openai(description, audio_file_path):
     url = "https://api.openai.com/v1/audio/transcriptions"
     
 
+    headers = {
+        "Authorization": f"Bearer {API_KEY_OPENAI}",
+        #"Content-Type": "multipart/form-data"
+    }
+
     with open(audio_file_path, 'rb') as audio_file:
 
         #file_content = await audio_file.read()
         
         # Подготовка данных для отправки
         files = {
-            'file': ('in_audio.ogg', audio_file),
+            'file': audio_file,
             'model': (None, model)
         }
         
-        headers = {
-            "Authorization": f"Bearer {API_KEY_OPENAI}",
-            "Content-Type": "multipart/form-data"
-        }
 
         # Выполнение POST-запроса
         response = requests.post(url, headers=headers, files=files)
+
         
         # Обработка ответа
         if response.status_code == 200:
@@ -56,7 +58,8 @@ if __name__ == "__main__":
 
 
 
-
+# # Закрытие файла после запроса
+# files['file'].close()
 
 
 
