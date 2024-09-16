@@ -25,16 +25,16 @@ async def transcription_openai(description, audio_path):
             file = file,
         )
 
-        length_of_audio = await read_audio_file(audio_path) # mp3 (ID3v1 и ID3v2), flac, ogg Vorbis, acc (and M4A), wav, wma (limited support), aiff
+        #length_of_audio = await read_audio_file(audio_path) # mp3 (ID3v1 и ID3v2), flac, ogg Vorbis, acc (and M4A), wav, wma (limited support), aiff
 
         # Statistic
-        used_tokens = length_of_audio
-        model_version = model # just only whisper-1
+        #used_tokens = length_of_audio
+        #model_version = model # just only whisper-1
         
         # Calculation of money spent on minutes + sec
-        expenses = await calculation(username, model_version, used_tokens, input_data="audio")
+        #expenses = await calculation(username, model_version, used_tokens, input_data="audio")
 
-        return {"response": transcript, "expenses": expenses, "minutes": length_of_audio}
+        return {"response": transcript}#, "expenses": expenses, "minutes": length_of_audio}
 
 
 
