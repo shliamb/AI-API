@@ -11,6 +11,7 @@ import io
 import requests
 
 import aiohttp
+from general_functions import encode_file
 
 
 
@@ -30,50 +31,21 @@ async def transcription_openai(description, audio_file_path):
 
     headers = {
         "Authorization": f"Bearer {API_KEY_OPENAI}",
-        #"Content-Type": "multipart/form-data"
     }
 
     async with aiohttp.ClientSession() as session:
-        with open(audio_file_path, 'rb') as f:
-            data = aiohttp.FormData()
-            data.add_field('file', f)
-            data.add_field('model', model)  # Добавляем описание
 
-            async with session.post(url, headers=headers, data=data) as response:
-                result = await response.json()
-                return result
+        encoded_image = await encode_file(audio_file_path)
 
+        #with open(audio_file_path, 'rb') as f:
+        data = aiohttp.FormData()
+        data.add_field('file', encoded_image)
+        data.add_field('model', model)
 
+        async with session.post(url, headers=headers, data=data) as response:
+            result = await response.json()
+            return result
 
-
-
-
-
-
-
-    #with open(audio_file_path, 'rb') as audio_file:
-
-        #file_content = await audio_file.read()
-        
-        # Подготовка данных для отправки
-    # data = {
-    #     'file': open(audio_file_path, 'rb'),
-    #     'model': (None, model)
-    # }
-        
-
-
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, headers=headers, data=data) as response:
-    #         response = await response.json()
-
-    #         # Обработка ответа
-    #         if response.status_code == 200:
-    #             file['file'].close()
-    #             return response.json()
-    #         else:
-    #             file['file'].close()
-    #             raise Exception(f"Error {response.status_code}: {response.text}")
 
 
 if __name__ == "__main__":
