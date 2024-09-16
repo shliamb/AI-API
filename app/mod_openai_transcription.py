@@ -40,7 +40,7 @@ async def transcription_openai(description, audio_file_path):
         #with open(audio_file_path, 'rb') as f:
         data = aiohttp.FormData()
         data.add_field('file', encoded_image)
-        data.add_field('model', model)
+        #data.add_field('model', model)
 
         async with session.post(url, headers=headers, data=data) as response:
             result = await response.json()
