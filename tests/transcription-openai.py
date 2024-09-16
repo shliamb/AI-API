@@ -4,10 +4,10 @@ url = "http://137.184.87.156:8000/api/transcription-openai/"
 
 data = {
         "username": "Shliamb10", # !
-        "prompt": "переведи в текст",
-        "language": "ru", # input language in ISO-639-1, will improve accuracy and latency - ru or en
+        #"prompt": "переведи в текст",
+        #"language": "ru", # input language in ISO-639-1, will improve accuracy and latency - ru or en
         "model": "whisper-1", # whisper-1
-        "response_format": "text", # json, text, srt, verbose_json, or vtt
+        #"response_format": "text", # json, text, srt, verbose_json, or vtt
         # timestamp_granularities=["word"],
         # timestamp_granularities=["segment"]
 }

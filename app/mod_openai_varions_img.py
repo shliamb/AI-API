@@ -1,11 +1,11 @@
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
 import logging
-from keys import api_key_openai
+from keys import API_KEY_OPENAI
 from general_functions import cleaner_model
 from general_functions import calculation
 
 
-client = AsyncOpenAI(api_key=api_key_openai)
+client = AsyncOpenAI(api_key=API_KEY_OPENAI)
 
 
 # Dall-e 2 variations img:

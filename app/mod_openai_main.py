@@ -4,13 +4,13 @@ import re
 # import datetime
 # OpenAI
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
-from keys import api_key_openai
+from keys import API_KEY_OPENAI
 # Service
 from general_functions import calculation, encode_file
 
 
 
-client = AsyncOpenAI(api_key=api_key_openai)
+client = AsyncOpenAI(api_key=API_KEY_OPENAI)
 
 
 

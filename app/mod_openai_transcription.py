@@ -2,15 +2,15 @@ from pathlib import Path
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
 # import aiofiles
 
-from keys import api_key_openai
+from keys import API_KEY_OPENAI
 
-# import aiofiles
-# import httpx
-# import asyncio
+import aiofiles
+import httpx
+import asyncio
 
 
 
-client = AsyncOpenAI(api_key=api_key_openai)
+client = AsyncOpenAI(api_key=API_KEY_OPENAI)
 
 
 async def transcription_openai(description, audio_path):
@@ -21,7 +21,7 @@ async def transcription_openai(description, audio_path):
     model = description.get("model", "whisper-1") # whisper-1 only now
     response_format = description.get("response_format", "text") # json, text, srt, verbose_json, or vtt
 
-    with open(audio_path, "rb") as content:
+    async with aiofiles.open(audio_path, "rb") as content:
 
         transcript = await client.audio.transcriptions.create(
             model = model,

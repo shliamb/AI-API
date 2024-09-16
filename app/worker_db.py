@@ -1,4 +1,4 @@
-from keys import user_db, paswor_db
+from keys import USER_DB, PASWORD_DB
 import logging
 import asyncio
 import sqlalchemy
@@ -12,12 +12,12 @@ from sqlalchemy import select, insert, update, join, func
 # import os
 # from dotenv import load_dotenv
 # load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
-# user_db, paswor_db = os.environ.get('USER_DB'),  os.environ.get('PASWOR_DB')
+# USER_DB, PASWORD_DB = os.environ.get('USER_DB'),  os.environ.get('PASWOR_DB')
 
 
 
 async def create_async_engine_and_session():                                # @localhost  # @postgres
-    engine = create_async_engine(f"postgresql+asyncpg://{user_db}:{paswor_db}@postgres:5432/my_database") # echo=True - вывод логирования
+    engine = create_async_engine(f"postgresql+asyncpg://{USER_DB}:{PASWORD_DB}@postgres:5432/my_database") # echo=True - вывод логирования
     async_session = sessionmaker(bind=engine, class_=AsyncSession)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

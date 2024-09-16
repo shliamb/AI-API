@@ -2,10 +2,10 @@ from pathlib import Path
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
 import aiofiles
 
-from keys import api_key_openai
+from keys import API_KEY_OPENAI
 
 
-client = AsyncOpenAI(api_key=api_key_openai)
+client = AsyncOpenAI(api_key=API_KEY_OPENAI)
 
 
 async def speech_to_audio_openai(description):

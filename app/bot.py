@@ -32,11 +32,11 @@ from backupdb import backup_db
 from restore_db import restore_db
 from general_functions import day_utcnow, unformat_date
 from config import money_to_start, my_app_key, time_correction, min_pay
-from keys import token_telegram, is_admin
+from keys import TOKEN_TELEGRAM, IS_ADMIN
 
 
 dp = Dispatcher() # All handlers should be attached to the Router (or Dispatcher)
-bot = Bot(token_telegram) # Initialize Bot instance with a default parse mode which will be passed to all API calls
+bot = Bot(TOKEN_TELEGRAM) # Initialize Bot instance with a default parse mode which will be passed to all API calls
 
 
 #########
@@ -262,7 +262,7 @@ async def invoice_user_1(message: Message, state: FSMContext):
     mes_id = message.chat.id
     summ = message.text
     id = user_id(message)
-    admin_id = is_admin
+    admin_id = IS_ADMIN
     url = f"tg://user?id={id}"
 
     # Проверка на число
@@ -402,7 +402,7 @@ async def admin(message: types.Message):
     id = user_id(message)
 
     # Check access
-    if id != is_admin:
+    if id != IS_ADMIN:
         await message.answer(f"Sorry, access is denied.")
         return
 
@@ -428,7 +428,7 @@ async def backup(message: types.Message):
     id = user_id(message)
 
     # Check access
-    if id != is_admin:
+    if id != IS_ADMIN:
         await message.answer(f"Sorry, access is denied.")
         return
 
@@ -532,7 +532,7 @@ async def clear_old_users(message: types.Message):
     id = user_id(message)
 
     # Check access
-    if id != is_admin:
+    if id != IS_ADMIN:
         await message.answer(f"Sorry, access is denied.")
         return
     # Тут, нужно получить все id пользователей, а затем поочереди по их id забирать их дату последнего посещения и баланс, если он равен или меньше 5$
@@ -550,7 +550,7 @@ async def clear_db(message: types.Message):
     id = user_id(message)
 
     # Check access
-    if id != is_admin:
+    if id != IS_ADMIN:
         await message.answer(f"Sorry, access is denied.")
         return
     # Нужно удалить все транзакции которые старше месяца допустим, возможно выйдет сделать такую функцию в базе и там все это проделать, без пйтана, посмотрим.

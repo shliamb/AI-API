@@ -1,16 +1,9 @@
-# https://github.com/google-gemini/generative-ai-python/blob/main/google/generativeai/answer.py
-# https://ai.google.dev/api/generate-content?hl=ru#text_gen_multimodal_one_image_prompt-SHELL
-
 # Base
 import logging
 import aiohttp
 import asyncio
-import base64
-# Google
-# import google.generativeai as genai
-# import PIL.Image
 # Service
-from keys import API_KEY_GEMINI, is_admin
+from keys import API_KEY_GEMINI
 from general_functions import calculation, encode_file
 
 
@@ -33,6 +26,7 @@ async def mod_gemini(description, image_path):
 
     # is IMAGE:
     if image_path:
+
         encoded_image = await encode_file(image_path)
 
         data = {
@@ -149,8 +143,8 @@ https://ai.google.dev/gemini-api/docs/tokens?hl=ru&lang=python
 
 
 
-
-
+# https://github.com/google-gemini/generative-ai-python/blob/main/google/generativeai/answer.py
+# https://ai.google.dev/api/generate-content?hl=ru#text_gen_multimodal_one_image_prompt-SHELL
 
 
 

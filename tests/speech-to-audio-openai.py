@@ -5,7 +5,7 @@ url = "http://137.184.87.156:8000/api/speech-to-audio-openai/"
 
 data = {
         "username": "Shliamb10",
-        "user_content": "Вот зараза..",
+        "user_content": "Не орите пожалуйста, я всех обслужу!",
         "voice": "nova", # alloy, echo, fable, onyx, nova, and shimmer
         "model": "tts-1", # tts-1 or tts-1-hd
         "response_format": "mp3", # mp3, opus, aac, flac, wav, and pcm

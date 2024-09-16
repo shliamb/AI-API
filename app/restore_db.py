@@ -1,9 +1,9 @@
-from keys import user_db, paswor_db
+from keys import USER_DB, PASWORD_DB
 import subprocess
 import logging
 
-db_username = user_db
-db_password = paswor_db
+db_username = USER_DB
+db_password = PASWORD_DB
 db_name = "my_database"
 confirmation = False # На всякий случай подтверждение функции
 
