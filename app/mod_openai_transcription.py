@@ -45,55 +45,76 @@ from general_functions import encode_file
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 async def transcription_openai(description, audio_file_path):
-
     username = description.get("username")
     prompt = description.get("prompt")
-    language = description.get("language") # input language in ISO-639-1, will improve accuracy and latency - ru or en
-    model = description.get("model", "whisper-1") # whisper-1 only now
-    response_format = description.get("response_format", "text") # json, text, srt, verbose_json, or vtt
+    language = description.get("language")  # input language in ISO-639-1, will improve accuracy and latency - ru or en
+    model = description.get("model", "whisper-1")  # whisper-1 only now
+    response_format = description.get("response_format", "text")  # json, text, srt, verbose_json, or vtt
 
     url = "https://api.openai.com/v1/audio/transcriptions"
-    
+
     headers = {
         "Authorization": f"Bearer {API_KEY_OPENAI}",
     }
 
-    with open(audio_file_path, 'rb') as audio_file: # Открываем файл в бинарном режиме
-
-
-
-        # content = await file.read()
-        file_like_object = io.BytesIO(audio_file)
-
-        files = {
-            'file': file_like_object, #audio_file,
-        }
-
-        data = {
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=headers, data={
             "model": model,
             "language": language,
             "prompt": prompt,
             "response_format": response_format,
-        }
+        }, files={'file': open(audio_file_path, 'rb')}) as response:
+            if response.status == 200:
+                return {"response": await response.text()}
+            else:
+                print("Error:", response.status, await response.text())
 
-        response = requests.post(url, headers=headers, files=files, data=data)
+# Пример вызова функции
+# asyncio.run(transcription_openai(description, audio_file_path))
 
-        if response.status_code == 200:
-            return {"response": response.text}
-        else:
-            print("Error:", response.status_code, response.text)
+
+
+
+
+
+
+
+
+
+# async def transcription_openai(description, audio_file_path):
+
+#     username = description.get("username")
+#     prompt = description.get("prompt")
+#     language = description.get("language") # input language in ISO-639-1, will improve accuracy and latency - ru or en
+#     model = description.get("model", "whisper-1") # whisper-1 only now
+#     response_format = description.get("response_format", "text") # json, text, srt, verbose_json, or vtt
+
+#     url = "https://api.openai.com/v1/audio/transcriptions"
+    
+#     headers = {
+#         "Authorization": f"Bearer {API_KEY_OPENAI}",
+#     }
+
+#     with open(audio_file_path, 'rb') as audio_file: # Открываем файл в бинарном режиме
+
+#         files = {
+#             'file': audio_file,
+#         }
+
+#         data = {
+#             "model": model,
+#             "language": language,
+#             "prompt": prompt,
+#             "response_format": response_format,
+#         }
+
+#         response = requests.post(url, headers=headers, files=files, data=data)
+
+#         if response.status_code == 200:
+#             return {"response": response.text}
+#         else:
+#             print("Error:", response.status_code, response.text)
 
 
 
