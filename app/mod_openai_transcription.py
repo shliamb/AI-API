@@ -13,19 +13,18 @@ async def transcription_openai(description, audio_path):
     model = description.get("model", "whisper-1") # whisper-1 only now
     response_format = description.get("response_format", "text") # json, text, srt, verbose_json, or vtt
 
-    with open(audio_path, "rb") as file:
+    # with open(audio_path, "rb") as file:
+    audio_file = open(audio_path, "rb")
 
-        audio = file.read()
-
-        transcript = await client.audio.transcriptions.create(
-            model = model,
-            prompt = prompt,
-            language = language,
-            response_format = response_format,
-            # timestamp_granularities=["word"],
-            # timestamp_granularities=["segment"]
-            file = audio,
-        )
+    transcript = await client.audio.transcriptions.create(
+        file = audio_file,
+        model = model,
+        prompt = prompt,
+        language = language,
+        response_format = response_format,
+        # timestamp_granularities=["word"],
+        # timestamp_granularities=["segment"]
+    )
 
         #length_of_audio = await read_audio_file(audio_path) # mp3 (ID3v1 и ID3v2), flac, ogg Vorbis, acc (and M4A), wav, wma (limited support), aiff
 
@@ -36,7 +35,8 @@ async def transcription_openai(description, audio_path):
         # Calculation of money spent on minutes + sec
         #expenses = await calculation(username, model_version, used_tokens, input_data="audio")
 
-        return {"response": transcript}#, "expenses": expenses, "minutes": length_of_audio}
+    print(transcript.words)
+    return {"response": transcript}#, "expenses": expenses, "minutes": length_of_audio}
 
 
 
