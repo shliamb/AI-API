@@ -85,7 +85,7 @@ async def transcription_openai(description, audio_file_path):
 
         response = requests.post(url, headers=headers, files=files, data=data)
 
-        return response
+        return {"response": response}
 
 
 
