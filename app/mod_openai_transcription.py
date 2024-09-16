@@ -33,26 +33,28 @@ async def transcription_openai(description, audio_file_path):
         #"Content-Type": "multipart/form-data"
     }
 
-    with open(audio_file_path, 'rb') as audio_file:
+    #with open(audio_file_path, 'rb') as audio_file:
 
         #file_content = await audio_file.read()
         
         # Подготовка данных для отправки
-        files = {
-            'file': audio_file,
-            'model': (None, model)
-        }
+    file = {
+        'file': open(audio_file_path, 'rb'),
+        'model': (None, model)
+    }
         
 
 
     async with aiohttp.ClientSession() as session:
-        async with session.post(url, headers=headers, files=files) as response:
+        async with session.post(url, headers=headers, files=file) as response:
             response = await response.json()
 
             # Обработка ответа
             if response.status_code == 200:
+                file['file'].close()
                 return response.json()
             else:
+                file['file'].close()
                 raise Exception(f"Error {response.status_code}: {response.text}")
 
 
