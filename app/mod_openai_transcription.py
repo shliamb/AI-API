@@ -74,11 +74,12 @@ async def transcription_openai(description, audio_file_path):
 
             file_data = await audio_file.read()
             
-            # Добавляем файлы в FormData
-            for file_key, file_value in file_data.items():
-                form.add_field(file_key, file_value['content'], filename=file_value['filename'])
+            # # Добавляем файлы в FormData
+            # for file_key, file_value in file_data.items():
+            #     form.add_field(file_key, file_value['content'], filename=file_value['filename'])
 
             # Добавляем дополнительные данные в FormData
+            form.add_field('file', file_data)
             form.add_field('model', model)
             form.add_field('language', language)
             form.add_field('prompt', prompt)
