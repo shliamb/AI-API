@@ -63,7 +63,6 @@ async def transcription_openai(description, audio_file_path):
 
     headers = {
         "Authorization": f"Bearer {API_KEY_OPENAI}",
-        # "Content-Type": "multipart/form-data",
     }
 
 
@@ -73,12 +72,8 @@ async def transcription_openai(description, audio_file_path):
             # Создаем объект FormData
             form = FormData()
 
-            # file_data = await audio_file.read()
-            file_data = audio_file._file
-            
-            # # Добавляем файлы в FormData
-            # for file_key, file_value in file_data.items():
-            #     form.add_field(file_key, file_value['content'], filename=file_value['filename'])
+            file_data = await audio_file.read()
+            # file_data = audio_file._file
 
             # Добавляем дополнительные данные в FormData
             form.add_field('file', file_data)
@@ -86,7 +81,6 @@ async def transcription_openai(description, audio_file_path):
             # form.add_field('language', language)
             # form.add_field('prompt', prompt)
             # form.add_field('response_format', response_format)
-
 
             async with session.post(url, headers=headers, data=form) as response:
                 #response_data = await response.json()
@@ -98,56 +92,6 @@ async def transcription_openai(description, audio_file_path):
 
 
 
-            # Отправляем POST запрос с использованием FormData
-            # async with session.post(url, headers=headers, data=form) as response:
-            #     response_data = await response.json()
-            # data = {
-            #     "model": model,
-            #     "language": language,
-            #     "prompt": prompt,
-            #     "response_format": response_format,
-            # }
-
-            # Отправляем POST запрос с использованием FormData
-            # async with session.post(url, headers=headers, data=form) as response:
-            #     response_data = await response.json()
-
-        # async with aiohttp.ClientSession() as session:
-        #     async with aiofiles.open(audio_file_path, 'rb') as audio_file: 
-        #         file_data = await audio_file.read()
-                
-        #         data = {
-        #             "model": model,
-        #             "language": language,
-        #             "prompt": prompt,
-        #             "response_format": response_format,
-        #         }
-                
-
-
-
-    #             if response.status == 200:
-    #                 #return {"response": await response.text()}
-    #                 print(await response.text())
-    #             else:
-    #                 print("Error:", response.status, await response.text())
-
-
-
-
-
-
-# async with ClientSession() as session:
-#     # Создаем объект FormData
-#     form = FormData()
-    
-#     # Добавляем файлы в FormData
-#     for file_key, file_value in file_data.items():
-#         form.add_field(file_key, file_value['content'], filename=file_value['filename'])
-
-#     # Отправляем POST запрос с использованием FormData
-#     async with session.post(url, headers=headers, data=form) as response:
-#         response_data = await response.json()
 
 
 
