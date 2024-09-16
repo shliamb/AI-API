@@ -63,7 +63,7 @@ async def transcription_openai(description, audio_file_path):
 
     headers = {
         "Authorization": f"Bearer {API_KEY_OPENAI}",
-        "Content-Type": "multipart/form-data",
+        # "Content-Type": "multipart/form-data",
     }
 
 
