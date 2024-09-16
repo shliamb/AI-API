@@ -48,6 +48,7 @@ async def transcription_openai(description, audio_file_path):
             #         "text": system_content
             #     }
             # },
+            "model": model,
         }
 
 
