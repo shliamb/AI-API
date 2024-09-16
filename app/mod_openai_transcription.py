@@ -66,33 +66,30 @@ async def transcription_openai(description, audio_file_path):
 
     url = "https://api.openai.com/v1/audio/transcriptions"
     
-
     headers = {
         "Authorization": f"Bearer {API_KEY_OPENAI}",
     }
 
-
-    # Открываем файл в бинарном режиме
-    with open(audio_file_path, 'rb') as audio_file:
+    with open(audio_file_path, 'rb') as audio_file: # Открываем файл в бинарном режиме
 
         files = {
             'file': audio_file,
         }
 
-        # Добавляем параметры формы (data)
         data = {
-            'model': model,
+            "model": model,
+            "language": language,
+            "prompt": prompt,
+            "response_format": response_format,
         }
 
-        # Выполнение POST-запроса
         response = requests.post(url, headers=headers, files=files, data=data)
 
-
-        # Обработка ответа
         if response.status_code == 200:
-            print("Transcription:", response.json())
+            return response.json()
         else:
-            print("Error:", response.status_code, response.text)
+            return {"code": response.status_code, "text": response.text}
+
 
 
 
