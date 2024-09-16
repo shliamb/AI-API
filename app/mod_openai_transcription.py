@@ -87,10 +87,10 @@ async def transcription_openai(description, audio_file_path):
         response = requests.post(url, headers=headers, files=files, data=data)
 
         if response.status_code == 200:
-            print("Transcription:", response.json())
-            print(type(response.json()))
-            print(type(response.text))
-            #return {"response": response.text}
+            #print("Transcription:", response.json())
+            # print(type(response.json()))
+            # print(type(response.text))
+            return {"response": response.text}
         else:
             print("Error:", response.status_code, response.text)
 
