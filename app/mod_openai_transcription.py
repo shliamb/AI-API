@@ -7,6 +7,8 @@ client = AsyncOpenAI(api_key=API_KEY_OPENAI)
 
 async def transcription_openai(description, audio_path):
 
+    print(audio_path)
+
     username = description.get("username")
     prompt = description.get("prompt")
     language = description.get("language") # input language in ISO-639-1, will improve accuracy and latency - ru or en
@@ -35,7 +37,7 @@ async def transcription_openai(description, audio_path):
         # Calculation of money spent on minutes + sec
         #expenses = await calculation(username, model_version, used_tokens, input_data="audio")
 
-    print(transcript.words)
+    #print(transcript.words)
     return {"response": transcript}#, "expenses": expenses, "minutes": length_of_audio}
 
 
