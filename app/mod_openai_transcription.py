@@ -35,36 +35,23 @@ async def transcription_openai(description, audio_file_path):
 
     async with aiohttp.ClientSession() as session:
 
-        encoded_image = await encode_file(audio_file_path)
+        encoded_audio = await encode_file(audio_file_path)
 
-
-        # data = {
-        #     "model": model,
-        #     "file": encoded_image,
-        # }
-
-
-        data = {
-
-            "model": {
-                "parts": {
-                    "text": model
-                }
+        # Формируем JSON-объект
+        payload = {
+            "inline_data": {
+                "mime_type": "audio/ogg",  # audio/ogg  audio/mpeg или другой подходящий тип для вашего аудио
+                "data": encoded_audio  # переменная с закодированными данными аудиофайла
             },
-            "contents": [{
-                "parts": [
-                    {
-                        "inline_data": {
-                            "mime_type": "audio/ogg", # "audio/wav", "audio/ogg"
-                            "data": encoded_image
-                        }
-                    }
-                ]
-            }]
+            # "system_instruction": {
+            #     "parts": {
+            #         "text": system_content
+            #     }
+            # },
         }
 
 
-        async with session.post(url, headers=headers, json=data) as response:
+        async with session.post(url, headers=headers, json=payload) as response:
             result = await response.json()
             return result
 
