@@ -6,7 +6,7 @@ data = {
         "username": "Shliamb10", # !
         #"prompt": "переведи в текст",
         #"language": "ru", # input language in ISO-639-1, will improve accuracy and latency - ru or en
-        # "model": "whisper-1", # whisper-1
+        "model": "whisper-1", # whisper-1
         #"response_format": "text", # json, text, srt, verbose_json, or vtt
         # timestamp_granularities=["word"],
         # timestamp_granularities=["segment"]
