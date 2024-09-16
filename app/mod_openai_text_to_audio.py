@@ -17,8 +17,6 @@ async def speech_to_audio_openai(description):
     response_format = description.get("response_format", "mp3") # mp3, opus, aac, flac, wav, and pcm
     speed = description.get("speed", "1") # 0.25 to 4.0. default - 1.0
 
-    speech_file_path = Path('./audio/speech.mp3')
-
     response = await client.audio.speech.create(
         model = model,
         voice = voice,
@@ -27,6 +25,8 @@ async def speech_to_audio_openai(description):
         input = user_content
     )
 
+    speech_file_path = Path('./audio/speech.mp3')
+    
     async with aiofiles.open(speech_file_path, 'wb') as audio_file:
         await audio_file.write(response.content)
 

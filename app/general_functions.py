@@ -5,6 +5,8 @@ import re
 import base64
 import aiofiles
 import asyncio
+from mutagen import File
+from io import BytesIO
 from config import price, time_correction
 from worker_db import add_statistic, get_user_by_username, update_user_by_username
 
@@ -38,6 +40,9 @@ async def calculation(username, model_version, used_tokens, input_data):
                 one_tok_price = value / 1000000 # Price 1 token to USD
                 break
             elif input_data == "img":
+                one_tok_price = value
+                break
+            elif input_data == "audio":
                 one_tok_price = value
                 break
         
@@ -113,11 +118,31 @@ async def encode_file(file_path):
     content = await file.read()
     return base64.b64encode(content).decode('utf-8')
   
+
 # Async save file
 async def write_file(file, file_path):
     async with aiofiles.open(file_path, "wb") as buffer:
         while content := await file.read(1024):  # Читаем файл порциями по 1024 байта
             await buffer.write(content)
+            return
 
-# with open(audio_path, "wb") as buffer:
-#     shutil.copyfileobj(audio.file, buffer)
+
+# Async calculating the length of an audio file:
+async def read_audio_file(file_path: str) -> float: # mp3 (ID3v1 и ID3v2), flac, ogg Vorbis, acc (and M4A), wav, wma (limited support), aiff
+    async with aiofiles.open(file_path, 'rb') as f:
+        content = await f.read()
+        audio_file = BytesIO(content)
+        
+        # Загружаем аудиофайл с помощью mutagen
+        audio = File(audio_file)
+        
+        if audio is None or audio.info is None:
+            print("The audio file could not be uploaded.")
+            logging.error("The audio file could not be uploaded.")
+        else:
+            # print(audio.pprint())
+            duration = audio.info.length  # Получаем длину в секундах
+            if duration:
+                length_sound = float(f"{duration:.2f}")
+                return length_sound
+

@@ -164,8 +164,7 @@ async def openai_api(
     if image:
         # Save img to server
         image_path = f"./uploads/{image.filename}"
-        with open(image_path, "wb") as buffer:
-            shutil.copyfileobj(image.file, buffer)
+        await write_file(image, image_path)
     else:
         image_path = None
 
@@ -392,8 +391,7 @@ async def variations_dall_e_func(
 
     # Save img to server
     image_path = f"./uploads/{file.filename}"
-    with open(image_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    await write_file(file, image_path)
 
     # Collect data
     description = {
@@ -475,14 +473,12 @@ async def edit_dall_e_point(
 
     # Save img to server
     image_path = f"./uploads/{image.filename}"
-    with open(image_path, "wb") as buffer:
-        shutil.copyfileobj(image.file, buffer)
+    await write_file(image, image_path)
 
     if mask:
         # Save mask to server
         mask_path = f"./uploads/{mask.filename}"
-        with open(mask_path, "wb") as buffer:
-            shutil.copyfileobj(mask.file, buffer)
+        await write_file(mask, mask_path)
     else:
         mask_path = None
 
@@ -620,14 +616,7 @@ async def point_transcription_openai(
     if audio:
         # Save audio to server
         audio_path = f"./uploads/{audio.filename}"
-
-
         await write_file(audio, audio_path)
-        # async with aiofiles.open(audio_path, "wb") as buffer:
-        #     while content := await audio.read(1024):  # Читаем файл порциями по 1024 байта
-        #         await buffer.write(content)
-        # with open(audio_path, "wb") as buffer:
-        #     shutil.copyfileobj(audio.file, buffer)
     else:
         audio_path = None
 
@@ -693,8 +682,7 @@ async def gemini_api(
     if file:
         # Save file to server
         file_path = f"./uploads/{file.filename}"
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        await write_file(file, file_path)
     else:
         file_path = None
 

@@ -7,7 +7,7 @@ url = "http://137.184.87.156:8000/api/edit-dall-e/"
 data = {
         "username": "Shliamb10", # !
         #"size": "1024x1024",
-        "user_content": "Дорисуй грустный рот" # !
+        "user_content": "Дорисуй" # !
         #"response_format": "url",
         #"n": 2,
         #"model": "dall-e-2"
@@ -18,12 +18,12 @@ headers = {
 }
 
 # Используем менеджер контекста for открытия файлов
-with open('./uploads/edit.png', 'rb') as edit_file, \
-     open('./uploads/lips.png', 'rb') as lips_file:
+with open('./uploads/edit.png', 'rb') as edit_file:#, \
+     #open('./uploads/lips.png', 'rb') as lips_file:
     
     image = {
         'image': ('edit.png', edit_file),
-        'mask': ('lips.png', lips_file),
+       # 'mask': ('lips.png', lips_file),
     }
 
     response = requests.post(url, headers=headers, data=data, files=image)
