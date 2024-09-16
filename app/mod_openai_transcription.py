@@ -8,13 +8,13 @@ import aiofiles
 import httpx
 import asyncio
 import io
+import requests
 
 
 
-client = AsyncOpenAI(api_key=API_KEY_OPENAI)
 
 
-async def transcription_openai(description, audio_path):
+async def transcription_openai(description, audio_file_path):
 
     username = description.get("username")
     prompt = description.get("prompt")
@@ -22,24 +22,93 @@ async def transcription_openai(description, audio_path):
     model = description.get("model", "whisper-1") # whisper-1 only now
     response_format = description.get("response_format", "text") # json, text, srt, verbose_json, or vtt
 
-    # async with aiofiles.open(audio_path, "rb") as file:
-    with open(audio_path, "rb") as file:
+    url = "https://api.openai.com/v1/audio/transcriptions"
+    
 
-        # content = file._file
-        content = io.BytesIO(file)
+    with open(audio_file_path, 'rb') as audio_file:
+
+        #file_content = await audio_file.read()
+        
+        # Подготовка данных для отправки
+        files = {
+            'file': ('in_audio.ogg', audio_file),
+            'model': (None, model)
+        }
+        
+        headers = {
+            "Authorization": f"Bearer {API_KEY_OPENAI}",
+            "Content-Type": "multipart/form-data"
+        }
+
+        # Выполнение POST-запроса
+        response = requests.post(url, headers=headers, files=files)
+        
+        # Обработка ответа
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise Exception(f"Error {response.status_code}: {response.text}")
 
 
-        print()
-        print(content)
-        print()
+if __name__ == "__main__":
+    asyncio.run(transcription_openai())
 
 
-        transcript = await client.audio.transcriptions.create(
-            model = model,
-            file = content
-        )
 
-    return transcript
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# client = AsyncOpenAI(api_key=API_KEY_OPENAI)
+
+
+# async def transcription_openai(description, audio_path):
+
+#     username = description.get("username")
+#     prompt = description.get("prompt")
+#     language = description.get("language") # input language in ISO-639-1, will improve accuracy and latency - ru or en
+#     model = description.get("model", "whisper-1") # whisper-1 only now
+#     response_format = description.get("response_format", "text") # json, text, srt, verbose_json, or vtt
+
+#     async with aiofiles.open(audio_path, "rb") as file:
+
+#         content = file._file
+
+#         transcript = await client.audio.transcriptions.create(
+#             model = model,
+#             prompt = prompt,
+#             language = language,
+#             response_format = response_format,
+#             # timestamp_granularities=["word"],
+#             # timestamp_granularities=["segment"]
+#             file = content
+#         )
+
+#     return transcript
 
 
 
