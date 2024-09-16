@@ -46,7 +46,7 @@ async def transcription_openai(description, audio_file_path):
 
 
     async with aiohttp.ClientSession() as session:
-        async with session.post(url, headers=headers, files=file) as response:
+        async with session.post(url, headers=headers, data=file) as response:
             response = await response.json()
 
             # Обработка ответа
@@ -62,6 +62,15 @@ if __name__ == "__main__":
     asyncio.run(transcription_openai())
 
 
+
+
+# async with aiohttp.ClientSession() as session:
+#     with open(audio_path, 'rb') as f:
+#         data = {
+#             'file': f  # Здесь 'file' - это имя поля формы
+#         }
+#         async with session.post(url, headers=headers, data=data) as response:
+#             result = await response.json()
 
 
 # # Закрытие файла после запроса
