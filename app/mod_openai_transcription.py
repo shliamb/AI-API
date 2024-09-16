@@ -14,49 +14,10 @@ import aiohttp
 from general_functions import encode_file
 
 
-client = AsyncOpenAI(api_key=API_KEY_OPENAI)
+# client = AsyncOpenAI(api_key=API_KEY_OPENAI)
 
 
-async def transcription_openai(description, audio_path):
-
-    username = description.get("username")
-    prompt = description.get("prompt")
-    language = description.get("language") # input language in ISO-639-1, will improve accuracy and latency - ru or en
-    model = description.get("model", "whisper-1") # whisper-1 only now
-    response_format = description.get("response_format", "text") # json, text, srt, verbose_json, or vtt
-
-    # async with aiofiles.open(audio_path, "rb") as file:
-
-        #content = file._file
-
-    encoded_audio = await encode_file(audio_path)
-
-    transcript = await client.audio.transcriptions.create(
-        model = model,
-        prompt = prompt,
-        language = language,
-        response_format = response_format,
-        # timestamp_granularities=["word"],
-        # timestamp_granularities=["segment"]
-        file = encoded_audio
-    )
-
-    return transcript
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# async def transcription_openai(description, audio_file_path):
+# async def transcription_openai(description, audio_path):
 
 #     username = description.get("username")
 #     prompt = description.get("prompt")
@@ -64,40 +25,106 @@ async def transcription_openai(description, audio_path):
 #     model = description.get("model", "whisper-1") # whisper-1 only now
 #     response_format = description.get("response_format", "text") # json, text, srt, verbose_json, or vtt
 
-#     url = "https://api.openai.com/v1/audio/transcriptions"
+#     # async with aiofiles.open(audio_path, "rb") as file:
+
+#         #content = file._file
+
+#     encoded_audio = await encode_file(audio_path)
+
+#     transcript = await client.audio.transcriptions.create(
+#         model = model,
+#         prompt = prompt,
+#         language = language,
+#         response_format = response_format,
+#         # timestamp_granularities=["word"],
+#         # timestamp_granularities=["segment"]
+#         file = encoded_audio
+#     )
+
+#     return transcript
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async def transcription_openai(description, audio_file_path):
+
+    username = description.get("username")
+    prompt = description.get("prompt")
+    language = description.get("language") # input language in ISO-639-1, will improve accuracy and latency - ru or en
+    model = description.get("model", "whisper-1") # whisper-1 only now
+    response_format = description.get("response_format", "text") # json, text, srt, verbose_json, or vtt
+
+    url = "https://api.openai.com/v1/audio/transcriptions"
     
 
-#     headers = {
-#         "Authorization": f"Bearer {API_KEY_OPENAI}",
-#     }
-
-#     async with aiohttp.ClientSession() as session:
-
-#         encoded_audio = await encode_file(audio_file_path)
-
-#         # Формируем JSON-объект
-#         payload = {
-#             "inline_data": {
-#                 "mime_type": "audio/ogg",  # audio/ogg  audio/mpeg или другой подходящий тип для вашего аудио
-#                 "data": encoded_audio  # переменная с закодированными данными аудиофайла
-#             },
-#             # "system_instruction": {
-#             #     "parts": {
-#             #         "text": system_content
-#             #     }
-#             # },
-#             "model": model,
-#         }
+    headers = {
+        "Authorization": f"Bearer {API_KEY_OPENAI}",
+    }
 
 
-#         async with session.post(url, headers=headers, json=payload) as response:
-#             result = await response.json()
-#             return result
+    files = {
+        'file': open(audio_file_path, 'rb'),  # Открываем файл в бинарном режиме
+        'model': model,
+    }
+
+    # Выполнение POST-запроса
+    response = requests.post(url, headers=headers, files=files)
+
+    # Закрытие файла после отправки запроса
+    files['file'].close()
+
+    # Обработка ответа
+    if response.status_code == 200:
+        print("Transcription:", response.json())
+    else:
+        print("Error:", response.status_code, response.text)
 
 
 
-# if __name__ == "__main__":
-#     asyncio.run(transcription_openai())
+
+
+
+
+
+
+
+    # async with aiohttp.ClientSession() as session:
+
+    #     encoded_audio = await encode_file(audio_file_path)
+
+    #     # Формируем JSON-объект
+    #     payload = {
+    #         "inline_data": {
+    #             "mime_type": "audio/ogg",  # audio/ogg  audio/mpeg или другой подходящий тип для вашего аудио
+    #             "data": encoded_audio  # переменная с закодированными данными аудиофайла
+    #         },
+    #         # "system_instruction": {
+    #         #     "parts": {
+    #         #         "text": system_content
+    #         #     }
+    #         # },
+    #         "model": model,
+    #     }
+
+
+    #     async with session.post(url, headers=headers, json=payload) as response:
+    #         result = await response.json()
+    #         return result
+
+
+
+if __name__ == "__main__":
+    asyncio.run(transcription_openai())
 
 
 
