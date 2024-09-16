@@ -32,12 +32,16 @@ async def speech_to_audio_openai(description):
         await audio_file.write(response.content)
 
         # Statistic
-        enc = tiktoken.get_encoding(model)
-        tokens = enc.encode(user_content)
-        used_tokens = len(tokens)
-        model_version = model # just only whisper-1
+        # enc = tiktoken.get_encoding(model)
+        # tokens = enc.encode(user_content)
+        # used_tokens = len(tokens)
+        # model_version = model # just only tts-1
 
-        print(used_tokens)
+        # Получить список всех зарегистрированных кодировок
+        available_encodings = tiktoken.list_encoding_names()
+        print("Available encodings:", available_encodings)
+
+        # print(used_tokens)
 
         # # Calculation of money spent on minutes + sec
         # expenses = await calculation(username, model_version, used_tokens, input_data="audio")
