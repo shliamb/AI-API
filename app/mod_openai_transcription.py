@@ -94,7 +94,7 @@ async def transcription_openai(description, audio_file_path):
         else:
             print("Error:", response.status_code, response.text)
 
-    return response#.json()
+    return response.json()
 
 
 
