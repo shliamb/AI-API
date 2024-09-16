@@ -2,6 +2,7 @@ from pathlib import Path
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
 import aiofiles
 import tiktoken
+from general_functions import calculation
 
 from keys import API_KEY_OPENAI
 
@@ -31,23 +32,16 @@ async def speech_to_audio_openai(description):
     async with aiofiles.open(speech_file_path, 'wb') as audio_file:
         await audio_file.write(response.content)
 
-        # Statistic
+        # Statistic *** Ебанный костыль, пока что не знаю как подругому сделать ****   Available encodings: ['gpt2', 'r50k_base', 'p50k_base', 'p50k_edit', 'cl100k_base', 'o200k_base']
         enc = tiktoken.get_encoding("gpt2")
         tokens = enc.encode(user_content)
         used_tokens = len(tokens)
         model_version = model # just only tts-1
 
-        # Получить список всех зарегистрированных кодировок  Available encodings: ['gpt2', 'r50k_base', 'p50k_base', 'p50k_edit', 'cl100k_base', 'o200k_base']
-        # available_encodings = tiktoken.list_encoding_names()
-        # print("Available encodings:", available_encodings)
-        print()
-        print(used_tokens)
-        print()
+        # Calculation of money spent on tokens
+        expenses = await calculation(username, model_version, used_tokens, input_data="text")
 
-        # # Calculation of money spent on minutes + sec
-        # expenses = await calculation(username, model_version, used_tokens, input_data="audio")
-
-        # return {"response":transcript, "expenses": expenses, "minutes": used_tokens / 60}
+        print(f"response: {speech_file_path}, expenses: {expenses}, minutes: {used_tokens}")
         return speech_file_path
 
 
@@ -58,4 +52,6 @@ async def speech_to_audio_openai(description):
 
 
 
-
+        # Получить список всех зарегистрированных кодировок  Available encodings: ['gpt2', 'r50k_base', 'p50k_base', 'p50k_edit', 'cl100k_base', 'o200k_base']
+        # available_encodings = tiktoken.list_encoding_names()
+        # print("Available encodings:", available_encodings)
