@@ -1,6 +1,7 @@
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
 from keys import API_KEY_OPENAI
 import aiofiles
+from general_functions import calculation, read_audio_file
 
 client = AsyncOpenAI(api_key=API_KEY_OPENAI)
 
@@ -24,24 +25,30 @@ async def transcription_openai(description, audio_path):
             file = file,
         )
 
-        return {"response":transcript} 
-
-
-
-
-        #length_of_audio = await read_audio_file(audio_path) # mp3 (ID3v1 и ID3v2), flac, ogg Vorbis, acc (and M4A), wav, wma (limited support), aiff
+        length_of_audio = await read_audio_file(audio_path)   # mp3 (ID3v1 и ID3v2), flac, ogg Vorbis, acc (and M4A), wav, wma (limited support), aiff
 
         # Statistic
-        #used_tokens = length_of_audio
-        #model_version = model # just only whisper-1
+        used_tokens = length_of_audio
+        model_version = model # just only whisper-1
         
         # Calculation of money spent on minutes + sec
-        #expenses = await calculation(username, model_version, used_tokens, input_data="audio")
+        expenses = await calculation(username, model_version, used_tokens, input_data="audio")
 
-    #print(transcript.words)
+        return {"response":transcript, "expenses": expenses, "minutes": used_tokens}
+
+
+
+
+
+
+
+
 
 
 '''
+
+
+
 Suport files Mutagen:
 
   - MP3 (ID3v1 и ID3v2)
@@ -51,6 +58,9 @@ Suport files Mutagen:
   - WAV
   - WMA (ограниченная поддержка)
   - AIFF
+
+  
+
 
 '''
 
