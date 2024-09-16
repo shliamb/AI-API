@@ -1,94 +1,77 @@
-from pathlib import Path
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
-# import aiofiles
-
 from keys import API_KEY_OPENAI
-
 import aiofiles
-import httpx
-import asyncio
-import io
-import requests
 
-import aiohttp
-from general_functions import encode_file
+client = AsyncOpenAI(api_key=API_KEY_OPENAI)
 
+async def transcription_openai(description, audio_path):
 
-from aiohttp import ClientSession, FormData
-
-# client = AsyncOpenAI(api_key=API_KEY_OPENAI)
-
-
-# async def transcription_openai(description, audio_path):
-
-#     username = description.get("username")
-#     prompt = description.get("prompt")
-#     language = description.get("language") # input language in ISO-639-1, will improve accuracy and latency - ru or en
-#     model = description.get("model", "whisper-1") # whisper-1 only now
-#     response_format = description.get("response_format", "text") # json, text, srt, verbose_json, or vtt
-
-#     # async with aiofiles.open(audio_path, "rb") as file:
-
-#         #content = file._file
-
-#     encoded_audio = await encode_file(audio_path)
-
-#     transcript = await client.audio.transcriptions.create(
-#         model = model,
-#         prompt = prompt,
-#         language = language,
-#         response_format = response_format,
-#         # timestamp_granularities=["word"],
-#         # timestamp_granularities=["segment"]
-#         file = encoded_audio
-#     )
-
-#     return transcript
-
-
-
-
-
-
-
-
-async def transcription_openai(description, audio_file_path):
     username = description.get("username")
     prompt = description.get("prompt")
-    language = description.get("language")  # input language in ISO-639-1
-    model = description.get("model", "whisper-1")  # whisper-1 only now
-    response_format = description.get("response_format", "text")  # json or text
+    language = description.get("language") # input language in ISO-639-1, will improve accuracy and latency - ru or en
+    model = description.get("model", "whisper-1") # whisper-1 only now
+    response_format = description.get("response_format", "text") # json, text, srt, verbose_json, or vtt
 
-    url = "https://api.openai.com/v1/audio/transcriptions"
+    async with aiofiles.open(audio_path, "rb") as file:
 
-    headers = {
-        "Authorization": f"Bearer {API_KEY_OPENAI}",
-    }
+        content = file._file
+
+        transcript = await client.audio.transcriptions.create(
+            model = model,
+            prompt = prompt,
+            language = language,
+            response_format = response_format,
+            # timestamp_granularities=["word"],
+            # timestamp_granularities=["segment"]
+            file = content
+        )
+
+        return transcript
 
 
-    async with ClientSession() as session:
-        async with aiofiles.open(audio_file_path, 'rb') as audio_file:
 
-            # Создаем объект FormData
-            form = FormData()
 
-            file_data = await audio_file.read()
-            # file_data = audio_file._file
 
-            # Добавляем дополнительные данные в FormData
-            form.add_field('file', file_data)
-            form.add_field('model', model)
-            # form.add_field('language', language)
-            # form.add_field('prompt', prompt)
-            # form.add_field('response_format', response_format)
 
-            async with session.post(url, headers=headers, data=form) as response:
-                #response_data = await response.json()
-                if response.status == 200:
-                    #return {"response": await response.text()}
-                    print(await response.text())
-                else:
-                    print("Error:", response.status, await response.text())
+
+
+# async def transcription_openai(description, audio_file_path):
+#     username = description.get("username")
+#     prompt = description.get("prompt")
+#     language = description.get("language")  # input language in ISO-639-1
+#     model = description.get("model", "whisper-1")  # whisper-1 only now
+#     response_format = description.get("response_format", "text")  # json or text
+
+#     url = "https://api.openai.com/v1/audio/transcriptions"
+
+#     headers = {
+#         "Authorization": f"Bearer {API_KEY_OPENAI}",
+#     }
+
+
+#     async with ClientSession() as session:
+#         async with aiofiles.open(audio_file_path, 'rb') as audio_file:
+
+#             # Создаем объект FormData
+#             form = FormData()
+
+#             # file_data = await audio_file.read() - не работае, хотя и асинхронный, он открывает фал и отдает чисто данные асинхронно, но так опенаи не принимает
+#             # file_data = audio_file._file - работает но не асинхронный вариант
+
+#             # Добавляем дополнительные данные в FormData
+#             form.add_field('file', file_data)
+#             form.add_field('model', model)
+#             # form.add_field('language', language)
+#             # form.add_field('prompt', prompt)
+#             # form.add_field('response_format', response_format)
+
+#             async with session.post(url, headers=headers, data=form) as response:
+#                 #response_data = await response.json()
+#                 if response.status == 200:
+#                     #return {"response": await response.text()}
+#                     print(await response.text())
+#                 else:
+#                     print("Error:", response.status, await response.text())
 
 
 
