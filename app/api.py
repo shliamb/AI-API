@@ -16,7 +16,7 @@ import uvicorn
 import gunicorn
 # Service
 from worker_db import get_user_by_username, update_user
-from general_functions import day_utcnow, unformat_date, remove_file_os, write_file
+from general_functions import day_utcnow, unformat_date, remove_file_os
 from mod_openai_main import mod_openai_text_img
 from mod_gemini_main import mod_gemini
 from mod_openai_gen_img import mod_gen_dall_e
@@ -164,7 +164,8 @@ async def openai_api(
     if image:
         # Save img to server
         image_path = f"./uploads/{image.filename}"
-        await write_file(image, image_path)
+        with open(image_path, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
     else:
         image_path = None
 
@@ -391,7 +392,8 @@ async def variations_dall_e_func(
 
     # Save img to server
     image_path = f"./uploads/{file.filename}"
-    await write_file(file, image_path)
+    with open(image_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
 
     # Collect data
     description = {
@@ -473,12 +475,14 @@ async def edit_dall_e_point(
 
     # Save img to server
     image_path = f"./uploads/{image.filename}"
-    await write_file(image, image_path)
+    with open(image_path, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
 
     if mask:
         # Save mask to server
         mask_path = f"./uploads/{mask.filename}"
-        await write_file(mask, mask_path)
+        with open(mask_path, "wb") as buffer:
+            shutil.copyfileobj(mask.file, buffer)
     else:
         mask_path = None
 
@@ -618,7 +622,6 @@ async def point_transcription_openai(
         audio_path = f"./uploads/{audio.filename}"
         with open(audio_path, "wb") as buffer:
             shutil.copyfileobj(audio.file, buffer)
-        #await write_file(audio, audio_path)
     else:
         audio_path = None
 
@@ -630,6 +633,16 @@ async def point_transcription_openai(
         remove = await remove_file_os(audio_path)
 
     return confirm_openai
+
+
+# audio_path = f"./uploads/{audio.filename}"
+    
+#     # Используем aiofiles для асинхронной записи файла
+#     async with aiofiles.open(audio_path, "wb") as buffer:
+#         while content := await audio.read(1024):  # Читаем файл порциями по 1024 байта
+#             await buffer.write(content)
+    
+#     return {"filename": audio.filename}
 
 
 
@@ -684,7 +697,8 @@ async def gemini_api(
     if file:
         # Save file to server
         file_path = f"./uploads/{file.filename}"
-        await write_file(file, file_path)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
     else:
         file_path = None
 
