@@ -16,6 +16,8 @@ async def transcription_openai(description, audio_path):
     # with open(audio_path, "rb") as file:
     audio_file = open(audio_path, "rb")
 
+    print(audio_file)
+
     transcript = await client.audio.transcriptions.create(
         file = audio_file,
         model = model,

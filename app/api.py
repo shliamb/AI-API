@@ -616,7 +616,9 @@ async def point_transcription_openai(
     if audio:
         # Save audio to server
         audio_path = f"./uploads/{audio.filename}"
-        await write_file(audio, audio_path)
+        with open(audio_path, "wb") as buffer:
+            shutil.copyfileobj(audio.file, buffer)
+        #await write_file(audio, audio_path)
     else:
         audio_path = None
 
