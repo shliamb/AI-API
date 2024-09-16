@@ -72,8 +72,13 @@ async def transcription_openai(description, audio_file_path):
 
     with open(audio_file_path, 'rb') as audio_file: # Открываем файл в бинарном режиме
 
+
+
+        # content = await file.read()
+        file_like_object = io.BytesIO(audio_file)
+
         files = {
-            'file': audio_file,
+            'file': file_like_object, #audio_file,
         }
 
         data = {
@@ -81,15 +86,11 @@ async def transcription_openai(description, audio_file_path):
             "language": language,
             "prompt": prompt,
             "response_format": response_format,
-
         }
 
         response = requests.post(url, headers=headers, files=files, data=data)
 
         if response.status_code == 200:
-            #print("Transcription:", response.json())
-            # print(type(response.json()))
-            # print(type(response.text))
             return {"response": response.text}
         else:
             print("Error:", response.status_code, response.text)
@@ -129,8 +130,8 @@ async def transcription_openai(description, audio_file_path):
 
 
 
-if __name__ == "__main__":
-    asyncio.run(transcription_openai())
+# if __name__ == "__main__":
+#     asyncio.run(transcription_openai())
 
 
 
