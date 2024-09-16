@@ -1,13 +1,10 @@
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
 from keys import API_KEY_OPENAI
 import aiofiles
-from general_functions import read_audio_file, calculation
 
 client = AsyncOpenAI(api_key=API_KEY_OPENAI)
 
 async def transcription_openai(description, audio_path):
-
-    print(audio_path)
 
     username = description.get("username")
     prompt = description.get("prompt")
@@ -15,18 +12,22 @@ async def transcription_openai(description, audio_path):
     model = description.get("model", "whisper-1") # whisper-1 only now
     response_format = description.get("response_format", "text") # json, text, srt, verbose_json, or vtt
 
-    # with open(audio_path, "rb") as file:
-    audio_file = open(audio_path, "rb")
+    with open(audio_path, "rb") as file:
 
-    print(audio_file)
+        transcript = await client.audio.transcriptions.create(
+            model = model,
+            prompt = prompt,
+            language = language,
+            response_format = response_format,
+            # timestamp_granularities=["word"],
+            # timestamp_granularities=["segment"]
+            file = file,
+        )
 
-    transcript = await client.audio.transcriptions.create(
-        file = audio_file,
-        model = model,
-        prompt = prompt,
-        language = language,
-        response_format = response_format,
-    )
+        return {"response":transcript} 
+
+
+
 
         #length_of_audio = await read_audio_file(audio_path) # mp3 (ID3v1 и ID3v2), flac, ogg Vorbis, acc (and M4A), wav, wma (limited support), aiff
 
@@ -38,11 +39,6 @@ async def transcription_openai(description, audio_path):
         #expenses = await calculation(username, model_version, used_tokens, input_data="audio")
 
     #print(transcript.words)
-    return {"response": transcript}#, "expenses": expenses, "minutes": length_of_audio}
-
-
-
-
 
 
 '''
