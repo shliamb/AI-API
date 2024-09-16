@@ -85,11 +85,12 @@ async def transcription_openai(description, audio_file_path):
 
         response = requests.post(url, headers=headers, files=files, data=data)
 
+        # Обработка ответа
         if response.status_code == 200:
-            print("Transcription:", response.json())
-            return response # .json()
+            print(response.json())
+            return response
         else:
-            print("Error:", response.status_code, response.text)
+            raise Exception(f"Error {response.status_code}: {response.text}")
 
 
 
@@ -125,8 +126,8 @@ async def transcription_openai(description, audio_file_path):
 
 
 
-if __name__ == "__main__":
-    asyncio.run(transcription_openai())
+# if __name__ == "__main__":
+#     asyncio.run(transcription_openai())
 
 
 
