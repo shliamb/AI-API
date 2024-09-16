@@ -7,6 +7,7 @@ from keys import API_KEY_OPENAI
 import aiofiles
 import httpx
 import asyncio
+import io
 
 
 
@@ -21,7 +22,10 @@ async def transcription_openai(description, audio_path):
     model = description.get("model", "whisper-1") # whisper-1 only now
     response_format = description.get("response_format", "text") # json, text, srt, verbose_json, or vtt
 
-    async with aiofiles.open(audio_path, "rb") as content:
+    async with aiofiles.open(audio_path, "rb") as file:
+
+        content = await file.read()
+        # file_like_object = io.BytesIO(content)
 
         transcript = await client.audio.transcriptions.create(
             model = model,
