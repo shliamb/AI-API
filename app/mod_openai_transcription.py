@@ -10,6 +10,9 @@ import asyncio
 import io
 import requests
 
+import aiohttp
+
+
 
 
 
@@ -41,15 +44,16 @@ async def transcription_openai(description, audio_file_path):
         }
         
 
-        # Выполнение POST-запроса
-        response = requests.post(url, headers=headers, files=files)
 
-        
-        # Обработка ответа
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise Exception(f"Error {response.status_code}: {response.text}")
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=headers, files=files) as response:
+            response = await response.json()
+
+            # Обработка ответа
+            if response.status_code == 200:
+                return response.json()
+            else:
+                raise Exception(f"Error {response.status_code}: {response.text}")
 
 
 if __name__ == "__main__":
