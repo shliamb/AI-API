@@ -112,3 +112,12 @@ async def encode_file(file_path):
   async with aiofiles.open(file_path, "rb") as file:
     content = await file.read()
     return base64.b64encode(content).decode('utf-8')
+  
+# Async save file
+async def write_file(file, file_path):
+    async with aiofiles.open(file_path, "wb") as buffer:
+        while content := await file.read(1024):  # Читаем файл порциями по 1024 байта
+            await buffer.write(content)
+
+# with open(audio_path, "wb") as buffer:
+#     shutil.copyfileobj(audio.file, buffer)

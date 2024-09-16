@@ -16,7 +16,7 @@ import uvicorn
 import gunicorn
 # Service
 from worker_db import get_user_by_username, update_user
-from general_functions import day_utcnow, unformat_date, remove_file_os
+from general_functions import day_utcnow, unformat_date, remove_file_os, write_file
 from mod_openai_main import mod_openai_text_img
 from mod_gemini_main import mod_gemini
 from mod_openai_gen_img import mod_gen_dall_e
@@ -620,10 +620,12 @@ async def point_transcription_openai(
     if audio:
         # Save audio to server
         audio_path = f"./uploads/{audio.filename}"
-        
-        async with aiofiles.open(audio_path, "wb") as buffer:
-            while content := await audio.read(1024):  # Читаем файл порциями по 1024 байта
-                await buffer.write(content)
+
+
+        await write_file(audio, audio_path)
+        # async with aiofiles.open(audio_path, "wb") as buffer:
+        #     while content := await audio.read(1024):  # Читаем файл порциями по 1024 байта
+        #         await buffer.write(content)
         # with open(audio_path, "wb") as buffer:
         #     shutil.copyfileobj(audio.file, buffer)
     else:
