@@ -25,15 +25,26 @@ async def speech_to_audio_openai(description):
         input = user_content
     )
 
+    print()
+    print(response)
+    print()
+
     speech_file_path = Path('./audio/speech.mp3')
     
     async with aiofiles.open(speech_file_path, 'wb') as audio_file:
         await audio_file.write(response.content)
 
-    return speech_file_path
+        return speech_file_path
 
 
+        # # Statistic
+        # used_tokens = length_of_audio
+        # model_version = model # just only whisper-1
+        
+        # # Calculation of money spent on minutes + sec
+        # expenses = await calculation(username, model_version, used_tokens, input_data="audio")
 
+        # return {"response":transcript, "expenses": expenses, "minutes": used_tokens / 60}
 
 
 

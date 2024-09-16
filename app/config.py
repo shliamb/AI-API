@@ -43,8 +43,8 @@ price = {
     'dall-e-2-256': 0.032,
 
     # Audio to 1M characters:
-    'tts-1': 30,
-    'tts-1-hd': 60,
+    'tts-1': 30, # / 1M characters
+    'tts-1-hd': 60, # / 1M characters
     'whisper-1': 0.012, # minute (rounded to the nearest second)
 
     # Google Gemini to 1M tokens:

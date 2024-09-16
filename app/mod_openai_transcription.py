@@ -34,7 +34,7 @@ async def transcription_openai(description, audio_path):
         # Calculation of money spent on minutes + sec
         expenses = await calculation(username, model_version, used_tokens, input_data="audio")
 
-        return {"response":transcript, "expenses": expenses, "minutes": used_tokens}
+        return {"response":transcript, "expenses": expenses, "minutes": used_tokens / 60}
 
 
 

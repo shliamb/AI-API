@@ -638,15 +638,6 @@ async def point_transcription_openai(
     return confirm_openai
 
 
-# audio_path = f"./uploads/{audio.filename}"
-    
-#     # Используем aiofiles для асинхронной записи файла
-#     async with aiofiles.open(audio_path, "wb") as buffer:
-#         while content := await audio.read(1024):  # Читаем файл порциями по 1024 байта
-#             await buffer.write(content)
-    
-#     return {"filename": audio.filename}
-
 
 
 ####
