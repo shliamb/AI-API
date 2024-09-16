@@ -33,29 +33,47 @@ async def transcription_openai(description, audio_file_path):
         #"Content-Type": "multipart/form-data"
     }
 
+    async with aiohttp.ClientSession() as session:
+        with open(audio_file_path, 'rb') as f:
+            data = aiohttp.FormData()
+            data.add_field('file', f)
+            data.add_field('model', model)  # Добавляем описание
+
+            async with session.post(url, headers=headers, data=data) as response:
+                result = await response.json()
+                return result
+
+
+
+
+
+
+
+
+
     #with open(audio_file_path, 'rb') as audio_file:
 
         #file_content = await audio_file.read()
         
         # Подготовка данных для отправки
-    file = {
-        'file': open(audio_file_path, 'rb'),
-        'model': (None, model)
-    }
+    # data = {
+    #     'file': open(audio_file_path, 'rb'),
+    #     'model': (None, model)
+    # }
         
 
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, headers=headers, data=file) as response:
-            response = await response.json()
+    # async with aiohttp.ClientSession() as session:
+    #     async with session.post(url, headers=headers, data=data) as response:
+    #         response = await response.json()
 
-            # Обработка ответа
-            if response.status_code == 200:
-                file['file'].close()
-                return response.json()
-            else:
-                file['file'].close()
-                raise Exception(f"Error {response.status_code}: {response.text}")
+    #         # Обработка ответа
+    #         if response.status_code == 200:
+    #             file['file'].close()
+    #             return response.json()
+    #         else:
+    #             file['file'].close()
+    #             raise Exception(f"Error {response.status_code}: {response.text}")
 
 
 if __name__ == "__main__":
