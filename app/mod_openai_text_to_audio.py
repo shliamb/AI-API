@@ -26,7 +26,9 @@ async def speech_to_audio_openai(description):
     )
 
     print()
-    print(used_tokens = response.usage.total_tokens)
+    #print(used_tokens = response.usage.total_tokens)
+    response_json = response.json()
+    print(response_json)
     print()
 
     speech_file_path = Path('./audio/speech.mp3')
