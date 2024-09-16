@@ -29,20 +29,20 @@ async def transcription_openai(description, audio_path):
 
         content = file._file
 
-        print()
-        print(content)
+        # print()
+        # print(content)
 
-        # transcript = await client.audio.transcriptions.create(
-        #     model = model,
-        #     prompt = prompt,
-        #     language = language,
-        #     response_format = response_format,
-        #     # timestamp_granularities=["word"],
-        #     # timestamp_granularities=["segment"]
-        #     file = content
-        # )
+        transcript = await client.audio.transcriptions.create(
+            model = model,
+            prompt = prompt,
+            language = language,
+            response_format = response_format,
+            # timestamp_granularities=["word"],
+            # timestamp_granularities=["segment"]
+            file = content
+        )
 
-    return # transcript
+    return transcript
 
 
 
