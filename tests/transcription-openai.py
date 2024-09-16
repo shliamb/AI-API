@@ -16,7 +16,6 @@ headers = {
     'appkey': '72d3d8e8-74c4-4ff6-9033-91e8670b3708',
 }
 
-
 with open('./audio/in_audio.ogg', 'rb') as f:
     file = {
         'audio': ('in_audio.ogg', f)
