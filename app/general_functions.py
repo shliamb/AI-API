@@ -43,7 +43,7 @@ async def calculation(username, model_version, used_tokens, input_data):
                 one_tok_price = value
                 break
             elif input_data == "audio":
-                one_tok_price = value
+                one_tok_price = value / 60 # Price 1 min
                 break
         
     if one_tok_price == None:
