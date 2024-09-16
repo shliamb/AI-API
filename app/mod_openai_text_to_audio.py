@@ -1,6 +1,7 @@
 from pathlib import Path
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
 import aiofiles
+import tiktoken
 
 from keys import API_KEY_OPENAI
 
@@ -25,29 +26,24 @@ async def speech_to_audio_openai(description):
         input = user_content
     )
 
-    # print()
-    # #print(used_tokens = response.usage.total_tokens)
-    # response_json = response.json()
-    # print(response_json)
-    # print()
-
     speech_file_path = Path('./audio/speech.mp3')
     
     async with aiofiles.open(speech_file_path, 'wb') as audio_file:
         await audio_file.write(response.content)
 
-        return speech_file_path
+        # Statistic
+        enc = tiktoken.get_encoding(model)
+        tokens = enc.encode(user_content)
+        used_tokens = len(tokens)
+        model_version = model # just only whisper-1
 
+        print(used_tokens)
 
-        # # Statistic
-        # used_tokens = length_of_audio
-        # model_version = model # just only whisper-1
-        
         # # Calculation of money spent on minutes + sec
         # expenses = await calculation(username, model_version, used_tokens, input_data="audio")
 
         # return {"response":transcript, "expenses": expenses, "minutes": used_tokens / 60}
-
+        return speech_file_path
 
 
 
