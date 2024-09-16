@@ -72,22 +72,27 @@ async def transcription_openai(description, audio_file_path):
     }
 
 
-    files = {
-        'file': open(audio_file_path, 'rb'),  # Открываем файл в бинарном режиме
-        'model': model,
-    }
+    # Открываем файл в бинарном режиме
+    with open(audio_file_path, 'rb') as audio_file:
 
-    # Выполнение POST-запроса
-    response = requests.post(url, headers=headers, files=files)
+        files = {
+            'file': audio_file,
+        }
 
-    # Закрытие файла после отправки запроса
-    files['file'].close()
+        # Добавляем параметры формы (data)
+        data = {
+            'model': model,
+        }
 
-    # Обработка ответа
-    if response.status_code == 200:
-        print("Transcription:", response.json())
-    else:
-        print("Error:", response.status_code, response.text)
+        # Выполнение POST-запроса
+        response = requests.post(url, headers=headers, files=files, data=data)
+
+
+        # Обработка ответа
+        if response.status_code == 200:
+            print("Transcription:", response.json())
+        else:
+            print("Error:", response.status_code, response.text)
 
 
 
