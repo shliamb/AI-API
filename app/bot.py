@@ -169,8 +169,8 @@ async def main_menu(message: types.Message):
         "<b>MAIN MENU:</b> \n\n"
         "/my_key - View your API key\n\n"
         "/balance - View your account balance\n\n"
-        "/add_money - Add $ to your account*\n\n"
-        "/get_stat - Get statistics*\n\n"
+        "/add_money - Add $ to your account\n\n"
+        "/get_stat - Get statistics\n\n"
         "/reset_key - Change the API key\n\n"
         "/help - Learn more about the API\n\n"
         , parse_mode="HTML")
