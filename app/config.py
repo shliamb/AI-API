@@ -5,10 +5,11 @@ limit_trying = 5
 timeout_after_error_username = 5 # sec.
 waiting_time = 15 # min/
 time_correction = +3 # Moscow
-money_to_start = 1 # 1$ to start work
+money_to_start = 0.5 # 1$ to start work
 my_app_key = "appkey" # Key to API Key
 min_pay = 1 # Minimum pay
 ai_default_model = "gpt-4o-mini-2024-07-18"
+uploads = "./uploads/"
 
 
 

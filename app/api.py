@@ -16,7 +16,7 @@ import uvicorn
 import gunicorn
 # Service
 from worker_db import get_user_by_username, update_user
-from general_functions import day_utcnow, unformat_date, remove_file_os
+from general_functions import day_utcnow, unformat_date, remove_file_os, random_name_2X, encode_file
 from mod_openai_main import mod_openai_text_img
 from mod_gemini_main import mod_gemini
 from mod_openai_gen_img import mod_gen_dall_e
@@ -24,10 +24,8 @@ from mod_openai_edit_img import mod_edit_dall_e
 from mod_openai_varions_img import variations_dall_e
 from mod_openai_text_to_audio import speech_to_audio_openai
 from mod_openai_transcription import transcription_openai
-from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price
+from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price, uploads
 
-#import base64
-from general_functions import encode_file
 
 
 app = FastAPI()
@@ -631,7 +629,8 @@ async def point_transcription_openai(
 
     if audio:
         # Save audio to server
-        audio_path = f"./uploads/{audio.filename}"
+        name = random_name_2X()
+        audio_path = f"{uploads}{name}-{audio.filename}"
         async with aiofiles.open(audio_path, "wb") as buffer:
             while content := await audio.read(1024):  # Читаем файл порциями по 1024 байта
                 await buffer.write(content)
@@ -639,6 +638,8 @@ async def point_transcription_openai(
         #     shutil.copyfileobj(audio.file, buffer)
     else:
         audio_path = None
+
+    print(audio_path)
 
     # Working with OpenAI
     confirm_openai = await transcription_openai(description, audio_path)

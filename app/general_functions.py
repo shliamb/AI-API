@@ -1,5 +1,7 @@
 from datetime import datetime, timezone, timedelta
 import logging
+import random
+import string
 import os
 import re
 import base64
@@ -146,3 +148,14 @@ async def read_audio_file(file_path: str) -> float: # mp3 (ID3v1 и ID3v2), flac
                 length_sound = float(f"{duration:.2f}")
                 return length_sound
 
+
+# Random name to file:
+def random_name() -> str:
+    random_num = str(random.randint(11, 98))
+    random_letters = string.ascii_lowercase + string.ascii_uppercase
+    text = random.choice(random_letters) + random_num
+    return text
+
+def random_name_2X() -> str:
+    name = f"{random_name()}-{random_name()}"
+    return name
