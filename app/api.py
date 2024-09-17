@@ -24,6 +24,7 @@ from mod_openai_edit_img import mod_edit_dall_e
 from mod_openai_varions_img import variations_dall_e
 from mod_openai_text_to_audio import speech_to_audio_openai
 from mod_openai_transcription import transcription_openai
+from mod_openai_translation import translation_openai
 from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price, uploads
 
 
@@ -651,6 +652,61 @@ async def point_transcription_openai(
         remove = await remove_file_os(audio_path)
 
     return confirm_openai
+
+
+# Create translation into English OPENAI Endpoint:
+@app.post("/api/translation-openai/", status_code=status.HTTP_200_OK)
+async def point_translation_openai(
+    username: str = Form(...),                      # !
+    model: str = Form(None),                        # Only whisper-1 is free code
+    response_format: str = Form(None),              # output format json, text, srt, verbose_json, or vtt.
+    prompt: str = Form(None),                       # in English
+    appkey: str = Header(...),                      # !
+    audio: Optional[UploadFile] = File(),           # ! flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav или webm. In Telegram ogg.
+):
+
+    # Choosing a price list.
+    if not model:
+        model = "whisper-1"
+
+    # Verify user and her appkey
+    confirm_verify = await verify_user_appkey(username, model, appkey)
+    if confirm_verify["status_code"] != status.HTTP_200_OK:
+        return confirm_verify
+
+    # Collect data
+    description = {
+        "username": username,
+    }
+    
+    if model:
+        description["model"] = model
+    if response_format:
+        description["response_format"] = response_format
+    if prompt:
+        description["prompt"] = prompt
+
+    if audio:
+        # Save audio to server
+        name = random_name_2X()
+        audio_path = f"{uploads}{name}-{audio.filename}" # ./uploads/I34-t47-in_audio_2.ogg
+        async with aiofiles.open(audio_path, "wb") as buffer:
+            while content := await audio.read(1024):  # Читаем файл порциями по 1024 байта
+                await buffer.write(content)
+    else:
+        audio_path = None
+
+    # Working with OpenAI
+    confirm_openai = await translation_openai(description, audio_path)
+
+    # Remove file
+    if audio_path:
+        remove = await remove_file_os(audio_path)
+
+    return confirm_openai
+
+
+
 
 
 

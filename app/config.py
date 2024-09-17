@@ -9,6 +9,7 @@ money_to_start = 0.5 # 1$ to start work
 my_app_key = "appkey" # Key to API Key
 min_pay = 1 # Minimum pay
 ai_default_model = "gpt-4o-mini-2024-07-18"
+# Folders:
 uploads = "./uploads/"
 audio_folder = "./audio/"
 
