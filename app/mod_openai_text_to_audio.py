@@ -41,7 +41,7 @@ async def speech_to_audio_openai(description):
         # Calculation of money spent on tokens
         expenses = await calculation(username, model_version, used_tokens, input_data="text")
 
-        print(f"response: {speech_file_path}, expenses: {expenses}, minutes: {used_tokens}")
+        # print(f"response: {speech_file_path}, expenses: {expenses}, minutes: {used_tokens}")
         return speech_file_path
 
 

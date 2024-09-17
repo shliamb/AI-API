@@ -6,7 +6,7 @@ import aiofiles
 # from pydantic import BaseModel
 from typing import Optional
 # import os
-import shutil
+# import shutil
 # import requests
 # Fasapi
 from fastapi import FastAPI, Header, Depends, HTTPException, status, UploadFile, File, Form
@@ -164,8 +164,11 @@ async def openai_api(
     if image:
         # Save img to server
         image_path = f"./uploads/{image.filename}"
-        with open(image_path, "wb") as buffer:
-            shutil.copyfileobj(image.file, buffer)
+        async with aiofiles.open(image_path, "wb") as buffer:
+            while content := await image.read(1024):  # Читаем файл порциями по 1024 байта
+                await buffer.write(content)
+        # with open(image_path, "wb") as buffer:
+        #     shutil.copyfileobj(image.file, buffer)
     else:
         image_path = None
 
@@ -392,8 +395,11 @@ async def variations_dall_e_func(
 
     # Save img to server
     image_path = f"./uploads/{file.filename}"
-    with open(image_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    async with aiofiles.open(image_path, "wb") as buffer:
+        while content := await file.read(1024):  # Читаем файл порциями по 1024 байта
+            await buffer.write(content)
+    # with open(image_path, "wb") as buffer:
+    #     shutil.copyfileobj(file.file, buffer)
 
     # Collect data
     description = {
@@ -475,14 +481,20 @@ async def edit_dall_e_point(
 
     # Save img to server
     image_path = f"./uploads/{image.filename}"
-    with open(image_path, "wb") as buffer:
-        shutil.copyfileobj(image.file, buffer)
+    async with aiofiles.open(image_path, "wb") as buffer:
+        while content := await image.read(1024):  # Читаем файл порциями по 1024 байта
+            await buffer.write(content)
+    # with open(image_path, "wb") as buffer:
+    #     shutil.copyfileobj(image.file, buffer)
 
     if mask:
         # Save mask to server
         mask_path = f"./uploads/{mask.filename}"
-        with open(mask_path, "wb") as buffer:
-            shutil.copyfileobj(mask.file, buffer)
+        async with aiofiles.open(mask_path, "wb") as buffer:
+            while content := await mask.read(1024):  # Читаем файл порциями по 1024 байта
+                await buffer.write(content)
+        # with open(mask_path, "wb") as buffer:
+        #     shutil.copyfileobj(mask.file, buffer)
     else:
         mask_path = None
 
@@ -691,8 +703,11 @@ async def gemini_api(
     if file:
         # Save file to server
         file_path = f"./uploads/{file.filename}"
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        async with aiofiles.open(file_path, "wb") as buffer:
+            while content := await file.read(1024):  # Читаем файл порциями по 1024 байта
+                await buffer.write(content)
+        # with open(file_path, "wb") as buffer:
+        #     shutil.copyfileobj(file.file, buffer)
     else:
         file_path = None
 
