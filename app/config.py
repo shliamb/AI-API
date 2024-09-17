@@ -10,6 +10,7 @@ my_app_key = "appkey" # Key to API Key
 min_pay = 1 # Minimum pay
 ai_default_model = "gpt-4o-mini-2024-07-18"
 uploads = "./uploads/"
+audio_folder = "./audio/"
 
 
 

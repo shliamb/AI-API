@@ -1,8 +1,9 @@
-from pathlib import Path
+# from pathlib import Path
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
 import aiofiles
 import tiktoken
-from general_functions import calculation
+from general_functions import calculation, random_name_2X
+from config import audio_folder
 
 from keys import API_KEY_OPENAI
 
@@ -27,7 +28,8 @@ async def speech_to_audio_openai(description):
         input = user_content
     )
 
-    speech_file_path = Path('./audio/speech.mp3')
+    name = random_name_2X()
+    speech_file_path = f"{audio_folder}{name}-audio.{response_format}" # speech_file_path = Path('./audio/speech.mp3')
     
     async with aiofiles.open(speech_file_path, 'wb') as audio_file:
         await audio_file.write(response.content)

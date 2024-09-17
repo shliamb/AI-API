@@ -161,7 +161,8 @@ async def openai_api(
 
     if image:
         # Save img to server
-        image_path = f"./uploads/{image.filename}"
+        name = random_name_2X()
+        image_path = f"{uploads}{name}-{image.filename}"
         async with aiofiles.open(image_path, "wb") as buffer:
             while content := await image.read(1024):  # Читаем файл порциями по 1024 байта
                 await buffer.write(content)
@@ -392,7 +393,8 @@ async def variations_dall_e_func(
         return confirm_verify
 
     # Save img to server
-    image_path = f"./uploads/{file.filename}"
+    name = random_name_2X()
+    image_path = f"{uploads}{name}-{file.filename}"
     async with aiofiles.open(image_path, "wb") as buffer:
         while content := await file.read(1024):  # Читаем файл порциями по 1024 байта
             await buffer.write(content)
@@ -478,7 +480,8 @@ async def edit_dall_e_point(
         return confirm_verify
 
     # Save img to server
-    image_path = f"./uploads/{image.filename}"
+    name = random_name_2X()
+    image_path = f"{uploads}{name}-{image.filename}"
     async with aiofiles.open(image_path, "wb") as buffer:
         while content := await image.read(1024):  # Читаем файл порциями по 1024 байта
             await buffer.write(content)
@@ -487,7 +490,8 @@ async def edit_dall_e_point(
 
     if mask:
         # Save mask to server
-        mask_path = f"./uploads/{mask.filename}"
+        name = random_name_2X()
+        mask_path = f"{uploads}{name}-{mask.filename}"
         async with aiofiles.open(mask_path, "wb") as buffer:
             while content := await mask.read(1024):  # Читаем файл порциями по 1024 байта
                 await buffer.write(content)
@@ -630,7 +634,7 @@ async def point_transcription_openai(
     if audio:
         # Save audio to server
         name = random_name_2X()
-        audio_path = f"{uploads}{name}-{audio.filename}"
+        audio_path = f"{uploads}{name}-{audio.filename}" # ./uploads/I34-t47-in_audio_2.ogg
         async with aiofiles.open(audio_path, "wb") as buffer:
             while content := await audio.read(1024):  # Читаем файл порциями по 1024 байта
                 await buffer.write(content)
@@ -638,8 +642,6 @@ async def point_transcription_openai(
         #     shutil.copyfileobj(audio.file, buffer)
     else:
         audio_path = None
-
-    print(audio_path)
 
     # Working with OpenAI
     confirm_openai = await transcription_openai(description, audio_path)
@@ -703,7 +705,8 @@ async def gemini_api(
 
     if file:
         # Save file to server
-        file_path = f"./uploads/{file.filename}"
+        name = random_name_2X()
+        file_path = f"{uploads}{name}-{file.filename}"
         async with aiofiles.open(file_path, "wb") as buffer:
             while content := await file.read(1024):  # Читаем файл порциями по 1024 байта
                 await buffer.write(content)
