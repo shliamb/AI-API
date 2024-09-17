@@ -59,15 +59,14 @@ async def gen_username(about):
 
 
 
-
+# Надо сделать:
 
 # Очистка базы - два варианта, от клиентов мертвых (просто помечать, так как удалив их, они смогут вновь использовать деньги в подарок), от старой статистики
 # Восстановление базы
-# Ключ от Gemini получил, теперь ее тоже можно прикрутить и попробовать.
 # Передача сигнала телеграмм боту, администратору
-
-# Косяк в том, что, если пользователь поменяет название модели, так что бы ее не было в прайсе, то деньги не спишутся..
-
+# При окончании средств, можно что бы бот оправлял именно пользователю сообщение
+# Сделать в админ, возможность редактировать способ оплаты
+# В оплате что то придумать с курсом доллара, где его брать и каким он должен быть.
 
 
 
@@ -143,14 +142,14 @@ async def command_start_handler(message: Message) -> None:
                 "Use the following keys to use the API:\n\n"
                 "<b>Username:</b>\n"
                 f"Username: <code>{is_on_user.username}</code>\n"
-                "Add to: <i>Json</i>\n"
+                "Add to: <i>Form-data</i>\n"
                 "\n"
                 "<b>API Key:</b>\n"
                 f"Key: <code>{my_app_key}</code>\n"
                 f"Value: <code>{is_on_user.appkey}</code>\n"
                 "Add to: <i>Header</i>\n"
-                "\n"
-                "If you are inactive for a long time, the user will be deleted from the database. You will be able to register again after.\n"
+                #"\n"
+                #"If you are inactive for a long time, the user will be deleted from the database. You will be able to register again after.\n"
                 "\n"
                 f"You have <b>{is_on_user.money}</b> $ to your balance.\n"
                 "\n"
@@ -189,14 +188,14 @@ async def my_key(message: types.Message):
         "Use the following keys to use the API:\n\n"
         "<b>Username:</b>\n"
         f"Username: <code>{data.username}</code>\n"
-        "Add to: <i>Json</i>\n"
+        "Add to: <i>Form-data</i>\n"
         "\n"
         "<b>API Key:</b>\n"
         f"Key: <code>{my_app_key}</code>\n"
         f"Value: <code>{data.appkey}</code>\n"
         "Add to: <i>Header</i>\n"
-        "\n"
-        "If you are inactive for a long time, the user will be deleted from the database. You will be able to register again after.\n"
+        #"\n"
+        # "If you are inactive for a long time, the user will be deleted from the database. You will be able to register again after.\n"
         "\n"
         f"You have <b>{data.money}</b> $ to your balance.\n"
         "\n"
@@ -205,6 +204,9 @@ async def my_key(message: types.Message):
             )
             
     await message.answer(text_get_key, parse_mode="HTML")
+
+
+
 
 
 #### Push /balance ####
@@ -233,7 +235,7 @@ async def add_money(message: types.Message, state: FSMContext):
     # await bot.send_chat_action(message.chat.id, action='typing')
     # id = user_id(message)
     # data = await get_user_by_id(id)
-    #await message.answer(f"Your Balance is {data.money} $", parse_mode="HTML")
+    # await message.answer(f"Your Balance is {data.money} $", parse_mode="HTML")
 
     await message.answer("Enter the deposit amount in USD:", reply_markup=ReplyKeyboardRemove())
 
@@ -329,7 +331,7 @@ async def get_stat_user(message: types.Message):
 
     all_static = []
     number = 0
-    all_static.append(["№", "№", "username_table_stat", "time", "use_model", "sesion_token/img", "price_1_tok/img", "total_price", "id telegram"]) # First a names row
+    all_static.append(["№", "№", "username table stat", "time", "use model", "sesion token/img/min", "price 1 tok/img/min", "total_price", "id telegram"]) # First a names row
     
     for it in data:
         number += 1
@@ -386,7 +388,7 @@ async def reset_key(message: types.Message):
 @dp.message(Command("help"))
 async def help(message: types.Message):
     await bot.send_chat_action(message.chat.id, action='typing')
-    await message.answer(f"There will be instructions for working with the API", parse_mode="HTML")
+    await message.answer(f"Description and instructions are here - https://github.com/shliamb/AI-API-instruction", parse_mode="HTML")
 
 
 
@@ -410,10 +412,10 @@ async def admin(message: types.Message):
         "<b>ADMIN MENU:</b> \n\n"
         "/backup - Make a backup of the database\n\n"
         "/admin_stat \n\n"
-        "/get_log \n\n"
-        "/clear_log \n\n"
+        "/get_logs \n\n"
         "clear \n"
         "   │ \n"
+        "   ├── /clear_logs - Deleting logs \n"
         "   ├── /clear_old_users - Deleting old users* \n"
         "   └── /clear_db - Cleaning up old DB data* \n\n"
         "/restore_db - Restoring a DB from a file*\n\n"
@@ -503,26 +505,39 @@ async def get_admin_stat(message: types.Message):
 
 
 # Admin submenu download log
-@dp.message(Command("get_log"))
+@dp.message(Command("get_logs"))
 async def admin_get_log(message: types.Message):
 
-    if os.path.exists("./log/app.log") and os.path.getsize("./log/app.log") > 0:
-        await bot.send_document(message.chat.id, document=types.input_file.FSInputFile("./log/app.log"))
+    if os.path.exists("./log/bot.log") and os.path.getsize("./log/bot.log") > 0:
+        await bot.send_document(message.chat.id, document=types.input_file.FSInputFile("./log/bot.log"))
     else:
-        await bot.send_message(message.chat.id, "The app.log file is empty or missing.")
+        await bot.send_message(message.chat.id, "The bot.log file is empty or missing.")
+
+    if os.path.exists("./log/api.log") and os.path.getsize("./log/api.log") > 0:
+        await bot.send_document(message.chat.id, document=types.input_file.FSInputFile("./log/api.log"))
+    else:
+        await bot.send_message(message.chat.id, "The api.log file is empty or missing.")
 
 
-# Admin clear log /clearlog
-@dp.message(Command("clear_log"))
+# Admin clear logs /clearlog
+@dp.message(Command("clear_logs"))
 async def admin_clear_log(message: types.Message):
 
-    if os.path.exists("./log/app.log") and os.path.getsize("./log/app.log") > 0:
+    if os.path.exists("./log/bot.log") and os.path.getsize("./log/bot.log") > 0:
 
-        with open("./log/app.log", 'w'):
+        with open("./log/bot.log", 'w'):
             pass
-        await bot.send_message(message.chat.id, "The app.log file has been cleared successfully.")
+        await bot.send_message(message.chat.id, "The bot.log file has been cleared successfully.")
     else:
-        await bot.send_message(message.chat.id, "The app.log file is empty or missing.")
+        await bot.send_message(message.chat.id, "The bot.log file is empty or missing.")
+
+    if os.path.exists("./log/api.log") and os.path.getsize("./log/api.log") > 0:
+
+        with open("./log/api.log", 'w'):
+            pass
+        await bot.send_message(message.chat.id, "The api.log file has been cleared successfully.")
+    else:
+        await bot.send_message(message.chat.id, "The api.log file is empty or missing.")
 
 
 # Admin Clear Old Users
