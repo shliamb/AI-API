@@ -4,16 +4,16 @@ import base64
 url = "http://137.184.87.156:8000/api/speech-to-audio-openai/"
 
 data = {
-        "username": "Shliamb10",
-        "user_content": "А ну-у-у-у-ка! Подика сюда, мальчик... Чеши по хорошему)",
+        "username": "Shliamb5",
+        "user_content": "А ну-у-у-у-ка! Подика сюда, мальчик.)",
         "voice": "nova", # alloy, echo, fable, onyx, nova, and shimmer
-        "model": "tts-1-hd", # tts-1 or tts-1-hd
+        "model": "tts-1", # tts-1 or tts-1-hd
         "response_format": "wav", # mp3, opus, aac, flac, wav, and pcm
         "speed": 1.0, # 0.25 to 4.0
 }
 
 headers = {
-    'appkey': '72d3d8e8-74c4-4ff6-9033-91e8670b3708',
+    'appkey': 'a36c0e6c-6123-42e9-bcda-1c16e0c7e201',
 }
 
 response = requests.post(url, headers=headers, data=data)

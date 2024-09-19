@@ -7,6 +7,7 @@ from openai import AsyncOpenAI, RateLimitError, OpenAIError
 from keys import API_KEY_OPENAI
 # Service
 from general_functions import calculation, encode_file
+from config import defoult_model_openai
 
 
 
@@ -19,8 +20,8 @@ async def mod_openai_text_img(description, image_path):
 
     username = description.get("username")
     user_content = description.get("user_content")
-    system_content = description.get("system_content", "")
-    model_name = description.get("model")
+    system_content = description.get("system_content")
+    model_name = description.get("model", defoult_model_openai)
 
     try:
         # 1. From the file
@@ -48,12 +49,17 @@ async def mod_openai_text_img(description, image_path):
 
         # 2. Without a picture
         if not image_path:
+
+            openai_messages = [
+                {"role": "user", "content": user_content},
+            ]
+
+            if system_content:
+                openai_messages.append({"role": "system", "content": system_content})
+
             response = await client.chat.completions.create(
-                messages=[
-                    {"role": "system", "content": system_content},
-                    {"role": "user", "content": user_content},
-                    ],
-                    model=model_name,
+                messages = openai_messages,
+                model = model_name,
             )
 
         # TOKENS:

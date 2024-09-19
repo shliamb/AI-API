@@ -25,7 +25,7 @@ from mod_openai_varions_img import variations_dall_e
 from mod_openai_text_to_audio import speech_to_audio_openai
 from mod_openai_transcription import transcription_openai
 from mod_openai_translation import translation_openai
-from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price, uploads
+from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price, uploads, defoult_model_gemini, defoult_model_openai
 
 
 
@@ -153,7 +153,7 @@ async def openai_api(
 
     # Choosing a price list.
     if not model:
-        model = "gpt-4o-mini"
+        model = defoult_model_openai
 
     # Verify user and her appkey
     confirm_verify = await verify_user_appkey(username, model, appkey)
@@ -752,7 +752,7 @@ async def gemini_api(
     file: Optional[UploadFile] = File(None)
 ):
     if not model:
-        model = "gemini-1.5-flash-latest"
+        model = defoult_model_gemini
 
     # Verify user and her appkey
     confirm_verify = await verify_user_appkey(username, model, appkey)

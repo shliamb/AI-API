@@ -5,6 +5,7 @@ import asyncio
 # Service
 from keys import API_KEY_GEMINI
 from general_functions import calculation, encode_file
+from config import defoult_model_gemini
 
 
 
@@ -15,7 +16,7 @@ async def mod_gemini(description, image_path):
     username = description.get("username")
     user_content = description.get("user_content")
     system_content = description.get("system_content")
-    model_name = description.get("model")
+    model_name = description.get("model", defoult_model_gemini)
     # tools = description.get("tools")
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={API_KEY_GEMINI}"
@@ -30,12 +31,6 @@ async def mod_gemini(description, image_path):
         encoded_image = await encode_file(image_path)
 
         data = {
-
-            "system_instruction": {
-                "parts": {
-                    "text": system_content
-                }
-            },
             "contents": [{
                 "parts": [
                     {"text": user_content},
@@ -49,21 +44,35 @@ async def mod_gemini(description, image_path):
             }]
         }
 
-    # No IMAGE:
-    elif not image_path:
 
-        data = {
-            "system_instruction": {
+        if system_content:
+            data["system_instruction"] = {
                 "parts": {
                     "text": system_content
                 }
-            },
+            }
+
+
+    # No IMAGE:
+    elif not image_path:
+
+
+        data = {
             "contents": {
                 "parts": {
                     "text": user_content
                 }
             }
         }
+
+
+        if system_content:
+            data["system_instruction"] = {
+                "parts": {
+                    "text": system_content
+                }
+            }
+
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=data, headers=headers) as response:
@@ -137,6 +146,24 @@ https://ai.google.dev/gemini-api/docs/tokens?hl=ru&lang=python
 
 '''
 
+
+        #     "system_instruction": {
+        #         "parts": {
+        #             "text": system_content
+        #         }
+        #     },
+        #     "contents": [{
+        #         "parts": [
+        #             {"text": user_content},
+        #             {
+        #                 "inline_data": {
+        #                     "mime_type": "image/jpeg",
+        #                     "data": encoded_image
+        #                 }
+        #             }
+        #         ]
+        #     }]
+        # }
 
 
 

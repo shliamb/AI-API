@@ -5,14 +5,14 @@ files = None
 url = "http://137.184.87.156:8000/api/gemini/"
 
 data = {
-        "username": "Shliamb10", # !
+        "username": "Shliamb5", # !
         "user_content": "Как называется ее стрижка? Хотя бы примерно.", # !
         "system_content": "Ответь по русски.",
         "model": "gemini-1.5-flash-latest",
 }
 
 headers = {
-    'appkey': '72d3d8e8-74c4-4ff6-9033-91e8670b3708',
+    'appkey': 'a36c0e6c-6123-42e9-bcda-1c16e0c7e201',
 }
 
 with open('./uploads/image45.png', 'rb') as file:

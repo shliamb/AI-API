@@ -67,6 +67,8 @@ async def gen_username(about):
 # При окончании средств, можно что бы бот оправлял именно пользователю сообщение
 # Сделать в админ, возможность редактировать способ оплаты
 # В оплате что то придумать с курсом доллара, где его брать и каким он должен быть.
+# Добавить последнее посещения пользователем, скорее всего когда будет обновляться статистика по деньгам..
+# Добавить цены моделей в бота
 
 
 
@@ -89,6 +91,7 @@ async def command_start_handler(message: Message) -> None:
        BotCommand(command="/add_money", description="Add Money"),
        BotCommand(command="/get_stat", description="Get Stats"),
        BotCommand(command="/reset_key", description="Reset Key"),
+       BotCommand(command="/prices", description="Prices"),
        BotCommand(command="/help", description="Help"),
     ]
     await bot.set_my_commands(bot_commands)
