@@ -151,7 +151,6 @@ async def openai_api(
     image: Optional[UploadFile] = File(None)        # # jpg, png проверенно
 ):
     
-
     try:
         assist_content = json.loads(assist_content) # Из Json (str) в dict
     except:
@@ -161,9 +160,6 @@ async def openai_api(
         response_format = json.loads(response_format) # Из Json (str) в dict
     except:
         print("INFO:     response_format is str.")
-
-    print("1: ", response_format)
-
 
     # Choosing a price list.
     if not model:

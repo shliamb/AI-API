@@ -21,11 +21,8 @@ async def mod_openai_text_img(description, image_path):
     user_content = description.get("user_content")
     system_content = description.get("system_content")
     model_name = description.get("model", defoult_model_openai)
-
     assist_content = description.get("assist_content")
     response_format = description.get("response_format")
-
-    print("2: ", response_format, type(response_format), "эталон:", type({"type": "text"}) )
 
     try:
 
