@@ -151,6 +151,8 @@ async def openai_api(
     image: Optional[UploadFile] = File(None)        # # jpg, png проверенно
 ):
     
+    print("1: ", response_format)
+
     try:
         assist_content = json.loads(assist_content)
         response_format = json.loads(response_format)
