@@ -23,7 +23,7 @@ async def mod_openai_text_img(description, image_path):
     model_name = description.get("model", defoult_model_openai)
 
     assist_content = description.get("assist_content")
-    response_format = description.get("response_format")
+    response_format_oai = description.get("response_format")
 
 
     try:
@@ -47,16 +47,15 @@ async def mod_openai_text_img(description, image_path):
         if user_content:
             messages_ai.append({"role": "user", "content": user_content},)
 
-        if not response_format:
-            response_format="text"
+        if not response_format_oai:
+            response_format_oai="text"
 
-    # print(messages_ai, f', response_format="{response_format}"')
 
         # OpenAI:
         response = await client.chat.completions.create(
             model = model_name,
             messages = messages_ai,
-            response_format=response_format
+            #response_format=response_format_oai
         )
 
         # TOKENS:
