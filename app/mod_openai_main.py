@@ -26,6 +26,9 @@ async def mod_openai_text_img(description, image_path):
     response_format_oai = description.get("response_format")
 
 
+    #response_format = {"type":"json_schema","json_schema":{"name":"user_profile","schema":{"type":"object","properties":{"name":{"description":"The name of the user","type":"string"},"age":{"description":"The age of the user","type":"integer"},"interests":{"description":"List of users interests","type":"array","items":{"type":"string"}}},"required":["name","age","interests"]}}}
+    response_format = {"type": "text"}
+
     try:
 
         messages_ai = []
@@ -47,15 +50,15 @@ async def mod_openai_text_img(description, image_path):
         if user_content:
             messages_ai.append({"role": "user", "content": user_content},)
 
-        if not response_format_oai:
-            response_format_oai="text"
+        # if not response_format:
+        #     response_format="text"
 
 
         # OpenAI:
         response = await client.chat.completions.create(
             model = model_name,
             messages = messages_ai,
-            response_format="json"
+            response_format=response_format
         )
 
         # TOKENS:
