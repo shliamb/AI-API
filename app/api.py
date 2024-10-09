@@ -158,6 +158,9 @@ async def openai_api(
         print("INFO:     Response_format is str.")
 
 
+    #print(assist_content)
+    print(response_format)
+
     # Choosing a price list.
     if not model:
         model = defoult_model_openai

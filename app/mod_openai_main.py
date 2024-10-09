@@ -50,6 +50,8 @@ async def mod_openai_text_img(description, image_path):
             response_format = {"type": "text"}
 
 
+        print(response_format)
+
         # OpenAI:
         response = await client.chat.completions.create(
             model = model_name,
