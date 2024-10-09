@@ -27,7 +27,8 @@ async def mod_openai_text_img(description, image_path):
 
 
     #response_format = {"type":"json_schema","json_schema":{"name":"user_profile","schema":{"type":"object","properties":{"name":{"description":"The name of the user","type":"string"},"age":{"description":"The age of the user","type":"integer"},"interests":{"description":"List of users interests","type":"array","items":{"type":"string"}}},"required":["name","age","interests"]}}}
-    response_format = {"type": "text"}
+    #response_format = {"type": "text"}
+    response_format = {"type": "json_object"}
 
     try:
 
