@@ -50,7 +50,7 @@ async def mod_openai_text_img(description, image_path):
             response_format = {"type": "text"}
 
 
-        print("response_format: ", assist_content)
+        print("response_format: ", response_format)
         print("assist_content: ", assist_content)
 
         # OpenAI:
