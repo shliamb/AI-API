@@ -13,7 +13,7 @@ data = {
         'model': 'gpt-4o-mini-2024-07-18',
         'assist_content': '[{"user": "How do I charge my battery?"}, {"assistant": "You should use the provided charging cable."}, {"user": "But it doesn\'t seem to charge."}, {"assistant": "Try another charge.."}]',
         #'response_format': '{"type":"json_schema","json_schema":{"name":"user_profile","schema":{"type":"object","properties":{"name":{"description":"The name of the user","type":"string"},"age":{"description":"The age of the user","type":"integer"},"interests":{"description":"List of users interests","type":"array","items":{"type":"string"}}},"required":["name","age","interests"]}}}',
-        'response_format': 'json' # if not,  response_format is text
+        #'response_format': '{"type": "json_object"}' # if not,  response_format is {"type": "text"}
 }
 
 headers = {
@@ -38,7 +38,9 @@ else:
 
 # "But it doesn't seem to charge."
 
-
+    #response_format = {"type":"json_schema","json_schema":{"name":"user_profile","schema":{"type":"object","properties":{"name":{"description":"The name of the user","type":"string"},"age":{"description":"The age of the user","type":"integer"},"interests":{"description":"List of users interests","type":"array","items":{"type":"string"}}},"required":["name","age","interests"]}}}
+    #response_format = {"type": "text"}
+    #response_format = {"type": "json_object"}
 '''
 
 Пример текстового + картинка по желанию запроса к API. При отсуствии картинки file = None. Данный endpoint только для текста 

@@ -23,12 +23,7 @@ async def mod_openai_text_img(description, image_path):
     model_name = description.get("model", defoult_model_openai)
 
     assist_content = description.get("assist_content")
-    response_format_oai = description.get("response_format")
-
-
-    #response_format = {"type":"json_schema","json_schema":{"name":"user_profile","schema":{"type":"object","properties":{"name":{"description":"The name of the user","type":"string"},"age":{"description":"The age of the user","type":"integer"},"interests":{"description":"List of users interests","type":"array","items":{"type":"string"}}},"required":["name","age","interests"]}}}
-    #response_format = {"type": "text"}
-    response_format = {"type": "json_object"}
+    response_format = description.get("response_format")
 
     try:
 
@@ -51,8 +46,8 @@ async def mod_openai_text_img(description, image_path):
         if user_content:
             messages_ai.append({"role": "user", "content": user_content},)
 
-        # if not response_format:
-        #     response_format="text"
+        if not response_format:
+            response_format = {"type": "text"}
 
 
         # OpenAI:
