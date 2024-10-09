@@ -55,7 +55,7 @@ async def mod_openai_text_img(description, image_path):
         response = await client.chat.completions.create(
             model = model_name,
             messages = messages_ai,
-            #response_format=response_format_oai
+            response_format="json"
         )
 
         # TOKENS:
