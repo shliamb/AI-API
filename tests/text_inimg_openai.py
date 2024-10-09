@@ -3,13 +3,17 @@ import requests
 
 image = None
 
-url = "http://137.184.87.156:8000/api/openai_chat/"
+# url = "http://137.184.87.156:8000/api/openai_chat/"
+url = "http://localhost:8000/api/openai_chat/"
 
 data = {
-        "username": "Shliamb10", # !
-        "user_content": "Что на рисунке видишь?", # !
-        # "system_content": "Ты крутой юморист, каждое слово - шутка",
-        "model": "gpt-4o-mini-2024-07-18",
+        'username': 'Shliamb10', # !
+        'user_content': 'Что на рисунке видишь?', # !
+        'system_content': 'Ты крутой юморист, каждое слово - шутка',
+        'model': 'gpt-4o-mini-2024-07-18',
+        'assist_content': '[{"user": "How do I charge my battery?"}, {"assistant": "You should use the provided charging cable."}, {"user": "But it doesn\'t seem to charge."}, {"assistant": "Try another charge.."}]',
+        #'response_format': '{"type":"json_schema","json_schema":{"name":"user_profile","schema":{"type":"object","properties":{"name":{"description":"The name of the user","type":"string"},"age":{"description":"The age of the user","type":"integer"},"interests":{"description":"List of users interests","type":"array","items":{"type":"string"}}},"required":["name","age","interests"]}}}',
+        'response_format': 'json' # if not,  response_format is text
 }
 
 headers = {
@@ -32,7 +36,7 @@ else:
 
 
 
-
+# "But it doesn't seem to charge."
 
 
 '''

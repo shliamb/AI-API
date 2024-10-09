@@ -1,7 +1,6 @@
 # Base
 import logging
 import re
-# import datetime
 # OpenAI
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
 from keys import API_KEY_OPENAI
@@ -23,60 +22,58 @@ async def mod_openai_text_img(description, image_path):
     system_content = description.get("system_content")
     model_name = description.get("model", defoult_model_openai)
 
+    assist_content = description.get("assist_content")
+    response_format = description.get("response_format")
+
+
     try:
-        # 1. From the file
+
+        messages_ai = []
+
+        if system_content:
+            messages_ai.append({"role": "system", "content": system_content},)
+
+        if assist_content:
+            for data in assist_content:
+                if "user" in data:
+                    messages_ai.append({"role": "user", "content": data["user"]})
+                if "assistant" in data:
+                    messages_ai.append({"role": "assistant", "content": data["assistant"]})
+
         if image_path:
             base64_file = await encode_file(image_path)
+            messages_ai.append({"role": "user", "content": [{"type": "text", "text": user_content}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_file}",},},],},)
 
-            response = await client.chat.completions.create(
-            model=model_name,
-            messages=[
-                {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": user_content},
-                    {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:image/jpeg;base64,{base64_file}",  # Так можно накидать много картинок, хз хз за чем..
-                    },
-                    },
-                ],
-                }
-            ],
-            #max_tokens=300,
-            )
+        if user_content:
+            messages_ai.append({"role": "user", "content": user_content},)
 
-        # 2. Without a picture
-        if not image_path:
+        if not response_format:
+            response_format="text"
 
-            openai_messages = [
-                {"role": "user", "content": user_content},
-            ]
+    # print(messages_ai, f', response_format="{response_format}"')
 
-            if system_content:
-                openai_messages.append({"role": "system", "content": system_content})
-
-            response = await client.chat.completions.create(
-                messages = openai_messages,
-                model = model_name,
-            )
+        # OpenAI:
+        response = await client.chat.completions.create(
+            model = model_name,
+            messages = messages_ai,
+            response_format=response_format
+        )
 
         # TOKENS:
-        if response:
+        try:
             response_content = response.choices[0].message.content
             model_version = response.model
             used_tokens = response.usage.total_tokens + response.usage.prompt_tokens
-        else:
-            logging.error("No response from openai")
-            raise
+
+            # Calculation of money spent on tokens
+            expenses = await calculation(username, model_version, used_tokens, input_data="text")
+
+            return {"response": response_content, "expenses": expenses, "used_tokens": used_tokens}
+
+        except:
+            response_content = response.choices[0].message.content
+            return {"response": response_content, "expenses": 0, "used_tokens": 0}
         
-        # Calculation of money spent on tokens
-        expenses = await calculation(username, model_version, used_tokens, input_data="text")
-
-        return {"response": response_content, "expenses": expenses, "used_tokens": used_tokens}
-    
-
 
 
     except RateLimitError as e:
@@ -144,6 +141,23 @@ leter..
 
 '''
 
+
+
+            # messages=[
+            #     {
+            #     "role": "user",
+            #     "content": [
+            #         {"type": "text", "text": user_content},
+            #         {
+            #         "type": "image_url",
+            #         "image_url": {
+            #             "url": f"data:image/jpeg;base64,{base64_file}",  # Так можно накидать много картинок, хз хз за чем..
+            #         },
+            #         },
+            #     ],
+            #     }
+            # ],
+            # )
 
 
 

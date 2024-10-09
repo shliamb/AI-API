@@ -4,13 +4,13 @@ logging.basicConfig(level=logging.INFO, filename='./log/api.log', filemode='a', 
 import asyncio
 import aiofiles
 # from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 # import os
 # import shutil
 # import requests
 # Fasapi
 from fastapi import FastAPI, Header, Depends, HTTPException, status, UploadFile, File, Form
-# from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import gunicorn
@@ -26,7 +26,7 @@ from mod_openai_text_to_audio import speech_to_audio_openai
 from mod_openai_transcription import transcription_openai
 from mod_openai_translation import translation_openai
 from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price, uploads, defoult_model_gemini, defoult_model_openai
-
+import json
 
 
 app = FastAPI()
@@ -142,14 +142,20 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
 @app.post("/api/openai_chat/", status_code=status.HTTP_200_OK)
 async def openai_api(
     username: str = Form(...),                      # !
-    # user_name   -->  {"role": "system", "name": "Alex", "content":
-    # system_name
+    assist_content: str = Form(None),               # history
+    response_format: str = Form(None),              # Json response rules if need this, text or json
     user_content: str = Form(...),                  # !
     system_content: str = Form(None),               #
     model: str = Form(None),                        #
     appkey: str = Header(...),                      # !
     image: Optional[UploadFile] = File(None)        # # jpg, png проверенно
 ):
+    
+    try:
+        assist_content = json.loads(assist_content)
+        response_format = json.loads(response_format)
+    except:
+        print("INFO:     Response_format is str.")
 
     # Choosing a price list.
     if not model:
@@ -167,8 +173,6 @@ async def openai_api(
         async with aiofiles.open(image_path, "wb") as buffer:
             while content := await image.read(1024):  # Читаем файл порциями по 1024 байта
                 await buffer.write(content)
-        # with open(image_path, "wb") as buffer:
-        #     shutil.copyfileobj(image.file, buffer)
     else:
         image_path = None
 
@@ -181,6 +185,10 @@ async def openai_api(
 
     if system_content:
         description["system_content"] = system_content
+    if assist_content:
+        description["assist_content"] = assist_content
+    if response_format:
+        description["response_format"] = response_format
 
     # Working with OpenAI
     confirm_openai = await mod_openai_text_img(description, image_path)
