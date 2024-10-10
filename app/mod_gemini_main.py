@@ -19,6 +19,10 @@ async def mod_gemini(description, image_path):
     model_name = description.get("model", defoult_model_gemini)
     # tools = description.get("tools")
 
+    assist_content = description.get("assist_content")
+    # response_format = description.get("response_format")
+
+
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={API_KEY_GEMINI}"
 
     headers = {
@@ -30,13 +34,17 @@ async def mod_gemini(description, image_path):
     if system_content:
         data["system_instruction"] = {"parts": {"text": system_content}}
 
-
-
-
-
     contents = []
 
-    contents.append({"role": "user", "parts":[{"text": user_content}]})
+    if assist_content:
+        for data in assist_content:
+            if "user" in data:
+                contents.append({"role": "user", "parts":[{"text": data["user"]}]})
+            if "assistant" in data:
+                contents.append({"role": "model", "parts":[{"text": data["assistant"]}]})
+
+    if user_content:
+        contents.append({"role": "user", "parts":[{"text": user_content}]})
 
     data["contents"] = contents
     
@@ -44,15 +52,7 @@ async def mod_gemini(description, image_path):
         encoded_image = await encode_file(image_path)
         data = {"contents": [{"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]}]}
 
-    '''
-
-    "contents": [
-        {"role": "user", "parts":[{"text": "Hello"}]},
-        {"role": "model", "parts":[{"text": "Great to meet you. What would you like to know?"}]},
-        {"role":"user", "parts":[{"text": "I have two dogs in my house. How many paws are in my house?"}]},
-        ]
-    '''
-
+    print(data)
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=data, headers=headers) as response:
@@ -104,6 +104,18 @@ async def mod_gemini(description, image_path):
     ]
 
 '''
+
+
+
+
+'''
+"contents": [
+    {"role": "user", "parts":[{"text": "Hello"}]},
+    {"role": "model", "parts":[{"text": "Great to meet you. What would you like to know?"}]},
+    {"role":"user", "parts":[{"text": "I have two dogs in my house. How many paws are in my house?"}]},
+    ]
+'''
+
 
 
 '''
