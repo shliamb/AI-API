@@ -40,17 +40,16 @@ async def mod_gemini(description, image_path):
             if "assistant" in one:
                 contents.append({"role": "model", "parts":[{"text": one["assistant"]}]},)
 
-    if user_content:
+    if image_path:
+        encoded_image = await encode_file(image_path)
+        contents.append({"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]})
+    elif user_content:
         contents.append({"role": "user", "parts":[{"text": user_content}]},)
 
     data["contents"] = contents
 
     if system_content:
         data["system_instruction"] = {"parts": {"text": system_content},}
-    
-    if image_path:
-        encoded_image = await encode_file(image_path)
-        data = {"contents": [{"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]}],}
 
 
     async with aiohttp.ClientSession() as session:
@@ -93,6 +92,11 @@ async def mod_gemini(description, image_path):
 # response = chat.send_message("How many paws are in my house?")
 # print(response.text)
 
+
+
+    # if image_path:
+    #     encoded_image = await encode_file(image_path)
+    #     data = {"contents": [{"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]}],}
 
 
 # {
