@@ -31,9 +31,6 @@ async def mod_gemini(description, image_path):
 
     data = {}
 
-    if system_content:
-        data["system_instruction"] = {"parts": {"text": system_content}}
-
     contents = []
 
     if assist_content:
@@ -47,6 +44,9 @@ async def mod_gemini(description, image_path):
         contents.append({"role": "user", "parts":[{"text": user_content}]})
 
     data["contents"] = contents
+
+    if system_content:
+        data["system_instruction"] = {"parts": {"text": system_content}}
     
     if image_path:
         encoded_image = await encode_file(image_path)
@@ -79,7 +79,7 @@ async def mod_gemini(description, image_path):
 
 
 
-
+# {'assistant': 'Try another charge..', 'contents': [{'role': 'user', 'parts': [{'text': 'How do I charge my battery?'}]}, {'role': 'model', 'parts': [{'text': 'You should use the provided charging cable.'}]}, {'role': 'user', 'parts': [{'text': "But it doesn't seem to charge."}]}, {'role': 'model', 'parts': [{'text': 'Try another charge..'}]}, {'role': 'user', 'parts': [{'text': 'как решить вопрос'}]}]}
 
 
 # model = genai.GenerativeModel("gemini-1.5-flash")
