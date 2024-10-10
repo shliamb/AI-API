@@ -60,7 +60,7 @@ async def mod_gemini(description, image_path):
 
 
 
-            Tokens:
+            # Tokens:
             if response:
                 response_text = response['candidates'][0]['content']['parts'][0]['text']
                 total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.

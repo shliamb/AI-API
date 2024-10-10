@@ -50,26 +50,26 @@ async def mod_openai_text_img(description, image_path):
 
 
         # OpenAI:
-        # response = await client.chat.completions.create(
-        #     model = model_name,
-        #     messages = messages_ai,
-        #     response_format=response_format
-        # )
+        response = await client.chat.completions.create(
+            model = model_name,
+            messages = messages_ai,
+            response_format=response_format
+        )
 
         # TOKENS:
-        # try:
-        #     response_content = response.choices[0].message.content
-        #     model_version = response.model
-        #     used_tokens = response.usage.total_tokens + response.usage.prompt_tokens
+        try:
+            response_content = response.choices[0].message.content
+            model_version = response.model
+            used_tokens = response.usage.total_tokens + response.usage.prompt_tokens
 
-        #     # Calculation of money spent on tokens
-        #     expenses = await calculation(username, model_version, used_tokens, input_data="text")
+            # Calculation of money spent on tokens
+            expenses = await calculation(username, model_version, used_tokens, input_data="text")
 
-        #     return {"response": response_content, "expenses": expenses, "used_tokens": used_tokens}
+            return {"response": response_content, "expenses": expenses, "used_tokens": used_tokens}
 
-        # except:
-        #     response_content = response.choices[0].message.content
-        #     return {"response": response_content, "expenses": 0, "used_tokens": 0}
+        except:
+            response_content = response.choices[0].message.content
+            return {"response": response_content, "expenses": 0, "used_tokens": 0}
         
 
 
