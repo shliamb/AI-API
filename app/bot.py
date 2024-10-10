@@ -53,7 +53,7 @@ async def typing(action) -> None:
 async def gen_username(about):
     cleaned_text = ""
     try:
-        cleaned_text = re.sub(r'[^a-zA-Z0-9]', '', about)
+        cleaned_text = re.sub(r'[^a-zA-Z0-9]', '', about) # Уберет пробелы, руские буквы, символы и значки..
     except:
         logging.info("It didn't work out to get a username, most likely there is a smile")
     username = cleaned_text + str(random.randint(21, 50)) + random_name_2X()

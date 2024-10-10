@@ -25,53 +25,20 @@ async def mod_gemini(description, image_path):
         'Content-Type': 'application/json'
     }
 
-    # is IMAGE:
+    data = {}
+
+    if system_content:
+        data["system_instruction"] = {"parts": {"text": system_content}}
+
+    if user_content:
+        data["contents"] = {"parts": {"text": user_content}}
+    
     if image_path:
-
         encoded_image = await encode_file(image_path)
-
-        data = {
-            "contents": [{
-                "parts": [
-                    {"text": user_content},
-                    {
-                        "inline_data": {
-                            "mime_type": "image/jpeg",
-                            "data": encoded_image
-                        }
-                    }
-                ]
-            }]
-        }
+        data = {"contents": [{"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]}]}
 
 
-        if system_content:
-            data["system_instruction"] = {
-                "parts": {
-                    "text": system_content
-                }
-            }
 
-
-    # No IMAGE:
-    elif not image_path:
-
-
-        data = {
-            "contents": {
-                "parts": {
-                    "text": user_content
-                }
-            }
-        }
-
-
-        if system_content:
-            data["system_instruction"] = {
-                "parts": {
-                    "text": system_content
-                }
-            }
 
 
     async with aiohttp.ClientSession() as session:
@@ -95,8 +62,6 @@ async def mod_gemini(description, image_path):
             return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
 
 
-if __name__ == "__main__":
-    asyncio.run(mod_gemini())
 
 
 
@@ -394,4 +359,77 @@ https://ai.google.dev/gemini-api/docs/tokens?hl=ru&lang=python
 
 # # Set the `response_mime_type` to output JSON
 # generation_config={"response_mime_type": "application/json"})=
+
+
+
+
+
+    # # is IMAGE:
+    # if image_path:
+
+    #     encoded_image = await encode_file(image_path)
+
+    #     data = {
+    #         "contents": [{
+    #             "parts": [
+    #                 {"text": user_content},
+    #                 {
+    #                     "inline_data": {
+    #                         "mime_type": "image/jpeg",
+    #                         "data": encoded_image
+    #                     }
+    #                 }
+    #             ]
+    #         }]
+    #     }
+
+
+    #     if system_content:
+    #         data["system_instruction"] = {
+    #             "parts": {
+    #                 "text": system_content
+    #             }
+    #         }
+
+
+    # # No IMAGE:
+    # elif not image_path:
+
+
+    #     data = {
+    #         "contents": {
+    #             "parts": {
+    #                 "text": user_content
+    #             }
+    #         }
+    #     }
+
+
+    #     if system_content:
+    #         data["system_instruction"] = {
+    #             "parts": {
+    #                 "text": system_content
+    #             }
+    #         }
+
+
+    # async with aiohttp.ClientSession() as session:
+    #     async with session.post(url, json=data, headers=headers) as response:
+    #         response = await response.json()
+
+    #         # Tokens:
+    #         if response:
+    #             response_text = response['candidates'][0]['content']['parts'][0]['text']
+    #             total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
+    #         else:
+    #             logging.error("No response from Google Gemini.")
+    #             return {"response": "No response from Google Gemini."}
+
+    #         model_version = model_name
+    #         used_tokens = total_token_count
+
+    #         # Calculation of money spent on tokens
+    #         expenses = await calculation(username, model_version, used_tokens, input_data="text")
+
+    #         return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
 

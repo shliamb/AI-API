@@ -142,24 +142,24 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
 @app.post("/api/openai_chat/", status_code=status.HTTP_200_OK)
 async def openai_api(
     username: str = Form(...),                      # !
+    appkey: str = Header(...),                      # !
     assist_content: str = Form(None),               # history
     response_format: str = Form(None),              # Json response rules if need this, text or json
     user_content: str = Form(...),                  # !
     system_content: str = Form(None),               #
     model: str = Form(None),                        #
-    appkey: str = Header(...),                      # !
     image: Optional[UploadFile] = File(None)        # # jpg, png проверенно
 ):
     
     try:
         assist_content = json.loads(assist_content) # Из Json (str) в dict
     except:
-        print("INFO:     assist_content is str.")
+        print("INFO:     assist_content is str. OpenAI.")
 
     try:
         response_format = json.loads(response_format) # Из Json (str) в dict
     except:
-        print("INFO:     response_format is str.")
+        print("INFO:     response_format is str. OpenAI.")
 
     # Choosing a price list.
     if not model:
@@ -757,12 +757,25 @@ async def point_translation_openai(
 @app.post("/api/gemini/", status_code=status.HTTP_200_OK)
 async def gemini_api(
     username: str = Form(...),
-    user_content: str = Form(...),
+    appkey: str = Header(...),
+    assist_content: str = Form(None),               # history
+    response_format: str = Form(None),              # Json response rules if need this, text or json
+    user_content: str = Form(...),                  # !
     system_content: str = Form(None),
     model: str = Form(None),
-    appkey: str = Header(...),
     file: Optional[UploadFile] = File(None)
 ):
+    try:
+        assist_content = json.loads(assist_content) # Из Json (str) в dict
+    except:
+        print("INFO:     assist_content is str. Gemini.")
+
+    try:
+        response_format = json.loads(response_format) # Из Json (str) в dict
+    except:
+        print("INFO:     response_format is str. Gemini.")
+
+    # Choosing a price list.
     if not model:
         model = defoult_model_gemini
 
@@ -792,6 +805,10 @@ async def gemini_api(
 
     if system_content:
         description["system_content"] = system_content
+    if assist_content:
+        description["assist_content"] = assist_content
+    if response_format:
+        description["response_format"] = response_format
 
 
     # Working with Gemini

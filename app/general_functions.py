@@ -71,7 +71,7 @@ async def calculation(username, model_version, used_tokens, input_data):
     # Getting user data
     user_data = await get_user_by_username(username)
     new_money = user_data.money - total_price
-    data_money = {"money": new_money}
+    data_money = {"money": new_money, "date_last_activ": await day_utcnow()}
 
     # The balance was changed taking into account the expense
     await update_user_by_username(username, data_money)
