@@ -775,8 +775,6 @@ async def gemini_api(
     except:
         print("INFO:     response_format is str. Gemini.")
 
-    print("1", file)
-
     # Choosing a price list.
     if not model:
         model = defoult_model_gemini
@@ -795,8 +793,6 @@ async def gemini_api(
                 await buffer.write(content)
     else:
         file_path = None
-
-    print("2", file_path)
 
     # Collect data
     description = {

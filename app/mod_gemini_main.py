@@ -29,19 +29,8 @@ async def mod_gemini(description, image_path):
         'Content-Type': 'application/json'
     }
 
-
-    print(image_path)
-
-
-    if image_path:
-        print("4")
-        encoded_image = await encode_file(image_path)
-        data = {"contents": [{"parts": [{"text": user_content},{"inline_data": {"mime_type": "image/jpeg","data": encoded_image}}]}],}
-
-    else:
-        data = {}
-        contents = []
-        contents.append({"role": "user", "parts":[{"text": user_content}]},)
+    data = {}
+    contents = []
 
     if assist_content:
         for one in assist_content:
@@ -50,20 +39,11 @@ async def mod_gemini(description, image_path):
             if "assistant" in one:
                 contents.append({"role": "model", "parts":[{"text": one["assistant"]}]},)
 
-    # if image_path:
-    #     encoded_image = await encode_file(image_path)
-    #     contents.append([{"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]}],)
-
-
-
-        # data = {"contents": [{"parts": [{"text": user_content},{"inline_data": {"mime_type": "image/jpeg","data": encoded_image}}]}],}
-
-        # {'contents': [{'role': 'user', 'parts': [{'text': 'что тут'}]}]}
-
-
-
-    # elif user_content:
-    #     contents.append({"role": "user", "parts":[{"text": user_content}]},)
+    if image_path:
+        encoded_image = await encode_file(image_path)
+        contents.append([{"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]}],)
+    elif user_content:
+        contents.append({"role": "user", "parts":[{"text": user_content}]},)
 
     data["contents"] = contents
 
@@ -72,29 +52,29 @@ async def mod_gemini(description, image_path):
 
 
     print(data)
-    # {'contents': [{'role': 'user', 'parts': [{'text': 'что тут'}]}]}
-
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, json=data, headers=headers) as response:
-    #         response = await response.json()
 
 
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, json=data, headers=headers) as response:
+            response = await response.json()
 
-            # Tokens:
-            # if response:
-            #     response_text = response['candidates'][0]['content']['parts'][0]['text']
-            #     total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
-            # else:
-            #     logging.error("No response from Google Gemini.")
-            #     return {"response": "No response from Google Gemini."}
 
-            # model_version = model_name
-            # used_tokens = total_token_count
 
-            # # Calculation of money spent on tokens
-            # expenses = await calculation(username, model_version, used_tokens, input_data="text")
+            Tokens:
+            if response:
+                response_text = response['candidates'][0]['content']['parts'][0]['text']
+                total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
+            else:
+                logging.error("No response from Google Gemini.")
+                return {"response": "No response from Google Gemini."}
 
-            # return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
+            model_version = model_name
+            used_tokens = total_token_count
+
+            # Calculation of money spent on tokens
+            expenses = await calculation(username, model_version, used_tokens, input_data="text")
+
+            return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
 
 
 
