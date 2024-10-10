@@ -30,14 +30,14 @@ async def mod_gemini(description, image_path):
     }
 
 
-
+    print(image_path)
 
 
     if image_path:
         encoded_image = await encode_file(image_path)
         data = {"contents": [{"parts": [{"text": user_content},{"inline_data": {"mime_type": "image/jpeg","data": encoded_image}}]}],}
 
-    elif user_content:
+    else:
         data = {}
         contents = []
         contents.append({"role": "user", "parts":[{"text": user_content}]},)
