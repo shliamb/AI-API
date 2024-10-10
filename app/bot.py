@@ -30,7 +30,7 @@ from aiogram.fsm.state import State, StatesGroup
 from worker_db import get_user_by_id, get_user_by_username, update_user, adding_user, get_all_data_user_by_username, get_last_statistics
 from backupdb import backup_db
 from restore_db import restore_db
-from general_functions import day_utcnow, unformat_date
+from general_functions import day_utcnow, unformat_date, random_name_2X
 from config import money_to_start, my_app_key, time_correction, min_pay
 from keys import TOKEN_TELEGRAM, IS_ADMIN
 
@@ -51,9 +51,13 @@ async def typing(action) -> None:
 
 # Generation a Unique Username
 async def gen_username(about):
-    cleaned_text = re.sub(r'[^a-zA-Z0-9]', '', about)
-    username = cleaned_text + str(random.randint(1, 10))
-    return username or None
+    cleaned_text = ""
+    try:
+        cleaned_text = re.sub(r'[^a-zA-Z0-9]', '', about)
+    except:
+        logging.info("It didn't work out to get a username, most likely there is a smile")
+    username = cleaned_text + str(random.randint(21, 50)) + random_name_2X()
+    return username
 
 ########
 
@@ -66,9 +70,8 @@ async def gen_username(about):
 # Передача сигнала телеграмм боту, администратору
 # При окончании средств, можно что бы бот оправлял именно пользователю сообщение
 # Сделать в админ, возможность редактировать способ оплаты
-# В оплате что то придумать с курсом доллара, где его брать и каким он должен быть.
 # Добавить последнее посещения пользователем, скорее всего когда будет обновляться статистика по деньгам..
-# Добавить цены моделей в бота
+
 
 
 
@@ -102,6 +105,7 @@ async def command_start_handler(message: Message) -> None:
     full_name = message.from_user.full_name
     first_name = message.from_user.first_name
     last_name = message.from_user.last_name
+    language_code = message.from_user.language_code # ??
 
     # Choosing a name user
     about = name if name else (first_name if first_name else (last_name if last_name else "User"))
@@ -109,21 +113,20 @@ async def command_start_handler(message: Message) -> None:
 
     is_on_user = await get_user_by_id(id) # Получаем по ID данные из базы
 
-    if is_on_user is not None:
+    if is_on_user:
         await message.answer("You are already registered in the system! Chek your key - /my_key") # Уже есть
+        return
 
-    if is_on_user is None:
+    if not is_on_user:
 
         while True: # Сразу проверяю на уникальность в базе Username, если не уникально, то генерим по новой, пока не попадем на уникальный вариант
             data_by_username = await get_user_by_username(username)
-            if data_by_username is not None:
+            if data_by_username:
                 username = await gen_username(about) # Генерим заново
             else:
                 break
         
         if data_by_username is None: # Зачем то перепроверяю, хз
-
-            last_act_to_base = await day_utcnow() # Записываю дату и время
 
             user_data = {
                 "id": id,
@@ -133,7 +136,7 @@ async def command_start_handler(message: Message) -> None:
                 "last_name": last_name,
                 "username": username,
                 "money": money_to_start,
-                "date_last_activ": last_act_to_base,
+                "date_last_activ": await day_utcnow(),
                         }
 
             await adding_user(user_data)
@@ -141,24 +144,25 @@ async def command_start_handler(message: Message) -> None:
             is_on_user = await get_user_by_id(id)
             # last_a = is_on_user.date_last_activ
             # current_datetime = await unformat_date(last_a) 
-            text_get_key = (  
-                "Use the following keys to use the API:\n\n"
-                "<b>Username:</b>\n"
-                f"Username: <code>{is_on_user.username}</code>\n"
-                "Add to: <i>Form-data</i>\n"
-                "\n"
-                "<b>API Key:</b>\n"
-                f"Key: <code>{my_app_key}</code>\n"
-                f"Value: <code>{is_on_user.appkey}</code>\n"
-                "Add to: <i>Header</i>\n"
-                #"\n"
-                #"If you are inactive for a long time, the user will be deleted from the database. You will be able to register again after.\n"
-                "\n"
-                f"You have <b>{is_on_user.money}</b> $ to your balance.\n"
-                "\n"
-                "If you don't understand anything - /help \n"
-                # f"Last user activity is - {current_datetime}"
-                    )
+
+            text_get_key = f''' 
+Use the following keys to use the API:
+
+<b>USERNAME:</b>
+    Username: <code>{is_on_user.username}</code>
+    Add to: <i>Form-data</i>
+
+<b>API KEY:</b>
+    Key: <code>{my_app_key}</code>
+    Value: <code>{is_on_user.appkey}</code>
+    Add to: <i>Header</i>
+
+"If you are inactive for a long time, the user will be deleted from the database. You will be able to register again after.
+
+You have <b>{is_on_user.money}</b> $ to your balance.
+
+If you don't understand anything - /help 
+            '''
             
             await message.answer(text_get_key, parse_mode="HTML")
 
@@ -168,15 +172,19 @@ async def command_start_handler(message: Message) -> None:
 async def main_menu(message: types.Message):
     await bot.send_chat_action(message.chat.id, action='typing')
 
-    await message.answer(
-        "<b>MAIN MENU:</b> \n\n"
-        "/my_key - View your API key\n\n"
-        "/balance - View your account balance\n\n"
-        "/add_money - Add $ to your account\n\n"
-        "/get_stat - Get statistics\n\n"
-        "/reset_key - Change the API key\n\n"
-        "/help - Learn more about the API\n\n"
-        , parse_mode="HTML")
+    text = '''
+
+<b>MAIN MENU:</b>
+    /my_key - view your API key
+    /balance - view your account balance
+    /add_money - add $ to your account
+    /get_stat - get statistics
+    /reset_key - change the API key
+    /help - Llarn more about the API
+
+    '''
+
+    await message.answer(text, parse_mode="HTML")
 
 
 
@@ -187,24 +195,24 @@ async def my_key(message: types.Message):
     id = user_id(message)
     data = await get_user_by_id(id)
 
-    text_get_key = (  
-        "Use the following keys to use the API:\n\n"
-        "<b>Username:</b>\n"
-        f"Username: <code>{data.username}</code>\n"
-        "Add to: <i>Form-data</i>\n"
-        "\n"
-        "<b>API Key:</b>\n"
-        f"Key: <code>{my_app_key}</code>\n"
-        f"Value: <code>{data.appkey}</code>\n"
-        "Add to: <i>Header</i>\n"
-        #"\n"
-        # "If you are inactive for a long time, the user will be deleted from the database. You will be able to register again after.\n"
-        "\n"
-        f"You have <b>{data.money}</b> $ to your balance.\n"
-        "\n"
-        "If you don't understand anything - /help \n"
-        # f"Last user activity is - {current_datetime}"
-            )
+    text_get_key = f''' 
+Use the following keys to use the API:
+
+<b>USERNAME:</b>
+    Username: <code>{data.username}</code>
+    Add to: <i>Form-data</i>
+
+<b>API KEY:</b>
+    Key: <code>{my_app_key}</code>
+    Value: <code>{data.appkey}</code>
+    Add to: <i>Header</i>
+
+"If you are inactive for a long time, the user will be deleted from the database. You will be able to register again after.
+
+You have <b>{data.money}</b> $ to your balance.
+
+If you don't understand anything - /help 
+    '''
             
     await message.answer(text_get_key, parse_mode="HTML")
 
@@ -387,6 +395,58 @@ async def reset_key(message: types.Message):
         await message.answer("Sorry, error, try again later.")
 
 
+
+# MENU: PRICES:
+@dp.message(Command('prices'))
+async def get_prices(message: types.Message):
+
+    id = user_id(message)
+
+
+    prices_en = '''
+
+    OpenAI language model 1 million tokens in $:
+        'o1-preview': 150,
+        'o1-preview-2024-09-12': 150,
+        'o1-mini': 30,
+        'o1-mini-2024-09-12': 30,
+        'chatgpt-4o-latest': 40,
+        'gpt-4o': 40,
+        'gpt-4o-2024-05-13': 40,
+        'gpt-4o-2024-08-06': 25,
+        'gpt-4o-mini': 1.5, # no vision
+        'gpt-4o-mini-2024-07-18': 1.5, # no vision
+        'gpt-4-turbo-2024-04-09': 80,
+
+    The language model from Google is 1 million in $:
+        'gemini-1.5-pro-latest': 93.75,
+        'gemini-1.5-flash-latest': 1.125,
+        'gemini-1.0-pro-latest': 4,
+
+    Generating images for one in $:
+        'dall-e-3-1024': 0.08,
+        'dall-e-3-1792': 0.16,
+        'dall-e-3-hd-1024': 0.16,
+        'dall-e-3-hd-1792': 0.24,
+        'dall-e-2-1024': 0.04,
+        'dall-e-2-512': 0.036,
+        'dall-e-2-256': 0.032,
+
+    Voice generation of 1M characters in $:
+        'tts-1': 30,
+        'tts-1-hd': 60,
+
+    Transcription from audio to text min. in $:
+        'whisper-1': 0.012,
+
+    '''
+
+
+    await message.answer(prices_en, parse_mode="HTML")
+
+
+
+
 #### Push /help ####
 @dp.message(Command("help"))
 async def help(message: types.Message):
@@ -411,18 +471,21 @@ async def admin(message: types.Message):
         await message.answer(f"Sorry, access is denied.")
         return
 
-    await message.answer(
-        "<b>ADMIN MENU:</b> \n\n"
-        "/backup - Make a backup of the database\n\n"
-        "/admin_stat \n\n"
-        "/get_logs \n\n"
-        "clear \n"
-        "   │ \n"
-        "   ├── /clear_logs - Deleting logs \n"
-        "   ├── /clear_old_users - Deleting old users* \n"
-        "   └── /clear_db - Cleaning up old DB data* \n\n"
-        "/restore_db - Restoring a DB from a file*\n\n"
-        , parse_mode="HTML")
+    text = '''
+
+<b>ADMIN MENU:</b>
+    /backup - make a backup of the database
+    /admin_stat
+    /get_logs
+
+<b>CLEAR DATA:</b>
+    /clear_logs - deleting logs
+    /clear_old_users - deleting old users*
+    /clear_db - cleaning up old DB data*
+    /restore_db - restoring a DB from a file*
+
+    '''
+    await message.answer(text, parse_mode="HTML")
 
 
 
