@@ -42,7 +42,14 @@ async def mod_gemini(description, image_path):
 
     if image_path:
         encoded_image = await encode_file(image_path)
-        contents.append({"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]},)
+        contents.append([{"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]}],)
+
+
+
+        # data = {"contents": [{"parts": [{"text": user_content},{"inline_data": {"mime_type": "image/jpeg","data": encoded_image}}]}],}
+
+
+
     elif user_content:
         contents.append({"role": "user", "parts":[{"text": user_content}]},)
 
@@ -53,6 +60,7 @@ async def mod_gemini(description, image_path):
 
 
     print(data)
+    # {'contents': [{'role': 'user', 'parts': [{'text': 'что тут'}]}]}
 
     # async with aiohttp.ClientSession() as session:
     #     async with session.post(url, json=data, headers=headers) as response:
@@ -82,6 +90,26 @@ async def mod_gemini(description, image_path):
 
 
 # {'assistant': 'Try another charge..', 'contents': [{'role': 'user', 'parts': [{'text': 'How do I charge my battery?'}]}, {'role': 'model', 'parts': [{'text': 'You should use the provided charging cable.'}]}, {'role': 'user', 'parts': [{'text': "But it doesn't seem to charge."}]}, {'role': 'model', 'parts': [{'text': 'Try another charge..'}]}, {'role': 'user', 'parts': [{'text': 'как решить вопрос'}]}]}
+
+
+
+
+# {'contents': [{'role': 'user', 'parts': [{'text': 'что тут'}]}]}
+
+
+
+# {'contents': [{'role': 'user', 'parts': [{'text': 'hi'}]}], 'system_instruction': {'parts': {'text': 'Ты личная асистентка одинокого мужчины 40 лет, его зовут Alex. Ты женщина, тебя зовут Ева. И ты очень злишься, если тебя называют другим именем. Ты добра ко мне, но не многословная и очень конкретна в разговоре. Предпочитаешь говорить мало и четко, по делу. Любишь иногда жестко подколоть.'}}}
+
+
+
+
+
+
+
+
+
+
+
 
 
 # model = genai.GenerativeModel("gemini-1.5-flash")
