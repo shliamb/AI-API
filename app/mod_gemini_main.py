@@ -30,15 +30,28 @@ async def mod_gemini(description, image_path):
     if system_content:
         data["system_instruction"] = {"parts": {"text": system_content}}
 
-    if user_content:
-        data["contents"] = {"parts": {"text": user_content}}
+
+
+
+
+    contents = []
+
+    contents.append({"role": "user", "parts":[{"text": user_content}]})
+
+    data["contents"] = contents
     
     if image_path:
         encoded_image = await encode_file(image_path)
         data = {"contents": [{"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]}]}
 
+    '''
 
-
+    "contents": [
+        {"role": "user", "parts":[{"text": "Hello"}]},
+        {"role": "model", "parts":[{"text": "Great to meet you. What would you like to know?"}]},
+        {"role":"user", "parts":[{"text": "I have two dogs in my house. How many paws are in my house?"}]},
+        ]
+    '''
 
 
     async with aiohttp.ClientSession() as session:
@@ -67,6 +80,30 @@ async def mod_gemini(description, image_path):
 
 
 
+
+
+# model = genai.GenerativeModel("gemini-1.5-flash")
+# chat = model.start_chat(
+#     history=[
+#         {"role": "user", "parts": "Hello"},
+#         {"role": "model", "parts": "Great to meet you. What would you like to know?"},
+#     ]
+# )
+# response = chat.send_message("I have 2 dogs in my house.")
+# print(response.text)
+# response = chat.send_message("How many paws are in my house?")
+# print(response.text)
+
+
+'''
+
+"contents": [
+    {"role": "user", "parts":[{"text": "Hello"}]},
+    {"role": "model", "parts":[{"text": "Great to meet you. What would you like to know?"}]},
+    {"role":"user", "parts":[{"text": "I have two dogs in my house. How many paws are in my house?"}]},
+    ]
+
+'''
 
 
 '''
