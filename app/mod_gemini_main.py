@@ -53,32 +53,25 @@ async def mod_gemini(description, image_path):
         data = {"contents": [{"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]}],}
 
 
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, json=data, headers=headers) as response:
+            response = await response.json()
 
+            # Tokens:
+            if response:
+                response_text = response['candidates'][0]['content']['parts'][0]['text']
+                total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
+            else:
+                logging.error("No response from Google Gemini.")
+                return {"response": "No response from Google Gemini."}
 
+            model_version = model_name
+            used_tokens = total_token_count
 
-    print(contents)
-    print()
-    print(data)
+            # Calculation of money spent on tokens
+            expenses = await calculation(username, model_version, used_tokens, input_data="text")
 
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, json=data, headers=headers) as response:
-    #         response = await response.json()
-
-    #         # Tokens:
-    #         if response:
-    #             response_text = response['candidates'][0]['content']['parts'][0]['text']
-    #             total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
-    #         else:
-    #             logging.error("No response from Google Gemini.")
-    #             return {"response": "No response from Google Gemini."}
-
-    #         model_version = model_name
-    #         used_tokens = total_token_count
-
-    #         # Calculation of money spent on tokens
-    #         expenses = await calculation(username, model_version, used_tokens, input_data="text")
-
-    #         return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
+            return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
 
 
 

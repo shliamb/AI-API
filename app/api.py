@@ -775,11 +775,6 @@ async def gemini_api(
     except:
         print("INFO:     response_format is str. Gemini.")
 
-
-    #print("assist_content: ", assist_content, type(assist_content))
-
-
-
     # Choosing a price list.
     if not model:
         model = defoult_model_gemini
