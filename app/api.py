@@ -791,8 +791,6 @@ async def gemini_api(
         async with aiofiles.open(file_path, "wb") as buffer:
             while content := await file.read(1024):  # Читаем файл порциями по 1024 байта
                 await buffer.write(content)
-        # with open(file_path, "wb") as buffer:
-        #     shutil.copyfileobj(file.file, buffer)
     else:
         file_path = None
 

@@ -29,9 +29,18 @@ async def mod_gemini(description, image_path):
         'Content-Type': 'application/json'
     }
 
-    data = {}
 
-    contents = []
+
+
+
+    if image_path:
+        encoded_image = await encode_file(image_path)
+        data = {"contents": [{"parts": [{"text": user_content},{"inline_data": {"mime_type": "image/jpeg","data": encoded_image}}]}],}
+
+    elif user_content:
+        data = {}
+        contents = []
+        contents.append({"role": "user", "parts":[{"text": user_content}]},)
 
     if assist_content:
         for one in assist_content:
@@ -40,18 +49,20 @@ async def mod_gemini(description, image_path):
             if "assistant" in one:
                 contents.append({"role": "model", "parts":[{"text": one["assistant"]}]},)
 
-    if image_path:
-        encoded_image = await encode_file(image_path)
-        contents.append([{"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]}],)
+    # if image_path:
+    #     encoded_image = await encode_file(image_path)
+    #     contents.append([{"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]}],)
 
 
 
         # data = {"contents": [{"parts": [{"text": user_content},{"inline_data": {"mime_type": "image/jpeg","data": encoded_image}}]}],}
 
+        # {'contents': [{'role': 'user', 'parts': [{'text': 'что тут'}]}]}
 
 
-    elif user_content:
-        contents.append({"role": "user", "parts":[{"text": user_content}]},)
+
+    # elif user_content:
+    #     contents.append({"role": "user", "parts":[{"text": user_content}]},)
 
     data["contents"] = contents
 
