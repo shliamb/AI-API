@@ -34,6 +34,7 @@ async def mod_gemini(description, image_path):
 
 
     if image_path:
+        print("4")
         encoded_image = await encode_file(image_path)
         data = {"contents": [{"parts": [{"text": user_content},{"inline_data": {"mime_type": "image/jpeg","data": encoded_image}}]}],}
 

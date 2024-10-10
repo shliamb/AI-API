@@ -763,7 +763,7 @@ async def gemini_api(
     user_content: str = Form(...),                  # !
     system_content: str = Form(None),
     model: str = Form(None),
-    file: Optional[UploadFile] = File(None)
+    file: Optional[UploadFile] = File(None),
 ):
     try:
         assist_content = json.loads(assist_content) # Из Json (str) в dict
@@ -774,6 +774,8 @@ async def gemini_api(
         response_format = json.loads(response_format) # Из Json (str) в dict
     except:
         print("INFO:     response_format is str. Gemini.")
+
+    print("1", file)
 
     # Choosing a price list.
     if not model:
@@ -793,6 +795,8 @@ async def gemini_api(
                 await buffer.write(content)
     else:
         file_path = None
+
+    print("2", file_path)
 
     # Collect data
     description = {
