@@ -45,36 +45,37 @@ async def mod_gemini(description, image_path):
     elif user_content:
         contents.append({"role": "user", "parts":[{"text": user_content}]},)
 
+    data["contents"] = contents
+
     if system_content:
         data["system_instruction"] = {"parts": {"text": system_content},}
 
-    data["contents"] = contents
-
-
+    print(system_content)
     print(data)
+    # {'contents': [[{'parts': [{'text': 'что ты видишь'}, {'inline_data': {'mime_type': 'image/jpeg', 'data': 'encoded_image'}}]}]]}
 
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, json=data, headers=headers) as response:
-            response = await response.json()
+    # async with aiohttp.ClientSession() as session:
+    #     async with session.post(url, json=data, headers=headers) as response:
+    #         response = await response.json()
 
 
 
-            # Tokens:
-            if response:
-                response_text = response['candidates'][0]['content']['parts'][0]['text']
-                total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
-            else:
-                logging.error("No response from Google Gemini.")
-                return {"response": "No response from Google Gemini."}
+    #         # Tokens:
+    #         if response:
+    #             response_text = response['candidates'][0]['content']['parts'][0]['text']
+    #             total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
+    #         else:
+    #             logging.error("No response from Google Gemini.")
+    #             return {"response": "No response from Google Gemini."}
 
-            model_version = model_name
-            used_tokens = total_token_count
+    #         model_version = model_name
+    #         used_tokens = total_token_count
 
-            # Calculation of money spent on tokens
-            expenses = await calculation(username, model_version, used_tokens, input_data="text")
+    #         # Calculation of money spent on tokens
+    #         expenses = await calculation(username, model_version, used_tokens, input_data="text")
 
-            return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
+    #         return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
 
 
 
