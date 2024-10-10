@@ -776,7 +776,7 @@ async def gemini_api(
         print("INFO:     response_format is str. Gemini.")
 
 
-    print("assist_content: ", assist_content, type(assist_content))
+    #print("assist_content: ", assist_content, type(assist_content))
 
 
 
