@@ -44,8 +44,8 @@ async def mod_gemini(description, image_path):
                     contents.append({"role": "user", "parts":[{"text": one["user"]}]},)
                 if "assistant" in one:
                     contents.append({"role": "model", "parts":[{"text": one["assistant"]}]},)
-            if user_content:
-                contents.append({"role": "user", "parts":[{"text": user_content}]},)
+        if user_content:
+            contents.append({"role": "user", "parts":[{"text": user_content}]},)
 
     data["contents"] = contents
 
