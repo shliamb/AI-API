@@ -8,7 +8,9 @@ from general_functions import calculation, encode_file
 from config import defoult_model_gemini
 
 
-
+#
+# При передаче картинки, системные инструкции работают только для текстовой части модели, тиак же при передачи картинки история не работает и контент, в картинке свой контент..
+#
 
 # Main Text Google Function
 async def mod_gemini(description, image_path):
@@ -18,9 +20,9 @@ async def mod_gemini(description, image_path):
     system_content = description.get("system_content")
     model_name = description.get("model", defoult_model_gemini)
     # tools = description.get("tools")
-
     assist_content = description.get("assist_content")
-    # response_format = description.get("response_format")
+    # ?? 'response_format':'[generationConfig: {responseMimeType: "application/json",responseSchema: {type: SchemaType.ARRAY,items: {type: SchemaType.OBJECT,properties: {recipe_name: {type: SchemaType.STRING,},},},},}});]'
+
 
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={API_KEY_GEMINI}"
@@ -32,27 +34,24 @@ async def mod_gemini(description, image_path):
     data = {}
     contents = []
 
-    if assist_content:
-        for one in assist_content:
-            if "user" in one:
-                contents.append({"role": "user", "parts":[{"text": one["user"]}]},)
-            if "assistant" in one:
-                contents.append({"role": "model", "parts":[{"text": one["assistant"]}]},)
-
     if image_path:
         encoded_image = await encode_file(image_path)
         contents.append([{"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]}],)
-    elif user_content:
-        contents.append({"role": "user", "parts":[{"text": user_content}]},)
+    else:
+        if assist_content:
+            for one in assist_content:
+                if "user" in one:
+                    contents.append({"role": "user", "parts":[{"text": one["user"]}]},)
+                if "assistant" in one:
+                    contents.append({"role": "model", "parts":[{"text": one["assistant"]}]},)
+            if user_content:
+                contents.append({"role": "user", "parts":[{"text": user_content}]},)
 
     data["contents"] = contents
 
     if system_content:
         data["system_instruction"] = {"parts": {"text": system_content},}
 
-    # print(system_content)
-    # print(data)
-    # {'contents': [[{'parts': [{'text': 'что ты видишь'}, {'inline_data': {'mime_type': 'image/jpeg', 'data': 'encoded_image'}}]}]]}
 
 
     async with aiohttp.ClientSession() as session:

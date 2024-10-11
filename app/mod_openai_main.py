@@ -14,6 +14,10 @@ client = AsyncOpenAI(api_key=API_KEY_OPENAI)
 
 
 
+
+#
+# При передаче картинки, системные инструкции работают только для текстовой части модели, тиак же при передачи картинки история не работает и контент, в картинке свой контент..
+#
 # Main Text OpenAI Function .
 async def mod_openai_text_img(description, image_path):
 
@@ -31,23 +35,20 @@ async def mod_openai_text_img(description, image_path):
         if system_content:
             messages_ai.append({"role": "system", "content": system_content},)
 
-        if assist_content:
-            for data in assist_content:
-                if "user" in data:
-                    messages_ai.append({"role": "user", "content": data["user"]})
-                if "assistant" in data:
-                    messages_ai.append({"role": "assistant", "content": data["assistant"]})
-
         if image_path:
             base64_file = await encode_file(image_path)
             messages_ai.append({"role": "user", "content": [{"type": "text", "text": user_content}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_file}",},},],},)
-
-        if user_content:
-            messages_ai.append({"role": "user", "content": user_content},)
-
-        if not response_format:
-            response_format = {"type": "text"}
-
+        else:
+            if assist_content:
+                for data in assist_content:
+                    if "user" in data:
+                        messages_ai.append({"role": "user", "content": data["user"]})
+                    if "assistant" in data:
+                        messages_ai.append({"role": "assistant", "content": data["assistant"]})
+            if user_content:
+                messages_ai.append({"role": "user", "content": user_content},)
+            if not response_format:
+                response_format = {"type": "text"}
 
         # OpenAI:
         response = await client.chat.completions.create(
