@@ -14,6 +14,8 @@ audio_folder = "./audio/"
 # AI Defoult:
 defoult_model_gemini = "gemini-1.5-flash-latest"
 defoult_model_openai = "gpt-4o-mini-2024-07-18"
+default_model_claude = "claude-3-haiku-20240307"
+default_antropic_version = "2023-06-01"
 
 
 
@@ -56,8 +58,17 @@ price = {
     'gemini-1.5-pro-latest': 93.75,
     'gemini-1.5-flash-latest': 1.125,
     'gemini-1.0-pro-latest': 4,
-    # 'text-embedding-004': 0, # Free  хз пока что как ее пользовать
-    # 'aqa': 0,
+
+
+    # Antropic Claude to 1M tokens:  Context window - 200k, 
+    # New:
+    'claude-3-5-sonnet-latest': 36, # output 8192 tokens
+    'claude-3-5-haiku-latest': 12, # no vision and output 8192 tokens
+    'claude-3-opus-latest': 180, # 4096 tokens
+    # Old:
+    'claude-3-sonnet-20240229': 36, # 4096 tokens
+    'claude-3-haiku-20240307': 3, # 4096 tokens
+
     }
 
 
@@ -71,6 +82,26 @@ price = {
 
 
 """
+
+
+
+6Nov2024 OpenAI 1m tokens:
+
+Model                         Input $              Output $           Total $
+
+Old:
+Claude 3 Haiku                 0.25                   1.25                 1.5
+Claude 3 Sonnet                3                      15                   18 
+
+New:
+Claude 3.5 Haiku               1                      5                    6
+Claude 3.5 Sonnet              3                      15                   18           
+Claude 3 Opus                  15                     75                   90
+
+
+
+
+
 
 5Sep2024 OpenAI 1m tokens:
 

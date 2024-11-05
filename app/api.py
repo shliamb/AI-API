@@ -19,13 +19,14 @@ from worker_db import get_user_by_username, update_user
 from general_functions import day_utcnow, unformat_date, remove_file_os, random_name_2X, encode_file
 from mod_openai_main import mod_openai_text_img
 from mod_gemini_main import mod_gemini
+from mod_claude_main import mod_claude
 from mod_openai_gen_img import mod_gen_dall_e
 from mod_openai_edit_img import mod_edit_dall_e
 from mod_openai_varions_img import variations_dall_e
 from mod_openai_text_to_audio import speech_to_audio_openai
 from mod_openai_transcription import transcription_openai
 from mod_openai_translation import translation_openai
-from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price, uploads, defoult_model_gemini, defoult_model_openai
+from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price, uploads, defoult_model_gemini, defoult_model_openai, default_model_claude
 import json
 
 
@@ -148,7 +149,7 @@ async def openai_api(
     user_content: str = Form(...),                  # !
     system_content: str = Form(None),               #
     model: str = Form(None),                        #
-    image: Optional[UploadFile] = File(None)        # # jpg, png проверенно
+    image: Optional[UploadFile] = File(None)        # # jpg, png проверенно   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! file !!!!!!!!!!!!!!!!!!!!!!!
 ):
     
     try:
@@ -823,6 +824,76 @@ async def gemini_api(
 
 
 
+#### Claude ####
+
+# TEXT & IMG Claude Endpoint
+@app.post("/api/claude/", status_code=status.HTTP_200_OK)
+async def claude_api(
+    username: str = Form(...),
+    appkey: str = Header(...),
+    assist_content: str = Form(None),               # history
+    # response_format: str = Form(None),
+    user_content: str = Form(...),                  # !
+    system_content: str = Form(None),
+    model: str = Form(None),
+    file: Optional[UploadFile] = File(None),
+):
+    try:
+        assist_content = json.loads(assist_content) # Из Json (str) в dict
+    except:
+        print("INFO:     assist_content is str. Claude.")
+
+    # try:
+    #     response_format = json.loads(response_format) # Из Json (str) в dict
+    # except:
+    #     print("INFO:     response_format is str. Claude.")
+
+    # Choosing a price list.
+    if not model:
+        model = default_model_claude
+
+    # Verify user and her appkey
+    confirm_verify = await verify_user_appkey(username, model, appkey)
+    if confirm_verify["status_code"] != status.HTTP_200_OK:
+        return confirm_verify
+
+    if file:
+        # Save file to server
+        name = random_name_2X()
+        file_path = f"{uploads}{name}-{file.filename}"
+        async with aiofiles.open(file_path, "wb") as buffer:
+            while content := await file.read(1024):  # Читаем файл порциями по 1024 байта
+                await buffer.write(content)
+    else:
+        file_path = None
+
+    # Collect data
+    description = {
+        "username": username,
+        "user_content": user_content,
+        "model": model,
+    }
+
+    if system_content:
+        description["system_content"] = system_content
+    if assist_content:
+        description["assist_content"] = assist_content
+    # if response_format:
+    #     description["response_format"] = response_format
+
+
+    # Working with Claude
+    confirm_claude = await mod_claude(description, file_path)
+
+    # Remove file
+    if file_path:
+        remove = await remove_file_os(file_path)
+
+    return confirm_claude
+
+
+
+
 
 
 
@@ -834,7 +905,7 @@ async def gemini_api(
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000) # При деплое переделать#### GEMINI TEXT ####
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
 
