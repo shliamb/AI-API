@@ -56,6 +56,8 @@ async def mod_claude(description, image_path):
     data["messages"] = contents
     data["model"] = model_name
 
+    data["max_tokens"] = 4096 # Условия запихнуть под разные модели разные колличества..
+
     if system_content:
         data["system"] = system_content
 
