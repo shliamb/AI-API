@@ -10,7 +10,7 @@ from general_functions import calculation, encode_file
 from config import default_model_claude, default_antropic_version
 
 
-
+import requests
 
 
 # Main Text ANTHROPIC Function
@@ -34,41 +34,56 @@ async def mod_claude(description, image_path):
         "content-type": "application/json"
     }
 
-    data = {}
-    contents = []
+    # data = {}
+    # contents = []
 
-    if image_path:
-        encoded_image = await encode_file(image_path)
-        contents.append({"role": "user", "content": [{"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": encoded_image,}}]})
-        contents.append({"type": "text", "text": user_content})
+    # if image_path:
+    #     encoded_image = await encode_file(image_path)
+    #     contents.append({"role": "user", "content": [{"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": encoded_image,}}]})
+    #     contents.append({"type": "text", "text": user_content})
 
 
-    else:
-        if assist_content:
-            for one in assist_content:
-                if "user" in one:
-                    contents.append({"role": "user", "content": one["user"]},)
-                if "assistant" in one:
-                    contents.append({"role": "assistant", "content":one["assistant"]},)
-        if user_content:
-            contents.append({"role": "user", "content": user_content},)
+    # else:
+    #     if assist_content:
+    #         for one in assist_content:
+    #             if "user" in one:
+    #                 contents.append({"role": "user", "content": one["user"]},)
+    #             if "assistant" in one:
+    #                 contents.append({"role": "assistant", "content":one["assistant"]},)
+    #     if user_content:
+    #         contents.append({"role": "user", "content": user_content},)
 
-    data["messages"] = contents
-    data["model"] = model_name
+    # data["messages"] = contents
+    # data["model"] = model_name
 
     # if system_content:
     #     data["system"] = system_content
 
 
 
-    print(data)
+    # print(data)
 
 
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, json=data, headers=headers) as response:
-            response = await response.json()
-            print(response)
+    data = {
+        "model": "claude-3-5-sonnet-20241022", # claude-3-haiku-20240307
+        "max_tokens": 1024,
+        "messages": [
+            {"role": "user", "content": "Привет, кто ты?"}
+        ]
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+
+    print(response.json())
+
+
+
+
+    # async with aiohttp.ClientSession() as session:
+    #     async with session.post(url, json=data, headers=headers) as response:
+    #         response = await response.json()
+    #         print(response)
 
 
 
