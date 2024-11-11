@@ -39,8 +39,19 @@ async def mod_claude(description, image_path):
 
     if image_path:
         encoded_image = await encode_file(image_path)
-        contents.append({"role": "user", "content": [{"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": encoded_image,}}]})
-        contents.append({"type": "text", "text": user_content})
+        # contents.append({"role": "user", "content": [{"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": encoded_image,}}]})
+        # contents.append({"type": "text", "text": user_content})
+        contents.append({"role": "user", "content": [
+            {
+                "type": "image",
+                "source": {
+                "type": "base64",
+                "media_type": "image/jpeg",
+                "data": encoded_image,
+                }
+            },
+            {"type": "text", "text": user_content}
+        ]})
 
 
     else:
@@ -63,7 +74,7 @@ async def mod_claude(description, image_path):
 
 
 
-    print(data)
+    # print(data)
 
 
 
@@ -78,6 +89,15 @@ async def mod_claude(description, image_path):
     response = requests.post(url, headers=headers, json=data)
 
     print(response.json())
+
+    # Извлечение текста ответа
+    text_answer = response['content'][0]['text']
+
+    # Извлечение input_tokens и output_tokens
+    input_tokens = response['usage']['input_tokens']
+    output_tokens = response['usage']['output_tokens']
+
+    print(text_answer, input_tokens, output_tokens)
 
 
 
