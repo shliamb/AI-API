@@ -852,10 +852,10 @@ async def claude_api(
     if not model:
         model = default_model_claude
 
-    # # Verify user and her appkey
-    # confirm_verify = await verify_user_appkey(username, model, appkey)
-    # if confirm_verify["status_code"] != status.HTTP_200_OK:
-    #     return confirm_verify
+    # Verify user and her appkey
+    confirm_verify = await verify_user_appkey(username, model, appkey)
+    if confirm_verify["status_code"] != status.HTTP_200_OK:
+        return confirm_verify
 
     if image:
         # Save file to server
