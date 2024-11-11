@@ -15,7 +15,7 @@ audio_folder = "./audio/"
 defoult_model_gemini = "gemini-1.5-flash-latest"
 defoult_model_openai = "gpt-4o-mini-2024-07-18"
 default_model_claude = "claude-3-haiku-20240307"
-default_antropic_version = "2023-06-01"
+default_antropic_version = "2023-06-01" # Специфичная для антропик вешь..
 
 
 

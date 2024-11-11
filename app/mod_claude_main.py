@@ -12,17 +12,9 @@ from config import default_model_claude, default_antropic_version
 
 
 
-async def mod_claude():
-    pass
 
-
-
-#
-# При передаче картинки, системные инструкции работают только для текстовой части модели, тиак же при передачи картинки история не работает и контент, в картинке свой контент..
-#
-
-# Main Text Google Function
-async def mod_gemini(description, image_path):
+# Main Text ANTHROPIC Function
+async def mod_claude(description, image_path):
 
     username = description.get("username")
     user_content = description.get("user_content")
@@ -47,45 +39,54 @@ async def mod_gemini(description, image_path):
 
     if image_path:
         encoded_image = await encode_file(image_path)
-        contents.append([{"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]}],)
+        contents.append({"role": "user", "content": [{"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": encoded_image,}}]})
+        contents.append({"type": "text", "text": user_content})
+
+
     else:
         if assist_content:
             for one in assist_content:
                 if "user" in one:
-                    contents.append({"role": "user", "parts":[{"text": one["user"]}]},)
+                    contents.append({"role": "user", "content": one["user"]},)
                 if "assistant" in one:
-                    contents.append({"role": "model", "parts":[{"text": one["assistant"]}]},)
+                    contents.append({"role": "assistant", "content":one["assistant"]},)
         if user_content:
-            contents.append({"role": "user", "parts":[{"text": user_content}]},)
+            contents.append({"role": "user", "content": user_content},)
 
-    data["contents"] = contents
+    data["messages"] = contents
+    data["model"] = model_name
 
-    if system_content:
-        data["system_instruction"] = {"parts": {"text": system_content},}
+    # if system_content:
+    #     data["system"] = system_content
+
+
+
+    print(data)
 
 
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=data, headers=headers) as response:
             response = await response.json()
+            print(response)
 
 
 
-            # Tokens:
-            if response:
-                response_text = response['candidates'][0]['content']['parts'][0]['text']
-                total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
-            else:
-                logging.error("No response from Google Gemini.")
-                return {"response": "No response from Google Gemini."}
+            # # Tokens:
+            # if response:
+            #     response_text = response['candidates'][0]['content']['parts'][0]['text']
+            #     total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
+            # else:
+            #     logging.error("No response from Google Gemini.")
+            #     return {"response": "No response from Google Gemini."}
 
-            model_version = model_name
-            used_tokens = total_token_count
+            # model_version = model_name
+            # used_tokens = total_token_count
 
-            # Calculation of money spent on tokens
-            expenses = await calculation(username, model_version, used_tokens, input_data="text")
+            # # Calculation of money spent on tokens
+            # expenses = await calculation(username, model_version, used_tokens, input_data="text")
 
-            return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
+            # return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
 
 
 
@@ -111,6 +112,9 @@ async def mod_gemini(description, image_path):
 #         {"role": "user", "content": "Hello, Claude"}
 #     ]
 # )
+
+
+
     #     [
     # {"role": "user", "content": "Hello there."},
     # {"role": "assistant", "content": "Hi, I'm Claude. How can I help you?"},
@@ -121,6 +125,8 @@ async def mod_gemini(description, image_path):
     # {"role": "user", "content": "Hello, Claude"}
     
     # {"role": "user", "content": [{"type": "text", "text": "Hello, Claude"}]}
+
+
 
     # {"role": "user", "content": [
     # {

@@ -836,7 +836,7 @@ async def claude_api(
     user_content: str = Form(...),                  # !
     system_content: str = Form(None),
     model: str = Form(None),
-    file: Optional[UploadFile] = File(None),
+    image: Optional[UploadFile] = File(None),
 ):
     try:
         assist_content = json.loads(assist_content) # Из Json (str) в dict
@@ -852,17 +852,17 @@ async def claude_api(
     if not model:
         model = default_model_claude
 
-    # Verify user and her appkey
-    confirm_verify = await verify_user_appkey(username, model, appkey)
-    if confirm_verify["status_code"] != status.HTTP_200_OK:
-        return confirm_verify
+    # # Verify user and her appkey
+    # confirm_verify = await verify_user_appkey(username, model, appkey)
+    # if confirm_verify["status_code"] != status.HTTP_200_OK:
+    #     return confirm_verify
 
-    if file:
+    if image:
         # Save file to server
         name = random_name_2X()
-        file_path = f"{uploads}{name}-{file.filename}"
+        file_path = f"{uploads}{name}-{image.filename}"
         async with aiofiles.open(file_path, "wb") as buffer:
-            while content := await file.read(1024):  # Читаем файл порциями по 1024 байта
+            while content := await image.read(1024):  # Читаем файл порциями по 1024 байта
                 await buffer.write(content)
     else:
         file_path = None
