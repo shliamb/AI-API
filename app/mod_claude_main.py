@@ -39,65 +39,55 @@ async def mod_claude(description, image_path):
 
     if image_path:
         encoded_image = await encode_file(image_path)
-        # contents.append({"role": "user", "content": [{"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": encoded_image,}}]})
-        # contents.append({"type": "text", "text": user_content})
         contents.append({"role": "user", "content": [
             {
                 "type": "image",
                 "source": {
                 "type": "base64",
-                "media_type": "image/jpeg",
+                "media_type": "image/jpeg", # image/jpeg, image/png, image/gif, and image/webp
                 "data": encoded_image,
                 }
             },
             {"type": "text", "text": user_content}
         ]})
 
-
     else:
         if assist_content:
             for one in assist_content:
                 if "user" in one:
-                    contents.append({"role": "user", "content": one["user"]},)
+                    contents.append({"role": "user", "content": one["user"]})
                 if "assistant" in one:
                     contents.append({"role": "assistant", "content":one["assistant"]})
         if user_content:
             contents.append({"role": "user", "content": user_content})
 
+    max_tokens = 4096
+    if model_name == "claude-3-5-sonnet-latest" or model_name == "claude-3-5-haiku-latest":
+        max_tokens = 8192
+
+    data["max_tokens"] = max_tokens
     data["messages"] = contents
     data["model"] = model_name
-
-    data["max_tokens"] = 4096 # Условия запихнуть под разные модели разные колличества..
 
     if system_content:
         data["system"] = system_content
 
 
-
-    # print(data)
-
-
-
-    # data = {
-    #     "model": "claude-3-5-sonnet-20241022", # claude-3-haiku-20240307
-    #     "max_tokens": 1024,
-    #     "messages": [
-    #         {"role": "user", "content": "Привет, кто ты?"}
-    #     ]
-    # }
-
     response = requests.post(url, headers=headers, json=data)
 
+
+    print(data)
+    print()
     print(response.json())
 
     # Извлечение текста ответа
-    text_answer = response['content'][0]['text']
+    # text_answer = response['content'][0]['text']
 
-    # Извлечение input_tokens и output_tokens
-    input_tokens = response['usage']['input_tokens']
-    output_tokens = response['usage']['output_tokens']
+    # # Извлечение input_tokens и output_tokens
+    # input_tokens = response['usage']['input_tokens']
+    # output_tokens = response['usage']['output_tokens']
 
-    print(text_answer, input_tokens, output_tokens)
+    # print(text_answer, input_tokens, output_tokens)
 
 
 
