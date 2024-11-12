@@ -99,6 +99,26 @@ async def mod_claude(description, image_path):
 
 
 
+            # print(data)
+            # print()
+            print(response)
+            print()
+            print()
+
+            # Извлечение текста ответа
+            text_answer = response['content'][0]['text']
+
+            # Извлечение input_tokens и output_tokens
+            input_tokens = response['usage']['input_tokens']
+            output_tokens = response['usage']['output_tokens']
+
+            print(text_answer, input_tokens, output_tokens)
+
+
+
+
+
+
             # # Tokens:
             # if response:
             #     response_text = response['candidates'][0]['content']['parts'][0]['text']
