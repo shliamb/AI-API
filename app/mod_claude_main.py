@@ -73,12 +73,12 @@ async def mod_claude(description, image_path):
         data["system"] = system_content
 
 
-    response = requests.post(url, headers=headers, json=data)
+    # response = requests.post(url, headers=headers, json=data)
 
 
-    print(data)
-    print()
-    print(response.json())
+    # print(data)
+    # print()
+    # print(response.json())
 
     # Извлечение текста ответа
     # text_answer = response['content'][0]['text']
@@ -92,10 +92,10 @@ async def mod_claude(description, image_path):
 
 
 
-    # async with aiohttp.ClientSession() as session:
-    #     async with session.post(url, json=data, headers=headers) as response:
-    #         response = await response.json()
-    #         print(response)
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, json=data, headers=headers) as response:
+            response = await response.json()
+            print(response)
 
 
 
