@@ -10,8 +10,6 @@ from general_functions import calculation, encode_file
 from config import default_model_claude, default_antropic_version
 
 
-import requests
-
 
 # Main Text ANTHROPIC Function
 async def mod_claude(description, image_path):
@@ -73,67 +71,28 @@ async def mod_claude(description, image_path):
         data["system"] = system_content
 
 
-    # response = requests.post(url, headers=headers, json=data)
-
-
-    # print(data)
-    # print()
-    # print(response.json())
-
-    # Извлечение текста ответа
-    # text_answer = response['content'][0]['text']
-
-    # # Извлечение input_tokens и output_tokens
-    # input_tokens = response['usage']['input_tokens']
-    # output_tokens = response['usage']['output_tokens']
-
-    # print(text_answer, input_tokens, output_tokens)
-
-
-
-
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=data, headers=headers) as response:
             response = await response.json()
-            print(response)
 
-
-
-            # print(data)
-            # print()
-            print(response)
-            print()
-            print()
-
-            # Извлечение текста ответа
-            text_answer = response['content'][0]['text']
-
-            # Извлечение input_tokens и output_tokens
             input_tokens = response['usage']['input_tokens']
             output_tokens = response['usage']['output_tokens']
 
-            print(text_answer, input_tokens, output_tokens)
+            # Tokens:
+            if response:
+                response_text = response['content'][0]['text']
+                total_token_count = input_tokens + output_tokens
+            else:
+                logging.error("No response from Anthropic Glaude.")
+                return {"response": "No response from Anthropic Glaude."}
 
+            model_version = model_name
+            used_tokens = total_token_count
 
+            # Calculation of money spent on tokens
+            expenses = await calculation(username, model_version, used_tokens, input_data="text")
 
-
-
-
-            # # Tokens:
-            # if response:
-            #     response_text = response['candidates'][0]['content']['parts'][0]['text']
-            #     total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
-            # else:
-            #     logging.error("No response from Google Gemini.")
-            #     return {"response": "No response from Google Gemini."}
-
-            # model_version = model_name
-            # used_tokens = total_token_count
-
-            # # Calculation of money spent on tokens
-            # expenses = await calculation(username, model_version, used_tokens, input_data="text")
-
-            # return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
+            return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
 
 
 
