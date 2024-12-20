@@ -406,8 +406,8 @@ async def get_prices(message: types.Message):
     prices_en = '''
 
     OpenAI language model 1 million tokens in $:
-        'o1-preview': 150,
-        'o1-preview-2024-09-12': 150,
+        'o1': 150,
+        'o1-2024-12-17': 150,
         'o1-mini': 30,
         'o1-mini-2024-09-12': 30,
         'chatgpt-4o-latest': 40,
