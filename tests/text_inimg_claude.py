@@ -17,12 +17,12 @@ headers = {
     'appkey': 'a36c0e6c-6123-42e9-bcda-1c16e0c7e201',
 }
 
-with open('./uploads/image.jpg', 'rb') as file:
-    image = {
-        'image': ('image.jpg', file),  # !
-    }
+# with open('./uploads/image.jpg', 'rb') as file:
+#     image = {
+#         'image': ('image.jpg', file),  # !
+#     }
 
-    response = requests.post(url, headers=headers, data=data, files=image)
+response = requests.post(url, headers=headers, data=data, files=image)
 
 if response.status_code == 200:
     print(response.json())

@@ -55,9 +55,10 @@ price = {
     'whisper-1': 0.012, # minute (rounded to the nearest second)
 
     # Google Gemini to 1M tokens:
-    'gemini-1.5-pro-latest': 93.75,
-    'gemini-1.5-flash-latest': 1.125,
-    'gemini-1.0-pro-latest': 4,
+    'gemini-2.0-flash-exp': 25,
+    'gemini-1.5-pro-latest': 25,
+    'gemini-1.5-flash-latest': 1.2,
+    'gemini-1.5-flash-8b': 0.8,
 
 
     # Antropic Claude to 1M tokens:  Context window - 200k, 
