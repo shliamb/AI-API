@@ -32,8 +32,11 @@ price = {
     'gpt-4-turbo-2024-04-09': 80,
 
     # New:
-    'o1-2024-12-17': 150,
-    'o3-mini-2025-01-31': 11,
+    'o1': 150,
+    'o3-mini': 11,
+
+    'o1-preview': 150,
+    'o1-mini': 11,
 
     # Images to one img:
     'dall-e-3-1024': 0.08,
