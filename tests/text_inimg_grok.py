@@ -7,7 +7,7 @@ url = "http://137.184.87.156:8000/api/grok/"
 
 data = {
         'username': 'Shliamb5', # !
-        'user_content': 'Что ты видишь?', # !
+        'user_content': 'Привет', # !
         #'system_content': 'Ты личный асистент в Германии',
         'model': 'grok-2-vision-latest',
         #'assist_content': '[{"user": "Привет, меня зовут Алекс."}, {"assistant": "Очень приятно Алекс, я Грок."}, {"user": "Мне 40 лет."}, {"assistant": "Ты в самом расвете сил!"}]',

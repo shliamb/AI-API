@@ -70,42 +70,31 @@ async def mod_grok(description, image_path):
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=data, headers=headers) as response:
             response = await response.json()
-            print(response)
 
+            # content = response['choices'][0]['message']['content']
+            # total_tokens = response['usage']['total_tokens']
+            # text_tokens = response['usage']['prompt_tokens_details']['text_tokens']
+            # audio_tokens = response['usage']['prompt_tokens_details']['audio_tokens']
+            # image_tokens = response['usage']['prompt_tokens_details']['image_tokens']
+            # cached_tokens = response['usage']['prompt_tokens_details']['cached_tokens']
 
-            content = response['choices'][0]['message']['content']
-            total_tokens = response['usage']['total_tokens']
-            text_tokens = response['usage']['prompt_tokens_details']['text_tokens']
-            audio_tokens = response['usage']['prompt_tokens_details']['audio_tokens']
-            image_tokens = response['usage']['prompt_tokens_details']['image_tokens']
-            cached_tokens = response['usage']['prompt_tokens_details']['cached_tokens']
+            #print(content, total_tokens, text_tokens, audio_tokens, image_tokens, cached_tokens)
 
-            print(content, total_tokens, text_tokens, audio_tokens, image_tokens, cached_tokens)
+            # Tokens:
+            if response:
+                response_text = response['choices'][0]['message']['content']
+                total_token_count = response['usage']['total_tokens']
+            else:
+                logging.error("No response from Grok.")
+                return {"response": "No response from Grok."}
 
-            # response_text = response['candidates'][0]['content']['parts'][0]['text']
-            # total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
+            model_version = model_name
+            used_tokens = total_token_count
 
-            # input_tokens = response['usage']['input_tokens']
-            # output_tokens = response['usage']['output_tokens']
+            # Calculation of money spent on tokens
+            expenses = await calculation(username, model_version, used_tokens, input_data="text")
 
-            # # Tokens:
-            # if response:
-            #     response_text = response['content'][0]['text']
-            #     total_token_count = input_tokens + output_tokens
-            # else:
-            #     logging.error("No response from Grok.")
-            #     return {"response": "No response from Grok."}
-
-            # model_version = model_name
-            # used_tokens = total_token_count
-
-            # # Calculation of money spent on tokens
-            # expenses = await calculation(username, model_version, used_tokens, input_data="text")
-
-            #return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
-            return {"response": response, "expenses": 0, "used_tokens": 0}
-
-
+            return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
 
 
 
