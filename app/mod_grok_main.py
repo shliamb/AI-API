@@ -21,6 +21,9 @@ async def mod_grok(description, image_path):
     # ?? 'response_format':'[generationConfig: {responseMimeType: "application/json",responseSchema: {type: SchemaType.ARRAY,items: {type: SchemaType.OBJECT,properties: {recipe_name: {type: SchemaType.STRING,},},},},}});]'
 
 
+    image_path = None # Пока не нашел как передавать картинкун
+
+
 
     url = "https://api.x.ai/v1/chat/completions"
     headers = {
@@ -92,10 +95,7 @@ async def mod_grok(description, image_path):
 
 
 
-
-
-
-
+# {'response': {'id': '10ad5eb6-01ea-4fcb-8b87-612703b14303', 'object': 'chat.completion', 'created': 1739047778, 'model': 'grok-2-vision-1212', 'choices': [{'index': 0, 'message': {'role': 'assistant', 'content': 'Я вижу текстовое сообщение, в котором написано "Что ты видишь?". Поскольку я являюсь текстовым ИИ, я не могу видеть изображения или физические объекты, я могу только интерпретировать и отвечать на текстовые запросы.', 'refusal': None}, 'finish_reason': 'stop'}], 'usage': {'prompt_tokens': 13, 'completion_tokens': 67, 'total_tokens': 80, 'prompt_tokens_details': {'text_tokens': 13, 'audio_tokens': 0, 'image_tokens': 0, 'cached_tokens': 0}}, 'system_fingerprint': 'fp_21e54090c4'}, 'expenses': 0, 'used_tokens': 0}
 
 
 
