@@ -72,6 +72,19 @@ async def mod_grok(description, image_path):
             response = await response.json()
             print(response)
 
+
+            content = response['choices'][0]['message']['content']
+            total_tokens = response['usage']['total_tokens']
+            text_tokens = response['usage']['prompt_tokens_details']['text_tokens']
+            audio_tokens = response['usage']['prompt_tokens_details']['audio_tokens']
+            image_tokens = response['usage']['prompt_tokens_details']['image_tokens']
+            cached_tokens = response['usage']['prompt_tokens_details']['cached_tokens']
+
+            print(content, total_tokens, text_tokens, audio_tokens, image_tokens, cached_tokens)
+
+            # response_text = response['candidates'][0]['content']['parts'][0]['text']
+            # total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
+
             # input_tokens = response['usage']['input_tokens']
             # output_tokens = response['usage']['output_tokens']
 
@@ -95,10 +108,9 @@ async def mod_grok(description, image_path):
 
 
 
-# {'response': {'id': '10ad5eb6-01ea-4fcb-8b87-612703b14303', 'object': 'chat.completion', 'created': 1739047778, 'model': 'grok-2-vision-1212', 'choices': [{'index': 0, 'message': {'role': 'assistant', 'content': 'Я вижу текстовое сообщение, в котором написано "Что ты видишь?". Поскольку я являюсь текстовым ИИ, я не могу видеть изображения или физические объекты, я могу только интерпретировать и отвечать на текстовые запросы.', 'refusal': None}, 'finish_reason': 'stop'}], 'usage': {'prompt_tokens': 13, 'completion_tokens': 67, 'total_tokens': 80, 'prompt_tokens_details': {'text_tokens': 13, 'audio_tokens': 0, 'image_tokens': 0, 'cached_tokens': 0}}, 'system_fingerprint': 'fp_21e54090c4'}, 'expenses': 0, 'used_tokens': 0}
 
 
-
+# response = {'id': '5c301da4-d584-4296-8967-6f190f3fe3c3', 'object': 'chat.completion', 'created': 1739048859, 'model': 'grok-2-vision-1212', 'choices': [{'index': 0, 'message': {'role': 'assistant', 'content': 'Привет', 'refusal': None}, 'finish_reason': 'stop'}], 'usage': {'prompt_tokens': 13, 'completion_tokens': 67, 'total_tokens': 80, 'prompt_tokens_details': {'text_tokens': 13, 'audio_tokens': 0, 'image_tokens': 0, 'cached_tokens': 0}}, 'system_fingerprint': 'fp_21e54090c4'}
 
 
 
