@@ -20,6 +20,7 @@ from general_functions import day_utcnow, unformat_date, remove_file_os, random_
 from mod_openai_main import mod_openai_text_img
 from mod_gemini_main import mod_gemini
 from mod_claude_main import mod_claude
+from mod_grok_main import mod_grok
 from mod_openai_gen_img import mod_gen_dall_e
 from mod_openai_edit_img import mod_edit_dall_e
 from mod_openai_varions_img import variations_dall_e
@@ -894,6 +895,75 @@ async def claude_api(
 
 
 
+
+
+
+#### Elon Musk Grok ####
+
+# TEXT & IMG Elon Musk Grok Endpoint
+@app.post("/api/grok/", status_code=status.HTTP_200_OK)
+async def grok_api(
+    username: str = Form(...),
+    appkey: str = Header(...),
+    assist_content: str = Form(None),               # history
+    # response_format: str = Form(None),
+    user_content: str = Form(...),                  # !
+    system_content: str = Form(None),
+    model: str = Form(None),
+    image: Optional[UploadFile] = File(None),
+):
+    try:
+        assist_content = json.loads(assist_content) # Из Json (str) в dict
+    except:
+        print("INFO:     assist_content is str. Grok.")
+
+    # try:
+    #     response_format = json.loads(response_format) # Из Json (str) в dict
+    # except:
+    #     print("INFO:     response_format is str. Grok.")
+
+    # Choosing a price list.
+    if not model:
+        model = default_model_claude
+
+    # Verify user and her appkey
+    confirm_verify = await verify_user_appkey(username, model, appkey)
+    if confirm_verify["status_code"] != status.HTTP_200_OK:
+        return confirm_verify
+
+    if image:
+        # Save file to server
+        name = random_name_2X()
+        file_path = f"{uploads}{name}-{image.filename}"
+        async with aiofiles.open(file_path, "wb") as buffer:
+            while content := await image.read(1024):  # Читаем файл порциями по 1024 байта
+                await buffer.write(content)
+    else:
+        file_path = None
+
+    # Collect data
+    description = {
+        "username": username,
+        "user_content": user_content,
+        "model": model,
+    }
+
+    if system_content:
+        description["system_content"] = system_content
+    if assist_content:
+        description["assist_content"] = assist_content
+    # if response_format:
+    #     description["response_format"] = response_format
+
+
+    # Working with Grok
+    confirm_grok = await mod_grok(description, file_path)
+
+    # Remove file
+    if file_path:
+        remove = await remove_file_os(file_path)
+
+    return confirm_grok
 
 
 

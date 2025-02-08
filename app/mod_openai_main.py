@@ -32,7 +32,7 @@ async def mod_openai_text_img(description, image_path):
 
         messages_ai = []
 
-        if system_content:
+        if system_content: # if system_content and model_name not in ("o1-preview", "o1-mini", "o1", "o3-mini"):
             messages_ai.append({"role": "system", "content": system_content},)
 
         if image_path:

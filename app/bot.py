@@ -406,39 +406,50 @@ async def get_prices(message: types.Message):
     prices_en = '''
 
     OpenAI language model 1 million tokens in $:
-        'o1': 150,
-        'o1-2024-12-17': 150,
-        'o1-mini': 30,
-        'o1-mini-2024-09-12': 30,
-        'chatgpt-4o-latest': 40,
-        'gpt-4o': 40,
-        'gpt-4o-2024-05-13': 40,
-        'gpt-4o-2024-08-06': 25,
-        'gpt-4o-mini': 1.5, # no vision
-        'gpt-4o-mini-2024-07-18': 1.5, # no vision
-        'gpt-4-turbo-2024-04-09': 80,
+        'o1-preview': 90,
+        'o1-mini': 3.3,
+        'chatgpt-4o-latest': 24,
+        'gpt-4o': 24,
+        'gpt-4o-2024-05-13': 24,
+        'gpt-4o-2024-08-06': 15,
+        'gpt-4o-mini': 1.8, # no vision
+        'gpt-4o-mini-2024-07-18': 1.8, # no vision
+        'gpt-4-turbo-2024-04-09': 48,
 
     The language model from Google is 1 million in $:
-        'gemini-2.0-flash-exp': 25,
-        'gemini-1.5-pro-latest': 25,
-        'gemini-1.5-flash-latest': 1.2,
-        'gemini-1.5-flash-8b': 0.8,
+        'gemini-2.0-flash-exp': 15,
+        'gemini-1.5-pro-latest': 15,
+        'gemini-1.5-flash-latest': 0.8,
+        'gemini-1.5-flash-8b': 0.5,
+    
+    The language model from Elon Musk Grok is 1 million in $:
+        'grok-vision-beta': 24,
+        'grok-2-vision-latest': 14.4,
+        'grok-2-latest': 14.4,
+        'grok-beta': 24,
+
+    The language model from Anthropic is 1 million in $:
+        'claude-3-5-sonnet-latest': 21.6,
+        'claude-3-5-haiku-latest': 7.2,
+        'claude-3-opus-latest': 108,
+        'claude-3-sonnet-20240229': 21.6,
+        'claude-3-haiku-20240307': 1.8,
 
     Generating images for one in $:
-        'dall-e-3-1024': 0.08,
-        'dall-e-3-1792': 0.16,
-        'dall-e-3-hd-1024': 0.16,
-        'dall-e-3-hd-1792': 0.24,
-        'dall-e-2-1024': 0.04,
-        'dall-e-2-512': 0.036,
-        'dall-e-2-256': 0.032,
+        'dall-e-3-1024': 0.048,
+        'dall-e-3-1792': 0.096,
+        'dall-e-3-hd-1024': 0.096,
+        'dall-e-3-hd-1792': 0.144,
+        'dall-e-2-1024': 0.024,
+        'dall-e-2-512': 0.0216,
+        'dall-e-2-256': 0.0192,
 
     Voice generation of 1M characters in $:
-        'tts-1': 30,
-        'tts-1-hd': 60,
+        'tts-1': 18,
+        'tts-1-hd': 36,
 
     Transcription from audio to text min. in $:
-        'whisper-1': 0.012,
+        'whisper-1': 0.0072,
 
     '''
 
