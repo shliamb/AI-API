@@ -406,8 +406,15 @@ async def get_prices(message: types.Message):
     prices_en = '''
 
     OpenAI language model 1 million tokens in $:
+        'gpt-4.1': 12,
+        'gpt-4.1-mini': 2.4,
+        'o1-pro': 900,
+        'gpt-4.1-nano': 0.6,
+        'gpt-4.5-preview': 270,
+        'o1': 90,
         'o1-preview': 90,
         'o1-mini': 3.3,
+        'o3-mini': 6.6,
         'chatgpt-4o-latest': 24,
         'gpt-4o': 24,
         'gpt-4o-2024-05-13': 24,
@@ -417,20 +424,27 @@ async def get_prices(message: types.Message):
         'gpt-4-turbo-2024-04-09': 48,
 
     The language model from Google is 1 million in $:
-        'gemini-2.0-flash-exp': 15,
-        'gemini-1.5-pro-latest': 15,
-        'gemini-1.5-flash-latest': 0.8,
+        'gemini-2.5-pro-preview-03-25': 21,
+        'gemini-2.0-flash-exp': 0.9,
+        'gemini-2.0-flash-lite-001': 0.45,
+        'gemini-1.5-pro-latest': 3.75,
+        'gemini-1.5-flash-latest': 0.225,
         'gemini-1.5-flash-8b': 0.5,
     
     The language model from Elon Musk Grok is 1 million in $:
+        'grok-3-latest': 21.6,
+        'grok-3-fast-latest': 36, 
+        'grok-3-mini-latest': 0.96,
+        'grok-3-mini-fast-latest': 5.52,
         'grok-vision-beta': 24,
         'grok-2-vision-latest': 14.4,
         'grok-2-latest': 14.4,
         'grok-beta': 24,
 
     The language model from Anthropic is 1 million in $:
+        'claude-3-7-sonnet-latest': 21.6,
         'claude-3-5-sonnet-latest': 21.6,
-        'claude-3-5-haiku-latest': 7.2,
+        'claude-3-5-haiku-latest': 5.76,
         'claude-3-opus-latest': 108,
         'claude-3-sonnet-20240229': 21.6,
         'claude-3-haiku-20240307': 1.8,
