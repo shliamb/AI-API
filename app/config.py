@@ -30,11 +30,16 @@ price = {
 
     'gpt-4.1': 12, # 1 million Contex gpt-4.1-2025-04-14
     'gpt-4.1-mini': 2.4, # gpt-4.1-mini-2025-04-14
-    'o1-pro': 900, # o1-pro-2025-03-19
     'gpt-4.1-nano': 0.6, # gpt-4.1-nano-2025-04-14
+
     'gpt-4.5-preview': 270, # gpt-4.5-preview-2025-02-27
+    'o1-pro': 900, # o1-pro-2025-03-19
     'o1': 90, # o1-2024-12-17
     'o1-preview': 90,
+
+    'o3': 60, # o3-2025-04-16 
+
+    'o4-mini': 6.6, # o4-mini-2025-04-16 
     'o3-mini': 6.6, # 
     'o1-mini': 6.6,
     # 'gpt-4o-mini-search-preview': 0.9,
