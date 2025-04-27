@@ -555,6 +555,11 @@ async def backup(message: types.Message):
 # Admin get statistic
 @dp.message(Command("admin_stat"))
 async def get_admin_stat(message: types.Message):
+    id = user_id(message)
+    # Check access
+    if id != IS_ADMIN:
+        await message.answer(f"Sorry, access is denied.")
+        return
 
     data = await get_all_data_user_by_username()
 
@@ -601,6 +606,11 @@ async def get_admin_stat(message: types.Message):
 # Admin submenu download log
 @dp.message(Command("get_logs"))
 async def admin_get_log(message: types.Message):
+    id = user_id(message)
+    # Check access
+    if id != IS_ADMIN:
+        await message.answer(f"Sorry, access is denied.")
+        return
 
     if os.path.exists("./log/bot.log") and os.path.getsize("./log/bot.log") > 0:
         await bot.send_document(message.chat.id, document=types.input_file.FSInputFile("./log/bot.log"))
@@ -616,6 +626,11 @@ async def admin_get_log(message: types.Message):
 # Admin clear logs /clearlog
 @dp.message(Command("clear_logs"))
 async def admin_clear_log(message: types.Message):
+    id = user_id(message)
+    # Check access
+    if id != IS_ADMIN:
+        await message.answer(f"Sorry, access is denied.")
+        return
 
     if os.path.exists("./log/bot.log") and os.path.getsize("./log/bot.log") > 0:
 
