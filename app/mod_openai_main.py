@@ -29,8 +29,8 @@ async def mod_openai_text_img(description, image_path):
     response_format = description.get("response_format")
 
 
-    from openai import OpenAI
-    client = OpenAI()
+    # from openai import OpenAI
+    # client = OpenAI()
 
     response = client.responses.create(
         model="gpt-4.1",
