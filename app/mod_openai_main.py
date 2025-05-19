@@ -37,7 +37,7 @@ async def mod_openai_text_img(description, image_path):
 
         if image_path:
             base64_file = await encode_file(image_path)
-            messages_ai.append({"role": "user", "content": [{"type": "text", "text": user_content}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_file}",},},],},)
+            messages_ai.append({"role": "user", "content": [{"type": "input_text", "text": user_content}, {"type": "input_image", "image_url": f"data:image/jpeg;base64,{base64_file}",},],},)
         else:
             if assist_content:
                 for data in assist_content:
