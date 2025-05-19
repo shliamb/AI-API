@@ -51,15 +51,21 @@ async def mod_openai_text_img(description, image_path):
                 response_format = {"type": "text"}
 
         # OpenAI:
-        response = await client.chat.completions.create(
+        response = await client.responses.create( # client.chat.completions.create(
             model = model_name,
-            messages = messages_ai,
-            response_format=response_format
+            input = messages_ai,
+            response_format = response_format
+            #instructions = instructions
         )
+
+        print()
+        print(response)
+        print(response.output_text)
+        print(response.output)
 
         # TOKENS:
         try:
-            response_content = response.choices[0].message.content
+            response_content = response.output_text #response.choices[0].message.content
             model_version = response.model
             used_tokens = response.usage.total_tokens + response.usage.prompt_tokens
 
@@ -69,7 +75,7 @@ async def mod_openai_text_img(description, image_path):
             return {"response": response_content, "expenses": expenses, "used_tokens": used_tokens}
 
         except:
-            response_content = response.choices[0].message.content
+            response_content = response.output_text 
             return {"response": response_content, "expenses": 0, "used_tokens": 0}
         
 
