@@ -2,15 +2,15 @@
 import logging
 import re
 # OpenAI
-from openai import OpenAI, RateLimitError, OpenAIError
+#from openai import OpenAI, RateLimitError, OpenAIError
 from keys import API_KEY_OPENAI
 # Service
 from general_functions import calculation, encode_file
 from config import defoult_model_openai
 
+import openai
 
-
-client = OpenAI(api_key=API_KEY_OPENAI)
+#client = OpenAI(api_key=API_KEY_OPENAI)
 
 
 
@@ -32,12 +32,13 @@ async def mod_openai_text_img(description, image_path):
     # from openai import OpenAI
     # client = OpenAI()
 
-    response = client.responses.create(
-        model="gpt-4.1",
-        input="Write a one-sentence bedtime story about a unicorn."
-    )
+    # response = client.responses.create(
+    #     model="gpt-4.1",
+    #     input="Write a one-sentence bedtime story about a unicorn."
+    # )
 
-    print(response.output_text)
+    # print(response.output_text)
+    print(openai.__version__)
 
     # try:
 
