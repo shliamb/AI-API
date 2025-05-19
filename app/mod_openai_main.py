@@ -9,7 +9,9 @@ from general_functions import calculation, encode_file
 from config import defoult_model_openai
 
 
+
 client = AsyncOpenAI(api_key=API_KEY_OPENAI)
+
 
 
 
@@ -26,82 +28,70 @@ async def mod_openai_text_img(description, image_path):
     assist_content = description.get("assist_content")
     response_format = description.get("response_format")
 
+    try:
 
-    response = await client.responses.create(
-        model="gpt-4o", input="Explain disestablishmentarianism to a smart five year old."
-    )
-    #rint(response.output_text)
+        messages_ai = []
 
-    # try:
+        if system_content: # if system_content and model_name not in ("o1-preview", "o1-mini", "o1", "o3-mini"):
+            messages_ai.append({"role": "system", "content": system_content},)
 
-    #     messages_ai = []
+        if image_path:
+            base64_file = await encode_file(image_path)
+            messages_ai.append({"role": "user", "content": [{"type": "text", "text": user_content}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_file}",},},],},)
+        else:
+            if assist_content:
+                for data in assist_content:
+                    if "user" in data:
+                        messages_ai.append({"role": "user", "content": data["user"]})
+                    if "assistant" in data:
+                        messages_ai.append({"role": "assistant", "content": data["assistant"]})
+            if user_content:
+                messages_ai.append({"role": "user", "content": user_content},)
+            if not response_format:
+                response_format = {"type": "text"}
 
-    #     if system_content: # if system_content and model_name not in ("o1-preview", "o1-mini", "o1", "o3-mini"):
-    #         messages_ai.append({"role": "system", "content": system_content},)
+        # OpenAI:
+        response = await client.chat.completions.create(
+            model = model_name,
+            messages = messages_ai,
+            response_format=response_format
+        )
 
-    #     if image_path:
-    #         base64_file = await encode_file(image_path)
-    #         messages_ai.append({"role": "user", "content": [{"type": "text", "text": user_content}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_file}",},},],},)
-    #     else:
-    #         if assist_content:
-    #             for data in assist_content:
-    #                 if "user" in data:
-    #                     messages_ai.append({"role": "user", "content": data["user"]})
-    #                 if "assistant" in data:
-    #                     messages_ai.append({"role": "assistant", "content": data["assistant"]})
-    #         if user_content:
-    #             messages_ai.append({"role": "user", "content": user_content},)
-    #         if not response_format:
-    #             response_format = {"type": "text"}
+        # TOKENS:
+        try:
+            response_content = response.choices[0].message.content
+            model_version = response.model
+            used_tokens = response.usage.total_tokens + response.usage.prompt_tokens
 
-    #     # OpenAI:
-    #     response = await client.responses.create( # client.chat.completions.create(
-    #         model = model_name,
-    #         input = messages_ai,
-    #         response_format = response_format
-    #         #instructions = instructions
-    #     )
+            # Calculation of money spent on tokens
+            expenses = await calculation(username, model_version, used_tokens, input_data="text")
 
-    #     print()
-    #     print(response)
-    #     print(response.output_text)
-    #     print(response.output)
+            return {"response": response_content, "expenses": expenses, "used_tokens": used_tokens}
 
-    #     # TOKENS:
-    #     try:
-    #         response_content = response.output_text #response.choices[0].message.content
-    #         model_version = response.model
-    #         used_tokens = response.usage.total_tokens + response.usage.prompt_tokens
-
-    #         # Calculation of money spent on tokens
-    #         expenses = await calculation(username, model_version, used_tokens, input_data="text")
-
-    #         return {"response": response_content, "expenses": expenses, "used_tokens": used_tokens}
-
-    #     except:
-    #         response_content = response.output_text 
-    #         return {"response": response_content, "expenses": 0, "used_tokens": 0}
+        except:
+            response_content = response.choices[0].message.content
+            return {"response": response_content, "expenses": 0, "used_tokens": 0}
         
 
 
-    # except RateLimitError as e:
-    #     no_money_openai = ""
-    #     error_message = str(e)
-    #     error_code_match = re.search(r"Error code: (\d+)", error_message)
-    #     error_code = error_code_match.group(1) if error_code_match else "No code provided"
-    #     if error_code == '429':
-    #        no_money_openai = "Error: There is no money for OpenAI account."
-    #        logging.error(f"Error {error_code}: {error_message}, There are not enough funds for OpenAI. Administrators are notified automatically. We will restore everything in the near future.") 
-    #     else:
-    #        no_money_openai = error_message
-    #     return no_money_openai
+    except RateLimitError as e:
+        no_money_openai = ""
+        error_message = str(e)
+        error_code_match = re.search(r"Error code: (\d+)", error_message)
+        error_code = error_code_match.group(1) if error_code_match else "No code provided"
+        if error_code == '429':
+           no_money_openai = "Error: There is no money for OpenAI account."
+           logging.error(f"Error {error_code}: {error_message}, There are not enough funds for OpenAI. Administrators are notified automatically. We will restore everything in the near future.") 
+        else:
+           no_money_openai = error_message
+        return no_money_openai
 
 
-    # except OpenAIError as e:
-    #     # Обработка других ошибок OpenAI
-    #     error_message = str(e)
-    #     logging.error(f"Error: {error_message}")
-    #     return error_message
+    except OpenAIError as e:
+        # Обработка других ошибок OpenAI
+        error_message = str(e)
+        logging.error(f"Error: {error_message}")
+        return error_message
     
 
 
