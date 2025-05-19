@@ -30,7 +30,7 @@ async def mod_openai_text_img(description, image_path):
     response = await client.responses.create(
         model="gpt-4o", input="Explain disestablishmentarianism to a smart five year old."
     )
-    print(response.output_text)
+    #rint(response.output_text)
 
     # try:
 
