@@ -2,7 +2,7 @@
 import logging
 import re
 # OpenAI
-from openai import AsyncOpenAI, RateLimitError, OpenAIError
+from openai import OpenAI, RateLimitError, OpenAIError
 from keys import API_KEY_OPENAI
 # Service
 from general_functions import calculation, encode_file
@@ -10,7 +10,7 @@ from config import defoult_model_openai
 
 
 
-client = AsyncOpenAI(api_key=API_KEY_OPENAI)
+client = OpenAI(api_key=API_KEY_OPENAI)
 
 
 
@@ -51,7 +51,7 @@ async def mod_openai_text_img(description, image_path):
                 response_format = {"type": "text"}
 
         # OpenAI:
-        response = await client.responses.create( # client.chat.completions.create(
+        response = client.responses.create( # client.chat.completions.create(
             model = model_name,
             input = messages_ai,
             response_format = response_format
