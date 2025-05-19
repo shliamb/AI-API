@@ -58,9 +58,15 @@ async def mod_openai_text_img(description, image_path):
             #instructions = instructions
         )
 
-        print()
-        print(response)
-        print(response.output_text)
+
+        response_id = response.id
+        total_tokens = response.usage.total_tokens
+        model = response.model
+        print(response_id)
+        print(total_tokens)
+        print(model)
+
+
 
         # TOKENS:
         try:
@@ -139,6 +145,7 @@ leter..
 
 
 
+        #Response(id='resp_682bb086c8a48191afd03810ef04478d0896040cf9413041', created_at=1747693702.0, error=None, incomplete_details=None, instructions=None, metadata={}, model='chatgpt-4o-latest', object='response', output=[ResponseOutputMessage(id='msg_682bb0879d908191844aa9d74ca51e680896040cf9413041', content=[ResponseOutputText(annotations=[], text="Привет, Alex. I'm ready (готова) к работе — говори, что нужно.", type='output_text')], role='assistant', status='completed', type='message')], parallel_tool_calls=True, temperature=1.0, tool_choice='auto', tools=[], top_p=1.0, max_output_tokens=None, previous_response_id=None, reasoning=Reasoning(effort=None, generate_summary=None, summary=None), service_tier='default', status='completed', text=ResponseTextConfig(format=ResponseFormatText(type='text')), truncation='disabled', usage=ResponseUsage(input_tokens=113, input_tokens_details=InputTokensDetails(cached_tokens=0), output_tokens=21, output_tokens_details=OutputTokensDetails(reasoning_tokens=0), total_tokens=134), user=None, store=True)
 
 
 
