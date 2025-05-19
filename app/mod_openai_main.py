@@ -51,7 +51,7 @@ async def mod_openai_text_img(description, image_path):
                 response_format = {"type": "text"}
 
         # OpenAI:
-        response = await client.responses.create( # client.chat.completions.create(
+        response = await client.responses.create(
             model = model_name,
             input = messages_ai,
             #response_format = response_format
@@ -59,20 +59,12 @@ async def mod_openai_text_img(description, image_path):
         )
 
 
-        response_id = response.id
-        total_tokens = response.usage.total_tokens
-        model = response.model
-        print(response_id)
-        print(total_tokens)
-        print(model)
-
-
-
         # TOKENS:
         try:
+            response_id = response.id
             response_content = response.output_text #response.choices[0].message.content
             model_version = response.model
-            used_tokens = response.usage.total_tokens + response.usage.prompt_tokens
+            used_tokens = response.usage.total_tokens # + response.usage.prompt_tokens
 
             # Calculation of money spent on tokens
             expenses = await calculation(username, model_version, used_tokens, input_data="text")
