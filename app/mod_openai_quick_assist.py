@@ -19,7 +19,7 @@ async def mod_openai_quick_assist(user_content:str) -> None:
     assist = AssistOpenAI(client)
 
 
-    print(f"List assist: {assist.list_assist}")
+    print(f"List assist: {assist.list_assist()}")
 
     # new_assist_id = assist.create_assist(name, instructions, model, tools)
 
