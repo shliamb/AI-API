@@ -1,5 +1,6 @@
 import logging
-from openai import OpenAI
+# from openai import OpenAI
+from openai import AsyncOpenAI, RateLimitError, OpenAIError
 import time
 import json
 
@@ -8,7 +9,7 @@ from config import defoult_model_openai
 from common_openai_assist import AssistOpenAI
 
 
-client = OpenAI(api_key=API_KEY_OPENAI)
+client = AsyncOpenAI(api_key=API_KEY_OPENAI)
 
 
 
