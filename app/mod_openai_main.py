@@ -62,7 +62,7 @@ async def mod_openai_text_img(description, image_path):
         # TOKENS:
         try:
             response_id = response.id
-            response_content = response.output_text #response.choices[0].message.content
+            response_content = response.output_text
             model_version = response.model
             used_tokens = response.usage.total_tokens # + response.usage.prompt_tokens
 

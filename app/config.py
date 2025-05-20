@@ -18,6 +18,10 @@ default_model_grok = "grok-2-vision-latest"
 default_model_claude = "claude-3-haiku-20240307"
 default_antropic_version = "2023-06-01" # Специфичная для антропик вешь..
 
+# api.py
+REQUEST_LIMIT = 10 # Максимальное количество запросов с одного IP-адреса в течение TIME_WINDOW секунд.
+TIME_WINDOW = 60 # Интервал времени в секундах, в течение которого действует ограничение.
+
 
 
 # Prices per 1M tokens:

@@ -30,8 +30,8 @@ from aiogram.fsm.state import State, StatesGroup
 from worker_db import get_user_by_id, get_user_by_username, update_user, adding_user, get_all_data_user_by_username, get_last_statistics
 from backupdb import backup_db
 from restore_db import restore_db
-from general_functions import day_utcnow, unformat_date, random_name_2X
-from config import money_to_start, my_app_key, time_correction, min_pay
+from general_functions import day_utcnow, random_name_2X
+from config import money_to_start, my_app_key, min_pay
 from keys import TOKEN_TELEGRAM, IS_ADMIN
 
 

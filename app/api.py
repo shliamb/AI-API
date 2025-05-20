@@ -5,15 +5,18 @@ import asyncio
 import aiofiles
 # from pydantic import BaseModel
 from typing import Optional, List
+from datetime import datetime, timezone, timedelta
 # import os
 # import shutil
 # import requests
 # Fasapi
-from fastapi import FastAPI, Header, Depends, HTTPException, status, UploadFile, File, Form
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException, Request, Header, Depends, status, UploadFile, File, Form
+from fastapi.responses import Response, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+import json
+from collections import defaultdict
 import uvicorn
-import gunicorn
+# import gunicorn
 # Service
 from worker_db import get_user_by_username, update_user
 from general_functions import day_utcnow, unformat_date, remove_file_os, random_name_2X, encode_file
@@ -22,28 +25,39 @@ from mod_gemini_main import mod_gemini
 from mod_claude_main import mod_claude
 from mod_grok_main import mod_grok
 from mod_openai_gen_img import mod_gen_dall_e
-from mod_openai_edit_img import mod_edit_dall_e
-from mod_openai_varions_img import variations_dall_e
 from mod_openai_text_to_audio import speech_to_audio_openai
 from mod_openai_transcription import transcription_openai
 from mod_openai_translation import translation_openai
-from config import limit_trying, timeout_after_error_username, waiting_time, time_correction, price, uploads, defoult_model_gemini, defoult_model_openai, default_model_claude
-import json
+from mod_openai_quick_assistent import mod_openai_quick_assist
+from config import limit_trying, timeout_after_error_username, waiting_time, price, uploads, defoult_model_gemini, defoult_model_openai, default_model_claude, TIME_WINDOW, REQUEST_LIMIT
 
 
 app = FastAPI()
 
 
-# Разрешаем CORS только для указанных эндпоинтов и метода POST
-origins = ["*"]  # Разрешаем все источники (можно заменить на конкретные домены)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["POST"],  # Только метод POST
-    allow_headers=["*"],
-)
+
+# Protection from poking
+ip_request_counts = defaultdict(list)
+lock = asyncio.Lock() # "Creating" (Создание) lock.
+
+@app.middleware("http")
+async def rate_limit(request: Request, call_next):
+    ip = request.client.host
+    now = datetime.now()
+    time_window_start = now - timedelta(seconds=TIME_WINDOW)
+
+    async with lock: # "Acquiring" (Получение) lock.
+        ip_request_counts[ip] = [t for t in ip_request_counts[ip] if t > time_window_start]
+        ip_request_counts[ip].append(now)
+        request_count = len(ip_request_counts[ip])
+
+    if request_count > REQUEST_LIMIT:
+        logging.error(f"Rate limit exceeded for IP: {ip}")
+        return Response(status_code=429, content="Too Many Requests")
+
+    response = await call_next(request)
+    return response
 
 
 
@@ -358,194 +372,6 @@ async def dall_e_point(
 
 
 
-#### Create image variation dall-e-2:
-@app.post("/api/variations-dall-e/", status_code=status.HTTP_200_OK)
-async def variations_dall_e_func(
-    username: str = Form(...),                      # !
-    size: str = Form(None),                         # 256x256, 512x512, or 1024x1024
-    response_format: str = Form(None),              # url or b64_json
-    n: int = Form(None),                            # 1 and 10
-    model: str = Form(None),                        # Only dall-e-2
-    appkey: str = Header(...),                      # !
-    file: Optional[UploadFile] = File(),            # ! PNG < 4mb square image
-):
-
-    # Check mistakes:
-    if model and model != "dall-e-2":
-        print("Error! Only Dalle-2 support variation image.")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Error! Only Dalle-2 support variation image.",
-        )
-
-    if size and size == "1792x1024" or size and size == "1024x1792":
-        print("Error! Not support size.")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Error! Not support size.",
-        )
-
-    elif size and size == "1792x1024" or size and size == "1024x1792":
-        print("Error! Not support size.")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Error! Not support size.",
-        )
-    
-    # Choosing a price list
-    if size and size == "1024x1024":
-        model = "dall-e-2-1024"
-    elif size and size == "512x512":
-        model = "dall-e-2-512"
-    elif size and size == "256x256":
-        model = "dall-e-2-256"
-    else:
-        model = "dall-e-2-1024"
-
-    # Verify user and her appkey
-    confirm_verify = await verify_user_appkey(username, model, appkey)
-    if confirm_verify["status_code"] != status.HTTP_200_OK:
-        return confirm_verify
-
-    # Save img to server
-    name = random_name_2X()
-    image_path = f"{uploads}{name}-{file.filename}"
-    async with aiofiles.open(image_path, "wb") as buffer:
-        while content := await file.read(1024):  # Читаем файл порциями по 1024 байта
-            await buffer.write(content)
-    # with open(image_path, "wb") as buffer:
-    #     shutil.copyfileobj(file.file, buffer)
-
-    # Collect data
-    description = {
-        "username": username,
-        "model": model
-    }
-
-    if size:
-        description["size"] = size
-    if response_format:
-        description["response_format"] = response_format
-    if n:
-        description["n"] = n
-
-    # Working with OpenAI
-    confirm_dall_e = await variations_dall_e(description, image_path)
-
-    # Remove file
-    if image_path:
-        remove = await remove_file_os(image_path)
-
-    if confirm_dall_e == "Error: There is no money for OpenAI account.":
-        logging.info("There is no money for OpenAI account.")
-        # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
-
-    return confirm_dall_e
-
-
-
-
-
-#### Edits IMAGE Dall-e 2 :
-@app.post("/api/edit-dall-e/", status_code=status.HTTP_200_OK)
-async def edit_dall_e_point(
-    username: str = Form(...),
-    user_content: str = Form(...),                   # ! < 1000
-    size: str = Form(None),                          # Only 256x256, 512x512, or 1024x1024
-    response_format: str = Form(None),               # url or b64_json
-    n: int = Form(None),                             # 1 and 10
-    model: str = Form(None),                         # only Dall-e 2
-    appkey: str = Header(...),
-    image: Optional[UploadFile] = File(),            # ! PNG ALFA IN < 4mb square image  - Если маска не указана, изображение должно иметь прозрачность, которая будет использоваться в качестве маски.
-    mask: Optional[UploadFile] = File(None)          # PNG & ALFA OUT < 4mb square image & size image = size mask - это изображение внедряется в пустое место картинки image
-):
-
-    # Check mistakes:
-    if model and model != "dall-e-2":
-        print("Error! Only Dalle-2 support edit image.")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Error! Only Dalle-2 support edit image.",
-        )
-    if len(user_content) > 1000:
-        print("Error! Not support > 1000 simbol")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Error! Not support > 1000 simbol",
-        )
-    if size and size == "1792x1024" or size and size == "1024x1792":
-        print("Error! Not support size.")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Error! Not support size.",
-        )
-    
-    if size and size == "1024x1024":
-        model = "dall-e-2-1024"
-    elif size and size == "512x512":
-        model = "dall-e-2-512"
-    elif size and size == "256x256":
-        model = "dall-e-2-256"
-    else:
-        model = "dall-e-2-1024"
-
-    # Verify user and her appkey
-    confirm_verify = await verify_user_appkey(username, model, appkey)
-    if confirm_verify["status_code"] != status.HTTP_200_OK:
-        return confirm_verify
-
-    # Save img to server
-    name = random_name_2X()
-    image_path = f"{uploads}{name}-{image.filename}"
-    async with aiofiles.open(image_path, "wb") as buffer:
-        while content := await image.read(1024):  # Читаем файл порциями по 1024 байта
-            await buffer.write(content)
-    # with open(image_path, "wb") as buffer:
-    #     shutil.copyfileobj(image.file, buffer)
-
-    if mask:
-        # Save mask to server
-        name = random_name_2X()
-        mask_path = f"{uploads}{name}-{mask.filename}"
-        async with aiofiles.open(mask_path, "wb") as buffer:
-            while content := await mask.read(1024):  # Читаем файл порциями по 1024 байта
-                await buffer.write(content)
-        # with open(mask_path, "wb") as buffer:
-        #     shutil.copyfileobj(mask.file, buffer)
-    else:
-        mask_path = None
-
-    # Collect data
-    description = {
-        "username": username,
-        "user_content": user_content,
-    }
-
-    if model:
-        description["model"] = model
-    if size:
-        description["size"] = size
-    if response_format:
-        description["response_format"] = response_format
-    if n:
-        description["n"] = n
-
-    # Working with OpenAI
-    confirm_dall_e = await mod_edit_dall_e(description, image_path, mask_path)
-
-    # Remove file
-    if image_path:
-        remove = await remove_file_os(image_path)
-    if mask_path:
-        remove = await remove_file_os(mask_path)
-
-    if confirm_dall_e == "Error: There is no money for OpenAI account.":
-        logging.info("There is no money for OpenAI account.")
-        # Передача сигнала телеграмм боту, администратору пока что хз как соеденить их)))
-
-    return confirm_dall_e
-
-
 
 
 
@@ -668,6 +494,10 @@ async def point_transcription_openai(
     return confirm_openai
 
 
+
+
+
+
 # Create translation into English OPENAI Endpoint:
 @app.post("/api/translation-openai/", status_code=status.HTTP_200_OK)
 async def point_translation_openai(
@@ -722,25 +552,41 @@ async def point_translation_openai(
 
 
 
+# Assistants OpenAI:
+@app.post("/api/quick-assist-openai/", status_code=status.HTTP_200_OK)
+async def grok_api(
+    username: str = Form(...),
+    appkey: str = Header(...),
+    user_content: str = Form(...), 
+    instructions: str = Form(None),             # "You are an HR bot, and you have access to files to answer employee questions about company policies.",
+    name: str = Form(None),                     # "HR Helper",
+    tools: str = Form(None),                     # [{"type": "file_search"}],
+    tool_resources: str = Form(None),           # {"file_search": {"vector_store_ids": ["vs_123"]}},
+    model: str = Form(None),
+    # image: Optional[UploadFile] = File(None),
+):
 
 
+    # Choosing a price list.
+    if not model:
+        model = defoult_model_openai
 
-####
+    # Verify user and her appkey
+    confirm_verify = await verify_user_appkey(username, model, appkey)
+    if confirm_verify["status_code"] != status.HTTP_200_OK:
+        return confirm_verify
 
+    # if image:
+    #     # Save img to server
+    #     name = random_name_2X()
+    #     image_path = f"{uploads}{name}-{image.filename}"
+    #     async with aiofiles.open(image_path, "wb") as buffer:
+    #         while content := await image.read(1024):  # Читаем файл порциями по 1024 байта
+    #             await buffer.write(content)
+    # else:
+    #     image_path = None
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    await mod_openai_quick_assist(user_content)
 
 
 
@@ -972,8 +818,6 @@ async def grok_api(
 
 
 
-
-
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
@@ -985,14 +829,6 @@ if __name__ == "__main__":
 
 
 
-# # Function to translate text using OpenAI
-# def translate_text(text, target_language='Spanish'):
-#     response = openai.Completion.create(
-#         model="text-davinci-003",  # or the latest model you want to use
-#         prompt=f"Translate the following English text to {target_language}: {text}",
-#         max_tokens=60
-#     )
-#     return response.choices[0].text.strip()
 
 
 
@@ -1023,36 +859,3 @@ if __name__ == "__main__":
 
 
 
-
-
-
-
-
-
-
-# # Model Gemini Text
-# class UserInput_Gemini(BaseModel):
-#     user_content: str
-#     #system_content: str
-#     system_content: Optional[str] = None
-#     username: str
-#     model: str
-#     #tools: str
-#     tools: Optional[str] = None
-
-# # TEXT GEMINI Endpoint
-# @app.post("/api/gemini/", status_code=status.HTTP_200_OK)
-# async def gemini_api(user_input: UserInput_Gemini, appkey: str = Header(...)):
-
-#     # Verify user and her appkey
-#     username = user_input.username
-#     model = user_input.model
-#     confirm_verify = await verify_user_appkey(username, model, appkey)
-#     if confirm_verify["status_code"] != status.HTTP_200_OK:
-#         raise
-
-#     # Working with Gemini
-#     confirm_gemini = await mod_gemini(username, user_input)
-
-
-#     return confirm_gemini
