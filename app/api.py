@@ -28,7 +28,7 @@ from mod_openai_gen_img import mod_gen_dall_e
 from mod_openai_text_to_audio import speech_to_audio_openai
 from mod_openai_transcription import transcription_openai
 from mod_openai_translation import translation_openai
-from mod_openai_quick_assistent import mod_openai_quick_assist
+from app.mod_openai_quick_assist import mod_openai_quick_assist
 from config import limit_trying, timeout_after_error_username, waiting_time, price, uploads, defoult_model_gemini, defoult_model_openai, default_model_claude, TIME_WINDOW, REQUEST_LIMIT
 
 
