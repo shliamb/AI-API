@@ -30,6 +30,7 @@ class AssistOpenAI:
                 tools=tools
             )
             return assistant.id
+        
         except Exception as e:
             logging.error(f"Failed to create assistant: {e}")
             return None
@@ -130,10 +131,19 @@ class AssistOpenAI:
     # Get Respounce:
     async def get_runs_threads(self, run_id: str, thread_id: str) -> tuple:
         '''Получение ответа'''
-        run_status = await self.client.beta.threads.runs.retrieve(
-            thread_id=thread_id,
-            run_id=run_id
-        )
-        status = run_status.status
-        tool_calls = run_status.required_action.submit_tool_outputs.tool_calls
-        return status, tool_calls
+        try:
+            run_status = await self.client.beta.threads.runs.retrieve(
+                thread_id=thread_id,
+                run_id=run_id
+            )
+            
+            if not run_status:
+                return None
+            
+            status = run_status.status
+            tool_calls = run_status.required_action.submit_tool_outputs.tool_calls
+            return status, tool_calls
+        
+        except Exception as e:
+            logging.error(f"Failed to Respounce get_runs_threads: {e}")
+            return None
