@@ -28,8 +28,8 @@ from mod_openai_gen_img import mod_gen_dall_e
 from mod_openai_text_to_audio import speech_to_audio_openai
 from mod_openai_transcription import transcription_openai
 from mod_openai_translation import translation_openai
-from mod_openai_quick_assist import oa_asist_custom_0525, oa_assist_retrieve
-from config import LIMIT_TRY, TIME_OUT_ERR_USERNAME, WAITING_TIME, PRICE, UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK
+from mod_openai_quick_assist import oa_asist_custom_0525, oa_assist_retrieve, oa_assist_list, oa_assist_del, oa_thread_del
+from config import LIMIT_TRY, TIME_OUT_ERR_USERNAME, WAITING_TIME, PRICE, UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK, USERNAME_ADMIN
 
 
 app = FastAPI()
@@ -577,6 +577,11 @@ async def in_oa_assist_custom_0525(
     - только assistant_id и thread_id — если контент отсутствует.
     '''
 
+    if username != USERNAME_ADMIN:
+        error_msg = f"Access denied for user '{username}'"
+        logging.error(error_msg)
+        return error_msg
+
     # Verify user and their appkey (подтверждение авторизации):
     verification = await verify_user_appkey(username, model, appkey)
     if verification.get("status_code") != status.HTTP_200_OK:
@@ -607,22 +612,111 @@ async def in_oa_assist_retrieve(
     thread_id: str = Form(...)
 ):
 
-    '''
-    Получение ответа от активного ассистента по указанному каналу (thread_id) и 
-    идентификатору запуска (run_id).
-    
-    '''
+    '''Получение ответа от активного ассистента по указанному каналу (thread_id) и идентификатору запуска (run_id).'''
 
-    # model = "retrieve openai assist"
+    if username != USERNAME_ADMIN:
+        error_msg = f"Access denied for user '{username}'"
+        logging.error(error_msg)
+        return error_msg
 
-    # # Verify user and their appkey (подтверждение авторизации):
-    # verification = await verify_user_appkey(username, model, appkey)
-    # if verification.get("status_code") != status.HTTP_200_OK:
-    #     logging.error("User verification failed: %s", verification)
-    #     return verification
+    model = "assistent-oa" # Пока что не знаю как и че делать с этим..
+
+    # Verify user and their appkey (подтверждение авторизации):
+    verification = await verify_user_appkey(username, model, appkey)
+    if verification.get("status_code") != status.HTTP_200_OK:
+        logging.error("User verification failed: %s", verification)
+        return verification
 
 
     return await oa_assist_retrieve(run_id, thread_id)
+
+
+
+# Получение списка Асистентов:
+@app.post("/api/oa-assist-list/", status_code=status.HTTP_200_OK)
+async def in_oa_assist_list(
+    username: str = Form(...),
+    appkey: str = Header(...)
+):
+
+    '''Получение списка агентов'''
+
+    if username != USERNAME_ADMIN:
+        error_msg = f"Access denied for user '{username}'"
+        logging.error(error_msg)
+        return error_msg
+
+    model = "assistent-oa" # Пока что не знаю как и че делать с этим..
+
+    # Verify user and their appkey (подтверждение авторизации):
+    verification = await verify_user_appkey(username, model, appkey)
+    if verification.get("status_code") != status.HTTP_200_OK:
+        logging.error("User verification failed: %s", verification)
+        return verification
+
+    return await oa_assist_list()
+
+
+
+# Удаление ассистента:
+@app.post("/api/oa-assist-del/", status_code=status.HTTP_200_OK)
+async def in_oa_assist_del(
+    username: str = Form(...),
+    appkey: str = Header(...),
+    assistant_id: str = Form(...)
+):
+
+    '''Удаление Ассистента'''
+
+    if username != USERNAME_ADMIN:
+        error_msg = f"Access denied for user '{username}'"
+        logging.error(error_msg)
+        return error_msg
+
+    model = "assistent-oa" # Пока что не знаю как и че делать с этим..
+
+    # Verify user and their appkey (подтверждение авторизации):
+    verification = await verify_user_appkey(username, model, appkey)
+    if verification.get("status_code") != status.HTTP_200_OK:
+        logging.error("User verification failed: %s", verification)
+        return verification
+    
+    return await oa_assist_del(assistant_id)
+
+
+
+
+# Удаление Thread:
+@app.post("/api/oa-thread-del/", status_code=status.HTTP_200_OK)
+async def in_oa_thread_del(
+    username: str = Form(...),
+    appkey: str = Header(...),
+    thread_id: str = Form(...)
+):
+
+    '''Удаление Thread'''
+
+    if username != USERNAME_ADMIN:
+        error_msg = f"Access denied for user '{username}'"
+        logging.error(error_msg)
+        return error_msg
+
+    model = "assistent-oa" # Пока что не знаю как и че делать с этим..
+
+    # Verify user and their appkey (подтверждение авторизации):
+    verification = await verify_user_appkey(username, model, appkey)
+    if verification.get("status_code") != status.HTTP_200_OK:
+        logging.error("User verification failed: %s", verification)
+        return verification
+    
+    return await oa_thread_del(thread_id)
+
+
+
+
+
+
+
 
 
 

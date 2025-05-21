@@ -6,6 +6,7 @@ TIME_CORRECTION = +3 # Moscow
 MONEY_TO_START = 0.3 # 1$ to start work
 MY_APP_KEY = "appkey" # Key to API Key
 MIN_PAY = 1 # Minimum pay
+USERNAME_ADMIN = "Shliamb5"
 
 # Folders:
 UPLOADS = "./uploads/"
@@ -29,6 +30,8 @@ PRICE = {
     # OpenAI to 1M tokes:
 
     # New:
+
+    'assistent-oa': 0.1, # Пока что хз че как
 
 
     'gpt-4.1': 12, # 1 million Contex gpt-4.1-2025-04-14

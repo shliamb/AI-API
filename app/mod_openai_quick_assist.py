@@ -6,7 +6,7 @@ from openai import AsyncOpenAI, RateLimitError, OpenAIError
 import json
 # Service
 from keys import API_KEY_OPENAI
-from config import DEF_MOD_OPENAI
+# from config import DEF_MOD_OPENAI
 from common_openai_assist import AssistOpenAI
 
 client = AsyncOpenAI(api_key=API_KEY_OPENAI)
@@ -14,6 +14,8 @@ assist = AssistOpenAI(client)
 
 
 
+
+# Запуск асистента кастомно:
 async def oa_asist_custom_0525(data:dict) -> dict:
 
     '''
@@ -29,7 +31,7 @@ async def oa_asist_custom_0525(data:dict) -> dict:
     - run_id (только если был запущен run)
     
     '''
-    
+
     name = data.get("name")
     instructions = data.get("instructions")
     model = data.get("model")
@@ -59,6 +61,8 @@ async def oa_asist_custom_0525(data:dict) -> dict:
 
 
 
+
+# Запрос ответа от запущенного Ассистента по треду:
 async def oa_assist_retrieve(run_id: str, thread_id: str) -> tuple:
     '''Получение ответа от активного ассистента по указанному каналу (thread_id) и 
     идентификатору запуска (run_id)'''
@@ -67,10 +71,27 @@ async def oa_assist_retrieve(run_id: str, thread_id: str) -> tuple:
 
 
 
+# Получение списка Ассистентов:
+async def oa_assist_list():
+    '''Получение списка Ассистентов'''
+    list_assist = await assist.list_assist()
+    return list_assist
 
 
 
+# Удаление Ассистента:
+async def oa_assist_del(assistant_id):
+    '''Удаление ассистента по id'''
+    response = await assist.delete_assist(assistant_id)
+    return response
 
+
+
+# Удаление Thread:
+async def oa_thread_del(thread_id):
+    '''Удаление Thread'''
+    response = await assist.delete_tread(thread_id)
+    return response
 
 
 

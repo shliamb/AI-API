@@ -60,10 +60,10 @@ data = {
     "name": "Математик",
     "instructions": "Ты помощник, который использует числовые функции от разработчика.",
     "model": "gpt-4o",        
-    "user_content": "Найди сумму чисел 5 и 8",
+    "user_content": "умножь 2 и 2",
     "tools": str_tools,
-    "assistant_id": None,
-    "thread_id": None
+    "assistant_id": "asst_JBoneVMpW2DcjsI9FjxV7FoR",
+    "thread_id": "thread_skm9CZ3hFJSGjE9kcQM9sLiR"
 }
 
 headers = {
@@ -80,5 +80,8 @@ else:
 
 
 
+# 1 нет асистента и канала {'asist_id': 'asst_aO3gwhPLOwPihaSP26SOIw1T', 'thread_id': 'thread_cKMbVmB5D4f9bjeoFTT8SLoc', 'run_id': 'run_bKTyP4PtQHxyFOWr8BJ8nnG0'} запустил и дал run_id
 
-#List assist: [Assistant(id='asst_UtCUnUUYRHlbDm8n86iFhcXl', created_at=1747744303, description=None, instructions='Ты помощник, который использует числовые функции от разработчика.', metadata={}, model='gpt-4o', name='Математик', object='assistant', tools=[FunctionTool(function=FunctionDefinition(name='add', description='Сложить два числа', parameters={'type': 'object', 'properties': {'a': {'type': 'number'}, 'b': {'type': 'number'}}, 'required': ['a', 'b']}, strict=False), type='function'), FunctionTool(function=FunctionDefinition(name='multiply', description='Умножить два числа', parameters={'type': 'object', 'properties': {'a': {'type': 'number'}, 'b': {'type': 'number'}}, 'required': ['a', 'b']}, strict=False), type='function')], response_format='auto', temperature=1.0, tool_resources=ToolResources(code_interpreter=None, file_search=None), top_p=1.0, reasoning_effort=None)]
+# 2 нет контента {'asist_id': 'asst_JBoneVMpW2DcjsI9FjxV7FoR', 'thread_id': 'thread_skm9CZ3hFJSGjE9kcQM9sLiR', 'system_message': 'Missing message from user.'} создал асистента и канал и отдал их id
+
+# 3 Еть асистент и канал контент {'asist_id': 'asst_JBoneVMpW2DcjsI9FjxV7FoR', 'thread_id': 'thread_skm9CZ3hFJSGjE9kcQM9sLiR', 'run_id': 'run_ibC2N55iH6RcsjNm3YecHW74'} запустил и дал run_id
