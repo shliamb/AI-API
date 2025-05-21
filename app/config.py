@@ -1,22 +1,21 @@
-
 #### CONFIG ####
+LIMIT_TRY = 5
+TIME_OUT_ERR_USERNAME = 5 # sec.
+WAITING_TIME = 15 # min/
+TIME_CORRECTION = +3 # Moscow
+MONEY_TO_START = 0.3 # 1$ to start work
+MY_APP_KEY = "appkey" # Key to API Key
+MIN_PAY = 1 # Minimum pay
 
-limit_trying = 5
-timeout_after_error_username = 5 # sec.
-waiting_time = 15 # min/
-time_correction = +3 # Moscow
-money_to_start = 0.3 # 1$ to start work
-my_app_key = "appkey" # Key to API Key
-min_pay = 1 # Minimum pay
 # Folders:
-uploads = "./uploads/"
-audio_folder = "./audio/"
+UPLOADS = "./uploads/"
+AUDIO_FOLDER = "./audio/"
 # AI Defoult:
-defoult_model_gemini = "gemini-1.5-flash-latest"
-defoult_model_openai = "gpt-4o-mini-2024-07-18"
-default_model_grok = "grok-2-vision-latest"
-default_model_claude = "claude-3-haiku-20240307"
-default_antropic_version = "2023-06-01" # Специфичная для антропик вешь..
+DEF_MOD_GOOGLE = "gemini-2.0-flash-exp"
+DEF_MOD_OPENAI = "gpt-4o-mini-2024-07-18"
+DEF_MOD_GROK = "grok-2-vision-latest"
+DEF_MOD_CLAUDE = "claude-3-haiku-20240307"
+DEF_CLAUDE_VERSION = "2023-06-01" # Специфичная для антропик вешь..
 
 # api.py
 REQUEST_LIMIT = 10 # Максимальное количество запросов с одного IP-адреса в течение TIME_WINDOW секунд.
@@ -26,7 +25,7 @@ TIME_WINDOW = 60 # Интервал времени в секундах, в те�
 
 # Prices per 1M tokens:
 # Важно, нужно размещать выше дорогие однокоренные модели, что бы не хитрили
-price = {
+PRICE = {
     # OpenAI to 1M tokes:
 
     # New:

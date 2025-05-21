@@ -31,7 +31,7 @@ from worker_db import get_user_by_id, get_user_by_username, update_user, adding_
 from backupdb import backup_db
 from restore_db import restore_db
 from general_functions import day_utcnow, random_name_2X
-from config import money_to_start, my_app_key, min_pay
+from config import MONEY_TO_START, MY_APP_KEY, MIN_PAY
 from keys import TOKEN_TELEGRAM, IS_ADMIN
 
 
@@ -135,7 +135,7 @@ async def command_start_handler(message: Message) -> None:
                 "first_name":first_name,
                 "last_name": last_name,
                 "username": username,
-                "money": money_to_start,
+                "money": MONEY_TO_START,
                 "date_last_activ": await day_utcnow(),
                         }
 
@@ -153,7 +153,7 @@ Use the following keys to use the API:
     Add to: <i>Form-data</i>
 
 <b>API KEY:</b>
-    Key: <code>{my_app_key}</code>
+    Key: <code>{MY_APP_KEY}</code>
     Value: <code>{is_on_user.appkey}</code>
     Add to: <i>Header</i>
 
@@ -203,7 +203,7 @@ Use the following keys to use the API:
     Add to: <i>Form-data</i>
 
 <b>API KEY:</b>
-    Key: <code>{my_app_key}</code>
+    Key: <code>{MY_APP_KEY}</code>
     Value: <code>{data.appkey}</code>
     Add to: <i>Header</i>
 
@@ -283,8 +283,8 @@ async def invoice_user_1(message: Message, state: FSMContext):
         await bot.send_message(message.chat.id, f"Enter only the amount in numbers in USD.")
         return
 
-    if float(summ) < min_pay:
-        await bot.send_message(message.chat.id, f"The minimum amount is {min_pay} $.")
+    if float(summ) < MIN_PAY:
+        await bot.send_message(message.chat.id, f"The minimum amount is {MIN_PAY} $.")
         return
 
     # запускаю функцию и передаю данные для подтверждения админом.

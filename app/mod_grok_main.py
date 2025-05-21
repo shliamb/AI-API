@@ -5,7 +5,7 @@ import aiohttp
 import asyncio
 # Service
 from general_functions import calculation, encode_file
-from config import default_model_grok
+from config import DEF_MOD_GROK
 
 
 
@@ -15,7 +15,7 @@ async def mod_grok(description, image_path):
     username = description.get("username")
     user_content = description.get("user_content")
     system_content = description.get("system_content")
-    model_name = description.get("model", default_model_grok)
+    model_name = description.get("model", DEF_MOD_GROK)
     # tools = description.get("tools")
     assist_content = description.get("assist_content")
     # ?? 'response_format':'[generationConfig: {responseMimeType: "application/json",responseSchema: {type: SchemaType.ARRAY,items: {type: SchemaType.OBJECT,properties: {recipe_name: {type: SchemaType.STRING,},},},},}});]'

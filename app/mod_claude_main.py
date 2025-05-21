@@ -7,7 +7,7 @@ import asyncio
 # import anthropic
 # Service
 from general_functions import calculation, encode_file
-from config import default_model_claude, default_antropic_version
+from config import DEF_MOD_CLAUDE, DEF_CLAUDE_VERSION
 
 
 
@@ -17,7 +17,7 @@ async def mod_claude(description, image_path):
     username = description.get("username")
     user_content = description.get("user_content")
     system_content = description.get("system_content")
-    model_name = description.get("model", default_model_claude)
+    model_name = description.get("model", DEF_MOD_CLAUDE)
     # tools = description.get("tools")
     assist_content = description.get("assist_content")
     # ?? 'response_format':'[generationConfig: {responseMimeType: "application/json",responseSchema: {type: SchemaType.ARRAY,items: {type: SchemaType.OBJECT,properties: {recipe_name: {type: SchemaType.STRING,},},},},}});]'
@@ -28,7 +28,7 @@ async def mod_claude(description, image_path):
 
     headers = {
         "x-api-key": API_KEY_CLAUDE,
-        "anthropic-version": default_antropic_version,
+        "anthropic-version": DEF_CLAUDE_VERSION,
         "content-type": "application/json"
     }
 

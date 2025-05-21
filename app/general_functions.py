@@ -9,7 +9,7 @@ import aiofiles
 import asyncio
 from mutagen import File
 from io import BytesIO
-from config import price, time_correction
+from config import PRICE, TIME_CORRECTION
 from worker_db import add_statistic, get_user_by_username, update_user_by_username
 
 # from config import price
@@ -19,7 +19,7 @@ from worker_db import add_statistic, get_user_by_username, update_user_by_userna
 async def day_utcnow():
     utc_zone = timezone.utc
     a = datetime.now(timezone.utc).replace(tzinfo=utc_zone)
-    a = a + timedelta(hours=time_correction)
+    a = a + timedelta(hours=TIME_CORRECTION)
     day_str = a.strftime("%Y-%m-%d %H:%M:%S")
     day = datetime.strptime(day_str, '%Y-%m-%d %H:%M:%S')
     logging.info("info: Getting the day and time from the server")
@@ -36,7 +36,7 @@ async def unformat_date(date):
 async def calculation(username, model_version, used_tokens, input_data):
     one_tok_price = None
     
-    for key, value in price.items():
+    for key, value in PRICE.items():
         if key == model_version:
             if input_data == "text":
                 one_tok_price = value / 1000000 # Price 1 token to USD

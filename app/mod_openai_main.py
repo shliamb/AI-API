@@ -6,7 +6,7 @@ from openai import AsyncOpenAI, RateLimitError, OpenAIError
 from keys import API_KEY_OPENAI
 # Service
 from general_functions import calculation, encode_file
-from config import defoult_model_openai
+from config import DEF_MOD_OPENAI
 
 
 
@@ -24,7 +24,7 @@ async def mod_openai_text_img(description, image_path):
     username = description.get("username")
     user_content = description.get("user_content")
     system_content = description.get("system_content")
-    model_name = description.get("model", defoult_model_openai)
+    model_name = description.get("model", DEF_MOD_OPENAI)
     assist_content = description.get("assist_content")
     response_format = description.get("response_format")
 

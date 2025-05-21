@@ -28,8 +28,8 @@ from mod_openai_gen_img import mod_gen_dall_e
 from mod_openai_text_to_audio import speech_to_audio_openai
 from mod_openai_transcription import transcription_openai
 from mod_openai_translation import translation_openai
-from app.mod_openai_quick_assist import mod_openai_quick_assist
-from config import limit_trying, timeout_after_error_username, waiting_time, price, uploads, defoult_model_gemini, defoult_model_openai, default_model_claude, TIME_WINDOW, REQUEST_LIMIT
+from mod_openai_quick_assist import oa_asist_custom_0525, oa_assist_retrieve
+from config import LIMIT_TRY, TIME_OUT_ERR_USERNAME, WAITING_TIME, PRICE, UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK
 
 
 app = FastAPI()
@@ -66,7 +66,7 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
     data_by_username = await get_user_by_username(username)
     
     if data_by_username is None:
-        await asyncio.sleep(timeout_after_error_username)
+        await asyncio.sleep(TIME_OUT_ERR_USERNAME)
         logging.error("Invalid UserName in Body! After a failed attempt, a 5-second wait is activated.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -75,7 +75,7 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
 
     if data_by_username.is_block is True:
 
-        un_waiting_time = float(0.01 * float(waiting_time))
+        un_waiting_time = float(0.01 * float(WAITING_TIME))
 
         date_now = await day_utcnow()
         un_date_now = await unformat_date(date_now)
@@ -83,10 +83,10 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
         un_time = un_date_now[1] - un_date_block[1]
 
         if un_date_now[0] == un_date_block[0] and un_time < un_waiting_time:
-            logging.error(f"Sorry, the user is blocked for {waiting_time} minutes, after {limit_trying} unsuccessful attempts.")
+            logging.error(f"Sorry, the user is blocked for {WAITING_TIME} minutes, after {LIMIT_TRY} unsuccessful attempts.")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Sorry, the user is blocked for {waiting_time} minutes, after {limit_trying} unsuccessful attempts.",
+                detail=f"Sorry, the user is blocked for {WAITING_TIME} minutes, after {LIMIT_TRY} unsuccessful attempts.",
             )
         
         if un_date_now[0] != un_date_block[0] or un_time >= un_waiting_time:
@@ -98,23 +98,23 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
                 detail="Congratulations! The time for blocking the user has passed, try again to access the API with the correct data.",
             )
 
-    if appkey != str(data_by_username.appkey) and data_by_username.is_failed < limit_trying:
+    if appkey != str(data_by_username.appkey) and data_by_username.is_failed < LIMIT_TRY:
         new_limit = data_by_username.is_failed + 1
         updated_data = {"is_failed": new_limit}
         await update_user(data_by_username.id, updated_data)
-        logging.error(f"Invalid API Key, {new_limit} attempt out of {limit_trying}.")
+        logging.error(f"Invalid API Key, {new_limit} attempt out of {LIMIT_TRY}.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid API Key, {new_limit} attempt out of {limit_trying}.",
+            detail=f"Invalid API Key, {new_limit} attempt out of {LIMIT_TRY}.",
         )
     
-    if appkey != str(data_by_username.appkey) and data_by_username.is_failed >= limit_trying:
+    if appkey != str(data_by_username.appkey) and data_by_username.is_failed >= LIMIT_TRY:
         updated_data = {"is_block": True, "date_block":  await day_utcnow() } 
         await update_user(data_by_username.id, updated_data)
-        logging.error(f"Invalid API Key, valid attempts have ended, sorry, try again in {waiting_time} minutes.")
+        logging.error(f"Invalid API Key, valid attempts have ended, sorry, try again in {WAITING_TIME} minutes.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid API Key, valid attempts have ended, sorry, try again in {waiting_time} minutes.",
+            detail=f"Invalid API Key, valid attempts have ended, sorry, try again in {WAITING_TIME} minutes.",
         )
 
     if data_by_username.money <= 0:
@@ -124,7 +124,7 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
             detail="Insufficient funds. Please add funds to your account.",
         )
 
-    if model not in price:
+    if model not in PRICE:
         logging.error("Unfortunately, this model is not on the list.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -179,7 +179,7 @@ async def openai_api(
 
     # Choosing a price list.
     if not model:
-        model = defoult_model_openai
+        model = DEF_MOD_OPENAI
 
     # Verify user and her appkey
     confirm_verify = await verify_user_appkey(username, model, appkey)
@@ -189,7 +189,7 @@ async def openai_api(
     if image:
         # Save img to server
         name = random_name_2X()
-        image_path = f"{uploads}{name}-{image.filename}"
+        image_path = f"{UPLOADS}{name}-{image.filename}"
         async with aiofiles.open(image_path, "wb") as buffer:
             while content := await image.read(1024):  # Читаем файл порциями по 1024 байта
                 await buffer.write(content)
@@ -475,7 +475,7 @@ async def point_transcription_openai(
     if audio:
         # Save audio to server
         name = random_name_2X()
-        audio_path = f"{uploads}{name}-{audio.filename}" # ./uploads/I34-t47-in_audio_2.ogg
+        audio_path = f"{UPLOADS}{name}-{audio.filename}" # ./UPLOADS/I34-t47-in_audio_2.ogg
         async with aiofiles.open(audio_path, "wb") as buffer:
             while content := await audio.read(1024):  # Читаем файл порциями по 1024 байта
                 await buffer.write(content)
@@ -533,7 +533,7 @@ async def point_translation_openai(
     if audio:
         # Save audio to server
         name = random_name_2X()
-        audio_path = f"{uploads}{name}-{audio.filename}" # ./uploads/I34-t47-in_audio_2.ogg
+        audio_path = f"{UPLOADS}{name}-{audio.filename}" # ./UPLOADS/I34-t47-in_audio_2.ogg
         async with aiofiles.open(audio_path, "wb") as buffer:
             while content := await audio.read(1024):  # Читаем файл порциями по 1024 байта
                 await buffer.write(content)
@@ -552,43 +552,77 @@ async def point_translation_openai(
 
 
 
-# Assistants OpenAI:
-@app.post("/api/quick-assist-openai/", status_code=status.HTTP_200_OK)
-async def grok_api(
+#### Assistants OpenAI: ####
+# В идеале, позже провести рекодинг по этому примеру или лучше..
+# Siple Assistent OpenAI:
+@app.post("/api/oa-assist-custom-0525/", status_code=status.HTTP_200_OK)
+async def in_oa_assist_custom_0525(
     username: str = Form(...),
     appkey: str = Header(...),
-    user_content: str = Form(...), 
-    instructions: str = Form(None),             # "You are an HR bot, and you have access to files to answer employee questions about company policies.",
-    name: str = Form(None),                     # "HR Helper",
-    tools: str = Form(None),                     # [{"type": "file_search"}],
-    tool_resources: str = Form(None),           # {"file_search": {"vector_store_ids": ["vs_123"]}},
-    model: str = Form(None),
-    # image: Optional[UploadFile] = File(None),
+    name: Optional[str] = Form(None),
+    instructions: Optional[str] = Form(None),
+    model: Optional[str] = Form(None),
+    user_content: Optional[str] = Form(None),        
+    tools: Optional[str] = Form(None),
+    assistant_id: Optional[str] = Form(None),
+    thread_id: Optional[str] = Form(None)
+):
+    '''
+    Упрощённый endpoint, объединяющий несколько задач OpenAI Assistant.  
+    Если переданы assistant_id и thread_id, подключается к существующему ассистенту и диалогу.  
+    Если они отсутствуют — создаёт нового ассистента и диалог.  
+    При наличии user_content, отправляет сообщение в thread и запускает выполнение.  
+    Возвращает:  
+    - assistant_id, thread_id, run_id — если передано user_content,  
+    - только assistant_id и thread_id — если контент отсутствует.
+    '''
+
+    # Verify user and their appkey (подтверждение авторизации):
+    verification = await verify_user_appkey(username, model, appkey)
+    if verification.get("status_code") != status.HTTP_200_OK:
+        logging.error("User verification failed: %s", verification)
+        return verification
+
+    # Сбор данных запроса в один dict: 
+    data = {
+        "name": name,
+        "instructions": instructions,
+        "model": model or DEF_MOD_OPENAI,
+        "user_content": user_content,
+        "tools": tools,
+        "assistant_id": assistant_id,
+        "thread_id": thread_id
+    }
+
+    return await oa_asist_custom_0525(data)
+
+
+
+# Getting a response from an active assistant:
+@app.post("/api/oa-assist-retrieve/", status_code=status.HTTP_200_OK)
+async def in_oa_assist_retrieve(
+    username: str = Form(...),
+    appkey: str = Header(...),
+    run_id: str = Form(...),
+    thread_id: str = Form(...)
 ):
 
+    '''
+    Получение ответа от активного ассистента по указанному каналу (thread_id) и 
+    идентификатору запуска (run_id).
+    
+    '''
 
-    # Choosing a price list.
-    if not model:
-        model = defoult_model_openai
+    # model = "retrieve openai assist"
 
-    # Verify user and her appkey
-    confirm_verify = await verify_user_appkey(username, model, appkey)
-    if confirm_verify["status_code"] != status.HTTP_200_OK:
-        return confirm_verify
-
-    # if image:
-    #     # Save img to server
-    #     name = random_name_2X()
-    #     image_path = f"{uploads}{name}-{image.filename}"
-    #     async with aiofiles.open(image_path, "wb") as buffer:
-    #         while content := await image.read(1024):  # Читаем файл порциями по 1024 байта
-    #             await buffer.write(content)
-    # else:
-    #     image_path = None
-
-    await mod_openai_quick_assist(user_content)
+    # # Verify user and their appkey (подтверждение авторизации):
+    # verification = await verify_user_appkey(username, model, appkey)
+    # if verification.get("status_code") != status.HTTP_200_OK:
+    #     logging.error("User verification failed: %s", verification)
+    #     return verification
 
 
+    return await oa_assist_retrieve(run_id, thread_id)
 
 
 
@@ -625,7 +659,7 @@ async def gemini_api(
 
     # Choosing a price list.
     if not model:
-        model = defoult_model_gemini
+        model = DEF_MOD_GOOGLE
 
     # Verify user and her appkey
     confirm_verify = await verify_user_appkey(username, model, appkey)
@@ -635,7 +669,7 @@ async def gemini_api(
     if file:
         # Save file to server
         name = random_name_2X()
-        file_path = f"{uploads}{name}-{file.filename}"
+        file_path = f"{UPLOADS}{name}-{file.filename}"
         async with aiofiles.open(file_path, "wb") as buffer:
             while content := await file.read(1024):  # Читаем файл порциями по 1024 байта
                 await buffer.write(content)
@@ -697,7 +731,7 @@ async def claude_api(
 
     # Choosing a price list.
     if not model:
-        model = default_model_claude
+        model = DEF_MOD_CLAUDE
 
     # Verify user and her appkey
     confirm_verify = await verify_user_appkey(username, model, appkey)
@@ -707,7 +741,7 @@ async def claude_api(
     if image:
         # Save file to server
         name = random_name_2X()
-        file_path = f"{uploads}{name}-{image.filename}"
+        file_path = f"{UPLOADS}{name}-{image.filename}"
         async with aiofiles.open(file_path, "wb") as buffer:
             while content := await image.read(1024):  # Читаем файл порциями по 1024 байта
                 await buffer.write(content)
@@ -770,7 +804,7 @@ async def grok_api(
 
     # Choosing a price list.
     if not model:
-        model = default_model_claude
+        model = DEF_MOD_GROK
 
     # Verify user and her appkey
     confirm_verify = await verify_user_appkey(username, model, appkey)
@@ -780,7 +814,7 @@ async def grok_api(
     if image:
         # Save file to server
         name = random_name_2X()
-        file_path = f"{uploads}{name}-{image.filename}"
+        file_path = f"{UPLOADS}{name}-{image.filename}"
         async with aiofiles.open(file_path, "wb") as buffer:
             while content := await image.read(1024):  # Читаем файл порциями по 1024 байта
                 await buffer.write(content)

@@ -1,37 +1,41 @@
 import logging
-#from openai import AsyncOpenAI, RateLimitError, OpenAIError
-import time
-import json
-
-#from keys import API_KEY_OPENAI
-#from config import defoult_model_openai
-
-
-#client = AsyncOpenAI(api_key=API_KEY_OPENAI)
+logging.basicConfig(format='%(levelname)s - %(message)s', level=logging.INFO)
+from typing import List, Union
 
 
 
 
+class AssistOpenAI:
 
-class AssistOpenAI: # assistant_id, thread_id, user_content, run_id, 
-    
-    def __init__(self, one_client):
-        self.client = one_client
+    '''
+
+    Основные методы взаимодействия с Ассистентом, каналами, запусками и другими сущностями.  
+    Объект клиента (client – клиент) OpenAI создаётся и используется непосредственно в месте 
+    инициализации (launch point – точка запуска).
+
+    '''
+
+    def __init__(self, client_openai):
+        self.client = client_openai
 
 
     # Assistent:
-    async def create_assist(self, name, instructions, model, tools: list) -> str:
-        "Добавление нового Ассистента"
-        assistant = await self.client.beta.assistants.create(
-            name=name,
-            instructions=instructions,
-            model=model,
-            tools=tools
-        )
-        return assistant.id
+    async def create_assist(self, name: str, instructions: str, model: str, tools: List) -> Union[str, None]:
+        '''Добавление нового Ассистента'''
+        try:
+            assistant = await self.client.beta.assistants.create(
+                name=name,
+                instructions=instructions,
+                model=model,
+                tools=tools
+            )
+            return assistant.id
+        except Exception as e:
+            logging.error(f"Failed to create assistant: {e}")
+            return None
     
-    async def list_assist(self, limit: int = 20) -> list:
-        """Получение списка ассистентов (default 20)"""
+    async def list_assist(self, limit: int = 20) -> List:
+        '''Получение списка ассистентов (default 20)'''
         my_assistants = await self.client.beta.assistants.list(
             order="desc",
             limit=limit
@@ -39,24 +43,24 @@ class AssistOpenAI: # assistant_id, thread_id, user_content, run_id,
         return my_assistants.data
 
     async def get_assist(self, assistant_id: str) -> dict:
-        "Получение данных Ассистента"
+        '''Получение данных Ассистента'''
         my_assistant = await self.client.beta.assistants.retrieve(assistant_id)
         return my_assistant
     
     async def delete_assist(self, assistant_id: str) -> dict:
-        "Удаление Ассистента"
+        '''Удаление Ассистента'''
         response = await self.client.beta.assistants.delete(assistant_id)
         return response
     
 
     # Threads:
     async def create_tread(self) -> dict:
-        "Добавление пустого канала"
+        '''Добавление пустого канала'''
         empty_thread = await self.client.beta.threads.create()
         return empty_thread.id
 
     async def create_tread(self, message: str) -> str:
-        "Добавление канала + добавление сообщения"
+        '''Добавление канала + добавление сообщения'''
         message_thread = await self.client.beta.threads.create(
             messages=[
                 {
@@ -68,12 +72,12 @@ class AssistOpenAI: # assistant_id, thread_id, user_content, run_id,
         return message_thread.id
     
     async def get_tread(self, thread_id: str) -> dict:
-        "Получение данных канала"
+        '''Получение данных канала'''
         my_thread = await self.client.beta.threads.retrieve(thread_id)
         return my_thread
     
     async def delete_tread(self, thread_id: str) -> dict:
-        "Удаление канала"
+        '''Удаление канала'''
         response = await self.client.beta.threads.delete(thread_id)
         return response
     
@@ -88,7 +92,7 @@ class AssistOpenAI: # assistant_id, thread_id, user_content, run_id,
         )
         return thread_message
     
-    async def list_message(self, thread_id: str) -> list:
+    async def list_message(self, thread_id: str) -> List:
         '''Список сообщений канала'''
         thread_messages = await self.client.beta.threads.messages.list(thread_id)
         return thread_messages.data
@@ -123,6 +127,7 @@ class AssistOpenAI: # assistant_id, thread_id, user_content, run_id,
         )
         return run
     
+    # Get Respounce:
     async def get_runs_threads(self, run_id: str, thread_id: str) -> tuple:
         '''Получение ответа'''
         run_status = await self.client.beta.threads.runs.retrieve(

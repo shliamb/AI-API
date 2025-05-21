@@ -5,7 +5,7 @@ import asyncio
 # Service
 from keys import API_KEY_GEMINI
 from general_functions import calculation, encode_file
-from config import defoult_model_gemini
+from config import DEF_MOD_GOOGLE
 
 
 #
@@ -18,7 +18,7 @@ async def mod_gemini(description, image_path):
     username = description.get("username")
     user_content = description.get("user_content")
     system_content = description.get("system_content")
-    model_name = description.get("model", defoult_model_gemini)
+    model_name = description.get("model", DEF_MOD_GOOGLE)
     # tools = description.get("tools")
     assist_content = description.get("assist_content")
     # ?? 'response_format':'[generationConfig: {responseMimeType: "application/json",responseSchema: {type: SchemaType.ARRAY,items: {type: SchemaType.OBJECT,properties: {recipe_name: {type: SchemaType.STRING,},},},},}});]'
