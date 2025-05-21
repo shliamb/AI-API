@@ -59,7 +59,7 @@ class AssistOpenAI:
         empty_thread = await self.client.beta.threads.create()
         return empty_thread.id
 
-    async def create_tread(self, message: str) -> str:
+    async def create_tread_and_message(self, message: str) -> str:
         '''Добавление канала + добавление сообщения'''
         message_thread = await self.client.beta.threads.create(
             messages=[
