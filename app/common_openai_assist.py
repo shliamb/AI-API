@@ -1,6 +1,6 @@
 import logging
 logging.basicConfig(format='%(levelname)s - %(message)s', level=logging.INFO)
-from typing import List, Union
+from typing import List, Optional, Union
 
 
 
@@ -19,115 +19,194 @@ class AssistOpenAI:
         self.client = client_openai
 
 
+
     # Assistent:
-    async def create_assist(self, name: str, instructions: str, model: str, tools: List) -> Union[str, None]:
+    async def create_assist(self, name: str, instructions: str, model: str, tools: List) -> Optional[str]:
         '''Добавление нового Ассистента'''
         try:
-            assistant = await self.client.beta.assistants.create(
+            response = await self.client.beta.assistants.create(
                 name=name,
                 instructions=instructions,
                 model=model,
                 tools=tools
             )
-            return assistant.id
+            return getattr(response, 'id', None)
         
         except Exception as e:
             logging.error(f"Failed to create assistant: {e}")
             return None
     
-    async def list_assist(self, limit: int = 20) -> List:
-        '''Получение списка ассистентов (default 20)'''
-        my_assistants = await self.client.beta.assistants.list(
-            order="desc",
-            limit=limit
-        )
-        return my_assistants.data
 
-    async def get_assist(self, assistant_id: str) -> dict:
+    async def list_assist(self, limit: int = 20) -> Optional[List]:
+        '''Получение списка ассистентов (по умолчанию 20)'''
+        try:
+            response = await self.client.beta.assistants.list(
+                order="desc",
+                limit=limit
+            )
+            return getattr(response, 'data', None)
+
+        except Exception as e:
+            logging.error(f"list_assist failed: {e}")
+            return None
+
+
+
+
+    async def get_assist(self, assistant_id: str):
         '''Получение данных Ассистента'''
-        my_assistant = await self.client.beta.assistants.retrieve(assistant_id)
-        return my_assistant
+        try:
+            response = await self.client.beta.assistants.retrieve(assistant_id)
+            return response or None
+
+        except Exception as e:
+            logging.error(f"get_assist failed: {e}")
+            return None
     
+
+
     async def delete_assist(self, assistant_id: str) -> dict:
         '''Удаление Ассистента'''
-        response = await self.client.beta.assistants.delete(assistant_id)
-        return response
+        try:
+            response = await self.client.beta.assistants.delete(assistant_id)
+            return response or None
+
+        except Exception as e:
+            logging.error(f"delete_assist failed: {e}")
+            return None
     
 
     # Threads:
     async def create_tread(self) -> dict:
         '''Добавление пустого канала'''
-        empty_thread = await self.client.beta.threads.create()
-        return empty_thread.id
+        try:
+            empty_thread = await self.client.beta.threads.create()
+            return getattr(empty_thread, 'id', None)
+        
+        except Exception as e:
+            logging.error(f"create_tread failed: {e}")
+            return None
+
 
     async def create_tread_and_message(self, message: str) -> str:
         '''Добавление канала + добавление сообщения'''
-        message_thread = await self.client.beta.threads.create(
-            messages=[
-                {
-                "role": "user",
-                "content": message
-                }
-            ]
-        )
-        return message_thread.id
+        try:
+            message_thread = await self.client.beta.threads.create(
+                messages=[
+                    {
+                    "role": "user",
+                    "content": message
+                    }
+                ]
+            )
+            return getattr(message_thread, 'id', None)
+        
+        except Exception as e:
+            logging.error(f"create_tread_and_message failed: {e}")
+            return None
     
+
     async def get_tread(self, thread_id: str) -> dict:
         '''Получение данных канала'''
-        my_thread = await self.client.beta.threads.retrieve(thread_id)
-        return my_thread
+        try:
+            my_thread = await self.client.beta.threads.retrieve(thread_id)
+            return my_thread or None
+        
+        except Exception as e:
+            logging.error(f"get_tread failed: {e}")
+            return None
     
-    async def delete_tread(self, thread_id: str) -> dict:
+
+    async def delete_tread(self, thread_id: str) -> str:
         '''Удаление канала'''
-        response = await self.client.beta.threads.delete(thread_id)
-        return response
-    
+        try:
+            response = await self.client.beta.threads.delete(thread_id)
+            return response or None
+
+        except Exception as e:
+            logging.error(f"Failed to delete_tread: {e}")
+            return None
+
 
     # Create Message:
     async def create_message(self, thread_id: str, message: str) -> dict:
         '''Добавление сообщения в канал'''
-        thread_message = await self.client.beta.threads.messages.create(
-        thread_id=thread_id,
-        role="user",
-        content=message
-        )
-        return thread_message
+        try:
+            thread_message = await self.client.beta.threads.messages.create(
+                thread_id=thread_id,
+                role="user",
+                content=message
+            )
+            return thread_message or None
+        
+        except Exception as e:
+            logging.error(f"Failed to create_message: {e}")
+            return None
     
+
+
     async def list_message(self, thread_id: str) -> List:
         '''Список сообщений канала'''
-        thread_messages = await self.client.beta.threads.messages.list(thread_id)
-        return thread_messages.data
-    
+        try:
+            thread_messages = await self.client.beta.threads.messages.list(thread_id)
+            return getattr(thread_messages, 'data', None)
+
+        except Exception as e:
+            logging.error(f"Failed to list_message: {e}")
+            return None
+
 
     # Run Assistent:
     async def run_assist(self, assist_id: str, thread_id: str) -> str:
         '''Запуск Ассистента'''
-        run = await self.client.beta.threads.runs.create(
-        thread_id=thread_id,
-        assistant_id=assist_id
-        )
-        return run.id
+        try:
+            run = await self.client.beta.threads.runs.create(
+                thread_id=thread_id,
+                assistant_id=assist_id
+            )
+            return getattr(run, 'id', None)
+        
+        except Exception as e:
+            logging.error(f"Failed to run_assist: {e}")
+            return None
     
+
+
     async def create_tread_and_run_assist(self, assist_id: str, message: str) -> str:
         '''Создание канала и запуск Ассистента в один запрос'''
-        run = await self.client.beta.threads.create_and_run(
-            assistant_id=assist_id,
-            thread={
-                "messages": [
-                {"role": "user", "content": message}
-                ]
-            }
-        )
-        return run.id
+        try:
+            run = await self.client.beta.threads.create_and_run(
+                assistant_id=assist_id,
+                thread={
+                    "messages": [
+                    {"role": "user", "content": message}
+                    ]
+                }
+            )
+            return getattr(run, 'id', None)
+
+        except Exception as e:
+            logging.error(f"Failed to create_tread_and_run_assist: {e}")
+            return None
     
+
+
     async def cansel_run(self, run_id: str, thread_id: str):
         '''Отменяет выполнение которое находится в процессе'''
-        run = await self.client.beta.threads.runs.cancel(
-        thread_id=thread_id,
-        run_id=run_id
-        )
-        return run
+        try:
+            run = await self.client.beta.threads.runs.cancel(
+                thread_id=thread_id,
+                run_id=run_id
+            )
+            return run or None
+        
+        except Exception as e:
+            logging.error(f"Failed to cansel_run: {e}")
+            return None
+
     
+
+
     # Get Respounce:
     async def get_runs_threads(self, run_id: str, thread_id: str) -> tuple:
         '''Получение ответа'''

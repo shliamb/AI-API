@@ -111,9 +111,6 @@ async def oa_thread_del(thread_id):
 
 
 
-
-
-
     # # Ждём завершения run и получения ответа
     # while True:
     #     status, tool_calls = await assist.get_runs_threads(run_id, thread_id)
