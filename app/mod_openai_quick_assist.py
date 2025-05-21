@@ -51,13 +51,14 @@ async def oa_asist_custom_0525(data:dict) -> dict:
     if user_content:
         # Кладём сообщение в канал:
         push_message = await assist.create_message(thread_id, user_content)
+        result_push_message = False if not push_message else True
     else:
         return {"asist_id": assistant_id, "thread_id": thread_id, "system_message": "Missing message from user."}
     
     # Запускаем ассистента:
     run_id = await assist.run_assist(assistant_id, thread_id)
 
-    return {"asist_id": assistant_id, "thread_id": thread_id, "run_id": run_id }
+    return {"asist_id": assistant_id, "thread_id": thread_id, "push_message": result_push_message, "run_id": run_id }
 
 
 
