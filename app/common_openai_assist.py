@@ -136,9 +136,9 @@ class AssistOpenAI:
                 thread_id=thread_id,
                 run_id=run_id
             )
-            
+
             if not run_status:
-                return None
+                return None, None
             
             status = run_status.status
             tool_calls = run_status.required_action.submit_tool_outputs.tool_calls
@@ -146,4 +146,4 @@ class AssistOpenAI:
         
         except Exception as e:
             logging.error(f"Failed to Respounce get_runs_threads: {e}")
-            return None
+            return None, None
