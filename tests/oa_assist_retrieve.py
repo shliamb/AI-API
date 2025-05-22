@@ -11,8 +11,8 @@ url = "http://137.184.87.156:8000/api/oa-assist-retrieve/"
 
 data = {
     "username": "Shliamb5",
-    "run_id": "run_ibC2N55iH6RcsjNm3YecHW74",
-    "thread_id": "thread_skm9CZ3hFJSGjE9kcQM9sLiR",        
+    "run_id": "run_I3iuAbuccCBNixSnj9hGLKVq",
+    "thread_id": "thread_kdnhJrhkFpvfZNR8QljlzmZT",        
 }
 
 headers = {

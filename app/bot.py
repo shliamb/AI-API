@@ -426,7 +426,8 @@ async def get_prices(message: types.Message):
         'gpt-4-turbo-2024-04-09': 48,
 
     The language model from Google is 1 million in $:
-        'gemini-2.5-pro-preview-03-25': 21,
+        'gemini-2.5-pro-preview-05-06': 13.5,
+        'gemini-2.5-flash-preview-04-17': 0.9,
         'gemini-2.0-flash-exp': 0.9,
         'gemini-2.0-flash-lite-001': 0.45,
         'gemini-1.5-pro-latest': 3.75,

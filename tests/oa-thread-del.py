@@ -10,7 +10,7 @@ url = "http://137.184.87.156:8000/api/oa-thread-del/"
 
 data = {
     "username": "Shliamb5",
-    "thread_id": "thread_cKMbVmB5D4f9bjeoFTT8SLoc",        
+    "thread_id": "thread_kdnhJrhkFpvfZNR8QljlzmZT",        
 }
 
 headers = {

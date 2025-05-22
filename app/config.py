@@ -87,7 +87,8 @@ PRICE = {
     'grok-beta': 24, # Only Text, Contex 131072, 
 
     # Google Gemini to 1M tokens:
-    'gemini-2.5-pro-preview-03-25': 21,# Maximum input tokens 1,048,576
+    'gemini-2.5-pro-preview-05-06': 13.5,# Maximum input tokens 1,048,576
+    'gemini-2.5-flash-preview-04-17': 0.9, # $3.50  - Text output (thinking- response and reasoning)
     'gemini-2.0-flash-exp': 0.9, # 15,
     'gemini-2.0-flash-lite-001': 0.45,
     'gemini-1.5-pro-latest': 3.75, # 15, 

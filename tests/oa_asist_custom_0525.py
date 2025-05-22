@@ -62,8 +62,8 @@ data = {
     "model": "gpt-4o",        
     "user_content": "умножь 2 и 2",
     "tools": str_tools,
-    "assistant_id": "asst_JBoneVMpW2DcjsI9FjxV7FoR",
-    "thread_id": "thread_skm9CZ3hFJSGjE9kcQM9sLiR"
+    #"assistant_id": "asst_JBoneVMpW2DcjsI9FjxV7FoR",
+    #"thread_id": "thread_skm9CZ3hFJSGjE9kcQM9sLiR"
 }
 
 headers = {
@@ -85,3 +85,8 @@ else:
 # 2 нет контента {'asist_id': 'asst_JBoneVMpW2DcjsI9FjxV7FoR', 'thread_id': 'thread_skm9CZ3hFJSGjE9kcQM9sLiR', 'system_message': 'Missing message from user.'} создал асистента и канал и отдал их id
 
 # 3 Еть асистент и канал контент {'asist_id': 'asst_JBoneVMpW2DcjsI9FjxV7FoR', 'thread_id': 'thread_skm9CZ3hFJSGjE9kcQM9sLiR', 'run_id': 'run_ibC2N55iH6RcsjNm3YecHW74'} запустил и дал run_id
+
+
+
+
+# {'asist_id': 'asst_vnwqU4a8930ZSHmZMlxRrfKp', 'thread_id': 'thread_kdnhJrhkFpvfZNR8QljlzmZT', 'push_message': True, 'run_id': 'run_I3iuAbuccCBNixSnj9hGLKVq'}

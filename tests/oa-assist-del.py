@@ -10,7 +10,7 @@ url = "http://137.184.87.156:8000/api/oa-assist-del/"
 
 data = {
     "username": "Shliamb5",
-    "assistant_id": "asst_UtCUnUUYRHlbDm8n86iFhcXl",        
+    "assistant_id": "asst_vnwqU4a8930ZSHmZMlxRrfKp",        
 }
 
 headers = {
