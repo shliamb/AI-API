@@ -6,7 +6,7 @@ TIME_CORRECTION = +3 # Moscow
 MONEY_TO_START = 0.3 # 1$ to start work
 MY_APP_KEY = "appkey" # Key to API Key
 MIN_PAY = 1 # Minimum pay
-USERNAME_ADMIN = "Shliamb5"
+USERNAME_ADMIN = "Alex7"
 
 # Folders:
 UPLOADS = "./uploads/"
