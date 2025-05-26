@@ -9,12 +9,12 @@ url = "http://137.184.87.156:8000/api/oa-thread-del/"
 
 
 data = {
-    "username": "Shliamb5",
-    "thread_id": "thread_kdnhJrhkFpvfZNR8QljlzmZT",        
+    "username": "Alex7",
+    "thread_id": "thread_rJPiJyIg7vnloIB7Ed52YFi0",        
 }
 
 headers = {
-    'appkey': 'a36c0e6c-6123-42e9-bcda-1c16e0c7e201',
+    'appkey': '4a69d997-981d-4808-9053-6ef21e14aa87',
 }
 
 response = requests.post(url, headers=headers, data=data)

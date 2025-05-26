@@ -10,13 +10,13 @@ url = "http://137.184.87.156:8000/api/oa-assist-retrieve/"
 
 
 data = {
-    "username": "Shliamb5",
-    "run_id": "run_I3iuAbuccCBNixSnj9hGLKVq",
-    "thread_id": "thread_kdnhJrhkFpvfZNR8QljlzmZT",        
+    "username": "Alex7",
+    "run_id": "run_aQ9sf8aXIPj5PoN5srZlCzRw",
+    "thread_id": "thread_YT7RwzaGI2LFnkA1xS56HnL6",        
 }
 
 headers = {
-    'appkey': 'a36c0e6c-6123-42e9-bcda-1c16e0c7e201',
+    'appkey': '4a69d997-981d-4808-9053-6ef21e14aa87'
 }
 
 response = requests.post(url, headers=headers, data=data)

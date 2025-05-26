@@ -56,18 +56,18 @@ str_tools = json.dumps(tools, ensure_ascii=False)
 
 
 data = {
-    "username": "Shliamb5",
+    "username": "Alex7",
     "name": "Математик",
     "instructions": "Ты помощник, который использует числовые функции от разработчика.",
     "model": "gpt-4o",        
-    "user_content": "умножь 2 и 2",
+    "user_content": "Ты готов к работе?",
     "tools": str_tools,
-    #"assistant_id": "asst_JBoneVMpW2DcjsI9FjxV7FoR",
-    #"thread_id": "thread_skm9CZ3hFJSGjE9kcQM9sLiR"
+    "assistant_id": "asst_jdGeLjY6ghHPzOjVoXV19jTd",
+    "thread_id": "thread_YT7RwzaGI2LFnkA1xS56HnL6"
 }
 
 headers = {
-    'appkey': 'a36c0e6c-6123-42e9-bcda-1c16e0c7e201',
+    'appkey': '4a69d997-981d-4808-9053-6ef21e14aa87',
 }
 
 response = requests.post(url, headers=headers, data=data)
@@ -90,3 +90,5 @@ else:
 
 
 # {'asist_id': 'asst_vnwqU4a8930ZSHmZMlxRrfKp', 'thread_id': 'thread_kdnhJrhkFpvfZNR8QljlzmZT', 'push_message': True, 'run_id': 'run_I3iuAbuccCBNixSnj9hGLKVq'}
+
+# {'asist_id': 'asst_xvtv85TFfs1WHgtcYp6Kl5fE', 'thread_id': 'thread_rJPiJyIg7vnloIB7Ed52YFi0', 'push_message': True, 'run_id': 'run_beUPVVrREjPcOxQsC4KlXjkl'}

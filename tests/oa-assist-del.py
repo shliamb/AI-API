@@ -9,12 +9,12 @@ url = "http://137.184.87.156:8000/api/oa-assist-del/"
 
 
 data = {
-    "username": "Shliamb5",
-    "assistant_id": "asst_vnwqU4a8930ZSHmZMlxRrfKp",        
+    "username": "Alex7",
+    "assistant_id": "asst_xvtv85TFfs1WHgtcYp6Kl5fE",        
 }
 
 headers = {
-    'appkey': 'a36c0e6c-6123-42e9-bcda-1c16e0c7e201',
+    'appkey': '4a69d997-981d-4808-9053-6ef21e14aa87',
 }
 
 response = requests.post(url, headers=headers, data=data)

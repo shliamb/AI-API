@@ -221,6 +221,7 @@ class AssistOpenAI:
             
             status = run_status.status
             tool_calls = run_status.required_action.submit_tool_outputs.tool_calls
+            print(run_status)
             return status, tool_calls
         
         except Exception as e:
