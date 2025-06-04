@@ -457,6 +457,8 @@ async def point_transcription_openai(
     confirm_verify = await verify_user_appkey(username, model, appkey)
     if confirm_verify["status_code"] != status.HTTP_200_OK:
         return confirm_verify
+    
+    
 
     # Collect data
     description = {
