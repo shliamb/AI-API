@@ -2,6 +2,7 @@
 import logging
 logging.basicConfig(format='%(levelname)s - %(message)s', level=logging.INFO)
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
+from typing import List, Optional, Union
 # import asyncio
 import json
 # Service
@@ -53,23 +54,30 @@ async def oa_asist_custom_0525(data:dict) -> dict:
         push_message = await assist.create_message(thread_id, user_content)
         result_push_message = False if not push_message else True
     else:
-        return {"asist_id": assistant_id, "thread_id": thread_id, "system_message": "Missing message from user."}
+        return {"assistant_id": assistant_id, "thread_id": thread_id, "system_message": "Missing message from user."}
     
     # Запускаем ассистента:
     run_id = await assist.run_assist(assistant_id, thread_id)
 
-    return {"asist_id": assistant_id, "thread_id": thread_id, "push_message": result_push_message, "run_id": run_id }
+    return {"assistant_id": assistant_id, "thread_id": thread_id, "push_message": result_push_message, "run_id": run_id }
 
 
 
 
 # Запрос ответа от запущенного Ассистента по треду:
-async def oa_assist_retrieve(run_id: str, thread_id: str) -> tuple:
+async def oa_assist_retrieve(run_id: str, thread_id: str) -> Optional[str]:
     '''Получение ответа от активного ассистента по указанному каналу (thread_id) и 
     идентификатору запуска (run_id)'''
-    status, tool_calls = await assist.get_runs_threads(run_id, thread_id)
-    return status, tool_calls
+    status_data = await assist.get_runs_threads(run_id, thread_id)
+    return status_data
 
+
+# Возврат результата функции Ассистенту:
+async def oa_returning_result_assist(run_id, thread_id, tool_outputs):
+    '''Возврат ответа Ассистенту'''
+    tool_outputs = json.loads(tool_outputs) if tool_outputs else None
+    response = await assist.returning_result_assist(run_id, thread_id, tool_outputs)
+    return response
 
 
 # Получение списка Ассистентов:
@@ -77,7 +85,6 @@ async def oa_assist_list():
     '''Получение списка Ассистентов'''
     list_assist = await assist.list_assist()
     return list_assist
-
 
 
 # Удаление Ассистента:

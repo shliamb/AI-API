@@ -31,6 +31,8 @@ async def translation_openai(description, audio_path):
         # Calculation of money spent on minutes + sec
         expenses = await calculation(username, model_version, min, input_data="audio")
 
+        print(transcript)
+
         return {"response":transcript, "expenses": expenses, "minutes": min}
 
 

@@ -60,10 +60,10 @@ data = {
     "name": "Математик",
     "instructions": "Ты помощник, который использует числовые функции от разработчика.",
     "model": "gpt-4o",        
-    "user_content": "Ты готов к работе?",
+    "user_content": "прибавь 2 к 6",
     "tools": str_tools,
-    "assistant_id": "asst_jdGeLjY6ghHPzOjVoXV19jTd",
-    "thread_id": "thread_YT7RwzaGI2LFnkA1xS56HnL6"
+    "assistant_id": "asst_ico0V2EH6M2AMd9EdJzvdlN0",
+    "thread_id": "thread_wUUZFBIxyzGbJtVKb1GnrvGb"
 }
 
 headers = {

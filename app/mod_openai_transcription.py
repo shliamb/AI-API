@@ -6,7 +6,6 @@ from general_functions import calculation, read_audio_file
 client = AsyncOpenAI(api_key=API_KEY_OPENAI)
 
 async def transcription_openai(description, audio_path):
-    print("\nTranscription_openai\n")
 
     username = description.get("username")
     prompt = description.get("prompt")
@@ -27,8 +26,6 @@ async def transcription_openai(description, audio_path):
         )
 
         length_of_audio = await read_audio_file(audio_path)   # mp3 (ID3v1 и ID3v2), flac, ogg Vorbis, acc (and M4A), wav, wma (limited support), aiff
-
-        print(f"\n{transcript}\n")
 
         # Statistic
         min = length_of_audio / 60 # from minutes
