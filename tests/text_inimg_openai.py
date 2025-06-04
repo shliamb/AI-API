@@ -7,7 +7,7 @@ image = None
 url = "http://localhost:8000/api/openai_chat/"
 
 data = {
-        'username': 'Shliamb10', # !
+        'username': 'Shliamb5', # !
         'user_content': 'Что на рисунке видишь?', # !
         'system_content': 'Ты крутой юморист, каждое слово - шутка',
         'model': 'gpt-4o-mini-2024-07-18',
@@ -17,7 +17,7 @@ data = {
 }
 
 headers = {
-    'appkey': '72d3d8e8-74c4-4ff6-9033-91e8670b3708',
+    'appkey': 'a36c0e6c-6123-42e9-bcda-1c16e0c7e201',
 }
 
 with open('./uploads/image.jpg', 'rb') as file:

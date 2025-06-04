@@ -28,8 +28,8 @@ from mod_openai_gen_img import mod_gen_dall_e
 from mod_openai_text_to_audio import speech_to_audio_openai
 from mod_openai_transcription import transcription_openai
 from mod_openai_translation import translation_openai
-from mod_openai_quick_assist import oa_asist_custom_0525, oa_assist_retrieve, oa_assist_list, oa_assist_del, oa_thread_del
-from config import LIMIT_TRY, TIME_OUT_ERR_USERNAME, WAITING_TIME, PRICE, UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK, USERNAME_ADMIN
+# from mod_openai_quick_assist import oa_asist_custom_0525, oa_assist_retrieve, oa_assist_list, oa_assist_del, oa_thread_del
+from config import LIMIT_TRY, TIME_OUT_ERR_USERNAME, WAITING_TIME, PRICE, UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK #, USERNAME_ADMIN
 
 
 app = FastAPI()
@@ -37,27 +37,39 @@ app = FastAPI()
 
 
 
-# Protection from poking
-ip_request_counts = defaultdict(list)
-lock = asyncio.Lock() # "Creating" (Создание) lock.
+# Разрешаем CORS только для указанных эндпоинтов и метода POST
+origins = ["*"]  # Разрешаем все источники (можно заменить на конкретные домены)
 
-@app.middleware("http")
-async def rate_limit(request: Request, call_next):
-    ip = request.client.host
-    now = datetime.now()
-    time_window_start = now - timedelta(seconds=TIME_WINDOW)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["POST"],  # Только метод POST
+    allow_headers=["*"],
+)
 
-    async with lock: # "Acquiring" (Получение) lock.
-        ip_request_counts[ip] = [t for t in ip_request_counts[ip] if t > time_window_start]
-        ip_request_counts[ip].append(now)
-        request_count = len(ip_request_counts[ip])
 
-    if request_count > REQUEST_LIMIT:
-        logging.error(f"Rate limit exceeded for IP: {ip}")
-        return Response(status_code=429, content="Too Many Requests")
+# # Protection from poking
+# ip_request_counts = defaultdict(list)
+# lock = asyncio.Lock() # "Creating" (Создание) lock.
 
-    response = await call_next(request)
-    return response
+# @app.middleware("http")
+# async def rate_limit(request: Request, call_next):
+#     ip = request.client.host
+#     now = datetime.now()
+#     time_window_start = now - timedelta(seconds=TIME_WINDOW)
+
+#     async with lock: # "Acquiring" (Получение) lock.
+#         ip_request_counts[ip] = [t for t in ip_request_counts[ip] if t > time_window_start]
+#         ip_request_counts[ip].append(now)
+#         request_count = len(ip_request_counts[ip])
+
+#     if request_count > REQUEST_LIMIT:
+#         logging.error(f"Rate limit exceeded for IP: {ip}")
+#         return Response(status_code=429, content="Too Many Requests")
+
+#     response = await call_next(request)
+#     return response
 
 
 
@@ -446,7 +458,7 @@ async def point_transcription_openai(
     response_format: str = Form(None),              # output format json, text, srt, verbose_json, or vtt.
     prompt: str = Form(None),                       # The prompt should match the audio language.
     appkey: str = Header(...),                      # !
-    audio: Optional[UploadFile] = File(),           # ! flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav или webm. In Telegram ogg.
+    audio: UploadFile = File(),           # ! flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav или webm. In Telegram ogg.
 ):
 
     # Choosing a price list.
