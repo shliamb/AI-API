@@ -4,4 +4,3 @@ log/
 venv/
 .env
 app/__pycache__/
-backup_db/

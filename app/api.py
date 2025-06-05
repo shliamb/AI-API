@@ -5,12 +5,12 @@ import asyncio
 import aiofiles
 # from pydantic import BaseModel
 from typing import Optional, List
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 # import os
 # import shutil
 # import requests
 # Fasapi
-from fastapi import FastAPI, HTTPException, Request, Header, Depends, status, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, Request, status, UploadFile, File, Form, Header, Depends
 from fastapi.responses import Response, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import json
@@ -37,12 +37,30 @@ app = FastAPI()
 
 
 
-# Protection from poking
+# Блокирует частые запросы по IP:
 ip_request_counts = defaultdict(list)
 lock = asyncio.Lock() # "Creating" (Создание) lock.
 
 @app.middleware("http")
 async def rate_limit(request: Request, call_next):
+    '''
+    Middleware для ограничения частоты запросов (rate limiting) по IP-адресу.
+    
+    Подсчитывает количество запросов от каждого IP в заданном временном окне (TIME_WINDOW).
+    Если количество запросов превышает лимит (REQUEST_LIMIT), возвращает ошибку 429.
+    
+    Использует:
+    - defaultdict для хранения временных меток запросов по IP
+    - asyncio.Lock() для безопасного доступа к общим данным из разных корутин
+    - Логирует превышение лимита
+    
+    Параметры:
+        request: Request - входящий HTTP-запрос
+        call_next - функция для вызова следующего middleware/обработчика
+        
+    Возвращает:
+        Response: либо ответ от следующего обработчика, либо 429 при превышении лимита
+    '''
     ip = request.client.host
     now = datetime.now()
     time_window_start = now - timedelta(seconds=TIME_WINDOW)
@@ -157,14 +175,14 @@ async def verify_user_appkey(username: str, model: str, appkey: str):
 # TEXT & IMAGE OPENAI Endpoint:
 @app.post("/api/openai_chat/", status_code=status.HTTP_200_OK)
 async def openai_api(
-    username: str = Form(...),                      # !
-    appkey: str = Header(...),                      # !
+    username: str = Form(...),
+    appkey: str = Header(...),
     assist_content: str = Form(None),               # history
     response_format: str = Form(None),              # Json response rules if need this, text or json
-    user_content: str = Form(...),                  # !
-    system_content: str = Form(None),               #
-    model: str = Form(None),                        #
-    image: Optional[UploadFile] = File(None)        # # jpg, png проверенно   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! file !!!!!!!!!!!!!!!!!!!!!!!
+    user_content: str = Form(...),
+    system_content: str = Form(None),
+    model: str = Form(None),
+    image: Optional[UploadFile] = File(None)        # jpg, png проверенно   ! file !
 ):
     
     try:
@@ -743,15 +761,6 @@ async def in_oa_thread_del(
         return verification
     
     return await oa_returning_result_assist(run_id, thread_id, tool_outputs)
-
-
-
-
-
-
-
-
-
 
 
 
