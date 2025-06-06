@@ -8,9 +8,9 @@ NOTIFICATION = True
 COUNTS_QUANTITY = 3 # MAX Коллисчество подключений - аккаунтов телеграмм пользователю
 MONEY_TO_START = 0.3 # 1$ to start work
 MY_APP_KEY = "appkey" # Key to API Key
-
-TIME_CORRECTION = +3 # Moscow
 MIN_PAY = 1 # Minimum pay
+TIME_CORRECTION = +3 # Moscow
+
 
 
 # FASTAPI
@@ -20,9 +20,6 @@ TIME_WINDOW = 60 # Интервал времени в секундах, в те�
 
 
 
-
-
-TIME_CORRECTION = +3 # Moscow
 
 
 USERNAME_ADMIN = "Alex7"

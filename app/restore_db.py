@@ -1,20 +1,16 @@
-from keys import USER_DB, PASWORD_DB
+from keys import USER_DB, PASSWORD_DB, DB_NAME
 import subprocess
 import logging
 
-db_username = USER_DB
-db_password = PASWORD_DB
-db_name = "my_database"
-confirmation = False # На всякий случай подтверждение функции
 
 
 def restore_db(file_path):
-                                                            # postgres
-    terminate_command = f'PGPASSWORD={db_password} psql -h postgres -p 5432 -U {db_username} -d {db_name} -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=\'{db_name}\';"'
+                                                            # postgres  localhost
+    terminate_command = f'PGPASSWORD={PASSWORD_DB} psql -h postgres -p 5432 -U {USER_DB} -d {DB_NAME} -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=\'{DB_NAME}\';"'
 
-    clear_command = f'PGPASSWORD={db_password} psql -h postgres -p 5432 -U {db_username} -d {db_name} -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"'
+    clear_command = f'PGPASSWORD={PASSWORD_DB} psql -h postgres -p 5432 -U {USER_DB} -d {DB_NAME} -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"'
 
-    pg_restore_command = f'PGPASSWORD={db_password} pg_restore -h postgres -p 5432 -U {db_username} -d {db_name} {file_path}'
+    pg_restore_command = f'PGPASSWORD={PASSWORD_DB} pg_restore -h postgres -p 5432 -U {USER_DB} -d {DB_NAME} {file_path}'
     
     try:
         subprocess.run(terminate_command, shell=True) # Формирование команды для завершения активных сеансов
@@ -23,17 +19,14 @@ def restore_db(file_path):
 
         subprocess.run(pg_restore_command, shell=True) # Восстановления базы данных из резервной копии с помощью pg_restore, выполнение команды через subprocess
         
-        confirmation = True
         logging.info("Database restore completed successfully.")
+        return True
+
+
     except Exception as e:
-        confirmation = False
-        logging.info(f"An error occurred: {e}")
+        logging.error(f"An error occurred restore_db : {e}")
+        return False
 
-    return confirmation
-
-
-if __name__ == "__main__":
-    restore_db()
 
 #
 # Очищает имеющуюся базу и восстанавливает из копии находящейся на сервере по адресу переданному по адресу и имени файла - file_path

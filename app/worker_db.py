@@ -89,6 +89,36 @@ async def read_user(user_id):
 
 
 
+# Read ALL users:
+async def read_users():
+    connection = None
+    try:
+        connection = await get_connection()
+        result = await connection.fetch(
+            '''
+                SELECT * FROM telegram;
+            '''
+        )
+
+        if not result:
+            return []
+
+        users = []
+        for rec in result:
+            users.append(dict(rec))
+            
+        return users
+    
+    except Exception as e:
+        logging.error(f"Error read_users: {e}")
+        return False
+
+    finally:
+        if connection:
+            await connection.close()
+
+
+
 # Update user:
 async def update_user(user_data):
     keys_list, values_list, i, connection = [], [], 1, None
