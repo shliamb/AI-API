@@ -1,148 +1,427 @@
-from keys import USER_DB, PASWORD_DB
+from keys import USER_DB, PASSWORD_DB, DB_NAME
+import asyncpg
+# import asyncio
 import logging
-import asyncio
-import sqlalchemy
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from models import Base, UsersBase, Statistics
-from sqlalchemy import select, insert, update, join, func
+#logging.basicConfig(format='%(message)s', level=logging.INFO) # filename='./log/api.log',
+logging.basicConfig(format='%(message)s', level=logging.INFO)
 
 
-# import os
-# from dotenv import load_dotenv
-# load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
-# USER_DB, PASWORD_DB = os.environ.get('USER_DB'),  os.environ.get('PASWOR_DB')
-
-
-
-async def create_async_engine_and_session():                                # @localhost  # @postgres
-    engine = create_async_engine(f"postgresql+asyncpg://{USER_DB}:{PASWORD_DB}@postgres:5432/my_database") # echo=True - вывод логирования
-    async_session = sessionmaker(bind=engine, class_=AsyncSession)
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    return async_session
-
-#### USER TELEGRAM PROPERTY #### 
-# Read User Telegram Data by id
-async def get_user_by_id(id):
-    async_session = await create_async_engine_and_session()
-    async with async_session() as session:
-        # Выполняем запрос на выборку данных пользователя из таблицы UsersTelegram по переданному идентификатору
-        query = select(UsersBase).filter(UsersBase.id == id)
-        result = await session.execute(query)
-        # Получаем первую строку, которая соответствует запросу
-        data = result.scalar_one_or_none()  # - это метод SQLAlchemy, который возвращает ровно один результат из результата запроса или None, если запрос не вернул ни одного результата.
-        return data or None
-
-# Read User Telegram Data by username
-async def get_user_by_username(username):
-    async_session = await create_async_engine_and_session()
-    async with async_session() as session:
-        # Выполняем запрос на выборку данных пользователя из таблицы UsersTelegram по переданному идентификатору
-        query = select(UsersBase).filter(UsersBase.username == username)
-        result = await session.execute(query)
-        # Получаем первую строку, которая соответствует запросу
-        data = result.scalar_one_or_none()  # - это метод SQLAlchemy, который возвращает ровно один результат из результата запроса или None, если запрос не вернул ни одного результата.
-        return data or None
-
-# Update User Telegram by ID
-async def update_user(id, updated_data):
-    async_session = await create_async_engine_and_session()
-    confirmation = False
-    async with async_session() as session:
-        try:
-            query = update(UsersBase).where(UsersBase.id == id).values(**updated_data)
-            await session.execute(query)
-            await session.commit()
-            confirmation = True
-            logging.info(f"update_user {id}")
-        except Exception as e:
-            logging.error(f"Failed to update user: {e}")
-    return confirmation
-
-
-# Update User Telegram by Username
-async def update_user_by_username(username, updated_data):
-    async_session = await create_async_engine_and_session()
-    confirmation = False
-    async with async_session() as session:
-        try:
-            query = update(UsersBase).where(UsersBase.username == username).values(**updated_data)
-            await session.execute(query)
-            await session.commit()
-            confirmation = True
-            logging.info(f"update_user {username}")
-        except Exception as e:
-            logging.error(f"Failed to update user: {e}")
-    return confirmation
-
-# Add User Telegram to DB
-async def adding_user(user_data):
-    async_session = await create_async_engine_and_session()
-    confirmation = False
-    async with async_session() as session:
-        try:
-            query = insert(UsersBase).values(**user_data)
-            await session.execute(query)
-            await session.commit()
-            confirmation = True
-            logging.info("adding_user")
-        except Exception as e:
-            logging.error(f"Failed to add user: {e}")
-    return confirmation
-
-
-
-# Admin get all users and her data
-async def get_all_data_user_by_username():
-    async_session = await create_async_engine_and_session()
-    async with async_session() as session:
-        query = select(UsersBase)
-        result = await session.execute(query)
-        # data = result.fetchall()
-        data = result.scalars().all()
-        return data or None
+# Asinc onnection to DB:
+async def get_connection():
+    connection = await asyncpg.connect(
+        host="localhost", # app_postgres  localhost  имя контейнера
+        database=DB_NAME,
+        user=USER_DB,
+        password=PASSWORD_DB
+    )
+    return connection
 
 
 
 
 
+#### USERS TABLE: ####
+######################
+
+# Add user:
+async def add_user(user_data):
+    keys_list, values_list, num_list, i, connection = [], [], [], 1, None 
+
+    user_id = user_data.get("user_id")
+    counts_api = user_data.get("counts_api")
+    if not user_id or not counts_api:
+        logging.error("Error add_user: Not enough data") 
+        return False
 
 
+    for key, value in user_data.items():
+        keys_list.append(key)
+        values_list.append(value)
+        num_list.append(f"${i}")
+        i += 1
 
+    keys = ", ".join(keys_list) # <-- в строку, а * распоковывает поотдельности
+    nums = ", ".join(num_list)
 
-
-
-
-#### STATISTICS ####
-# Add statistics
-async def add_statistic(data):
-    async_session = await create_async_engine_and_session()
-    confirmation = False
-    async with async_session() as session:
-        try:
-            query = insert(Statistics).values(**data)
-            await session.execute(query)
-            await session.commit()
-            confirmation = True
-            logging.info("Add a one statistics line to table")
-        except Exception as e:
-            logging.error(f"Failed to add statistics: {e}")
-    return confirmation
-
-
-# Read Statistics on id all 30 line
-async def get_last_statistics(username):
-    async_session = await create_async_engine_and_session()
-    async with async_session() as session:
-        query = (
-            select(Statistics)
-            .filter(Statistics.username_table_stat == username)
-            .order_by(Statistics.time.desc())  # Сортировка по убыванию даты
-            .limit(100)  # Ограничение на количество строк
+    try:
+        connection = await get_connection()
+        await connection.execute(
+            f'''
+            INSERT INTO telegram ({keys}) VALUES ({nums})
+            ''', 
+            *values_list # Оператор распоковки *
         )
-        result = await session.execute(query)
-        data = result.scalars().all()  # Получение всех строк
-        return data
+        return True
+    
+    except Exception as e:
+        logging.error(f"Error add_user: {e}")
+        return False
+    
+    finally:
+        if connection:
+            await connection.close()
 
+
+# Read user ID:
+async def read_user(user_id):
+    connection = None
+    try:
+        connection = await get_connection()
+        result = await connection.fetch(
+            '''
+                SELECT * FROM telegram WHERE user_id = $1;
+            ''',
+            user_id,
+        )
+
+        if not result:
+            return {}
+
+        return dict(*result)
+    
+    except Exception as e:
+        logging.error(f"Error read_user: {e}")
+        return False
+
+    finally:
+        if connection:
+            await connection.close()
+
+
+
+# Update user:
+async def update_user(user_data):
+    keys_list, values_list, i, connection = [], [], 1, None
+
+    user_id = user_data.get("user_id")
+    if not user_id:
+        logging.error("Error update_user: Not enough data") 
+        return False
+
+    for key, value in user_data.items():
+        if key != "user_id":
+            keys_list.append(f"{key} = ${i}")
+            values_list.append(value) #user_data[key])
+            i += 1
+
+    update_string = ", ".join(keys_list) # <-- в строку, а * распоковывает поотдельности
+    values_list.append(user_id)
+
+    try:
+        connection = await get_connection()
+        await connection.execute(
+            f'''
+            UPDATE telegram SET {update_string} WHERE user_id = ${i};
+            ''',
+            *values_list
+        )
+        return True
+    
+    except Exception as e:
+        logging.error(f"Error update_user: {e}")
+        return False
+    
+    finally:
+        if connection:
+            await connection.close()
+
+
+
+
+
+
+
+#### ACCOUNT API ACCESS TABLE: ####
+###################################
+
+# Add ACCOUNT:
+async def add_account(account_data):
+    keys_list, values_list, num_list, i, connection = [], [], [], 1, None 
+
+    access_id = account_data.get("access_id")
+    api_key = account_data.get("api_key")
+    api_value = account_data.get("api_value")
+    user_id_telegram = account_data.get("user_id_telegram")
+    if not access_id or not api_key or not api_value or not user_id_telegram:
+        logging.error("Error update_account: Not enough data") 
+        return False
+
+    for key, value in account_data.items():
+        keys_list.append(key)
+        values_list.append(value)
+        num_list.append(f"${i}")
+        i += 1
+
+    keys = ", ".join(keys_list) # <-- в строку, а * распоковывает поотдельности
+    nums = ", ".join(num_list)
+
+    try:
+        connection = await get_connection()
+        await connection.execute(
+            f'''
+            INSERT INTO account_api_access ({keys}) VALUES ({nums})
+            ''', 
+            *values_list # Оператор распоковки *
+        )
+        return True
+    
+    except Exception as e:
+        logging.error(f"Error add_account: {e}")
+        print(f"Error add_account: {e}")
+        return False
+    
+    finally:
+        if connection:
+            await connection.close()
+
+
+
+# Read ACCOUNT for access_id:
+async def read_account_access_id(access_id):
+    connection = None
+    try:
+        connection = await get_connection()
+        result = await connection.fetch(
+            '''
+                SELECT * FROM account_api_access WHERE access_id = $1;
+            ''',
+            access_id,
+        )
+
+        if not result:
+            return {}
+
+        return dict(*result)
+    
+    except Exception as e:
+        logging.error(f"Error read_account_access_id: {e}")
+        return False
+
+    finally:
+        if connection:
+            await connection.close()
+
+
+
+# Read ACCOUNTS for user_id_telegram:
+async def read_accounts_user_id(user_id):
+    connection = None
+    try:
+        connection = await get_connection()
+        result = await connection.fetch(
+            '''
+                SELECT * FROM account_api_access WHERE user_id_telegram = $1;
+            ''',
+            user_id,
+        )
+
+        if not result:
+            return []
+
+        accounts = []
+        for record in result:
+            accounts.append(dict(record))
+        return accounts
+    
+    except Exception as e:
+        logging.error(f"Error read_accounts_user_id: {e}")
+        return False
+
+    finally:
+        if connection:
+            await connection.close()
+
+
+
+# Update account:
+async def update_account(account_data):
+    keys_list, values_list, i, connection = [], [], 1, None
+
+    access_id = account_data.get("access_id")
+    if not access_id:
+        logging.error("Error update_account: Not enough data") 
+        return False
+
+    for key, value in account_data.items():
+        if key != "access_id":
+            keys_list.append(f"{key} = ${i}")
+            values_list.append(value) #user_data[key])
+            i += 1
+
+    update_string = ", ".join(keys_list) # <-- в строку, а * распоковывает поотдельности
+    values_list.append(access_id)
+
+    try:
+        connection = await get_connection()
+        await connection.execute(
+            f'''
+            UPDATE account_api_access SET {update_string} WHERE access_id = ${i};
+            ''',
+            *values_list
+        )
+        return True
+    
+    except Exception as e:
+        logging.error(f"Error update_account: {e}")
+        print(f"Error update_account: {e}")
+        return False
+    
+    finally:
+        if connection:
+            await connection.close()
+
+
+# Dellete account:
+async def del_account(access_id):
+    connection = None
+
+    if not access_id:
+        logging.error("Error del_account: Where is access_id?") 
+        return False
+
+    try:
+        connection = await get_connection()
+        await connection.execute(
+            f'''
+            DELETE FROM account_api_access WHERE access_id = $1;
+            ''',
+            access_id
+        )
+        return True
+    
+    except Exception as e:
+        logging.error(f"Error del_account: {e}")
+        return False
+    
+    finally:
+        if connection:
+            await connection.close()
+
+
+
+
+
+
+
+
+#### STATISTIC TABLE: ####
+##########################
+
+# Add record stat:
+async def add_record_stat(stat_data):
+    keys_list, values_list, num_list, i, connection = [], [], [], 1, None 
+
+    user_id = stat_data.get("user_id")
+    time = stat_data.get("time")
+    access_id = stat_data.get("access_id")
+    if not user_id or not time or not access_id:
+        logging.error("Error add_record_stat: Not enough data") 
+        return False
+
+    for key, value in stat_data.items():
+        keys_list.append(key)
+        values_list.append(value)
+        num_list.append(f"${i}")
+        i += 1
+
+    keys = ", ".join(keys_list) # <-- в строку, а * распоковывает поотдельности
+    nums = ", ".join(num_list)
+
+    try:
+        connection = await get_connection()
+        await connection.execute(
+            f'''
+            INSERT INTO statistics ({keys}) VALUES ({nums})
+            ''', 
+            *values_list # Оператор распоковки *
+        )
+        return True
+    
+    except Exception as e:
+        logging.error(f"Error add_record_stat: {e}")
+        return False
+    
+    finally:
+        if connection:
+            await connection.close()
+
+
+# Read stat for user_id:
+async def read_stat_for_user_id(user_id):
+    connection = None
+    try:
+        connection = await get_connection()
+        result = await connection.fetch(
+            '''
+                SELECT * FROM statistics WHERE user_id = $1;
+            ''',
+            user_id,
+        )
+
+        if not result:
+            return []
+
+        list_stat = []
+        for record in result:
+            list_stat.append(dict(record))
+        return list_stat
+    
+    except Exception as e:
+        logging.error(f"Error read_stat_for_user_id: {e}")
+        return False
+
+    finally:
+        if connection:
+            await connection.close()
+
+
+
+# Read stat for access_id:
+async def read_stat_for_access_id(access_id):
+    connection = None
+    try:
+        connection = await get_connection()
+        result = await connection.fetch(
+            '''
+                SELECT * FROM statistics WHERE access_id = $1;
+            ''',
+            access_id,
+        )
+
+        if not result:
+            return []
+
+        list_stat = []
+        for record in result:
+            list_stat.append(dict(record))
+        return list_stat
+    
+    except Exception as e:
+        logging.error(f"Error read_stat_for_access_id: {e}")
+        return False
+
+    finally:
+        if connection:
+            await connection.close()
+
+
+
+# Delete_stat_table:
+async def delete_stat_table():
+
+    try:
+        connection = await get_connection()
+        await connection.execute(
+            '''
+            TRUNCATE TABLE statistics;
+            '''
+        )
+        return True
+    
+    except Exception as e:
+        logging.error(f"Error delete_stat_table: {e}")
+        return False
+    
+    finally:
+        if connection:
+            await connection.close()

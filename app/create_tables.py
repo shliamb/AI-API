@@ -1,4 +1,4 @@
-from get_keys import USER_DB, PASSWORD_DB, DB_NAME
+from keys import USER_DB, PASSWORD_DB, DB_NAME
 import logging
 logging.basicConfig(format='%(message)s', level=logging.INFO, filename='./log/api.log')
 import psycopg2
@@ -13,53 +13,77 @@ def create_tables_in_db():
         
         cursor = connection.cursor()
 
- 
- 
-        create_table_users = '''
-        CREATE TABLE IF NOT EXISTS users (
-            -- User data
-            username VARCHAR(50) PRIMARY KEY,           --(Username пользователя, для идентификации в API)
-            appkey UUID,                                --(UUID в качестве API Key)
-            is_failed INTEGER DEFAULT 0,                --(Неудачные попытки доступа)
-            is_block BOOLEAN DEFAULT FALSE,             --(Заблокирован ли пользователь из-за колл. не верных вводов.)
-            date_block TIMESTAMP,                       --(Дата и время блокировки, для отсчета времени блокировки)
-            date_last_activ TIMESTAMP,                  --(Дата последней активности)
-            time_zone VARCHAR(10), 
-            language VARCHAR(10),
-            paid INTEGER DEFAULT 0,                     --(Колличество оплат)
-            money FLOAT,                                --(Денег на счету)
-            money_currency VARCHAR(50) DEFAULT "$",     --(Валюта)
-            notifications BOOLEAN,
 
-            -- Telegram
-            id BIGINT UNIQUE NOT NULL,                  --(Телеграмм id)
+        # Account Telegram: 
+        create_table_telegram  = '''
+        CREATE TABLE IF NOT EXISTS telegram  (
+
+            user_id BIGINT PRIMARY KEY,
             name VARCHAR(50),
-            full_name VARCHAR(50),
+            full_name VARCHAR(100),
             first_name VARCHAR(50),
-            last_name VARCHAR(50)
+            last_name VARCHAR(50),
+
+            counts_api INTEGER NOT NULL,                        -- Колличество доступов к АПИ
+            list_access_id VARCHAR(300),                        -- Список access_id пользователя
+            last_visit TIMESTAMP,
+            time_zone VARCHAR(32), 
+            language VARCHAR(10),
+            count_paid INTEGER DEFAULT 0,                       -- Колличество оплат
+            money FLOAT,
+            block_user BOOLEAN DEFAULT FALSE,
+            god_user BOOLEAN DEFAULT FALSE,                     -- Пользователь, на котором нет проверки денег - для себя и своих проектов
+            notifications BOOLEAN
         );
-        CREATE INDEX sid_username ON users(username);
-        CREATE INDEX sid_appkey ON users(appkey);
-        CREATE INDEX sid_is_failed ON users(is_failed);
-        CREATE INDEX sid_is_block ON users(is_block);
-        CREATE INDEX sid_id ON users(id);
+        CREATE INDEX sid_user_id ON telegram(user_id);
+        CREATE INDEX sid_block ON telegram(block_user);
+        CREATE INDEX sid_notifications ON telegram(notifications);
+        CREATE INDEX sid_counts_account_api ON telegram(counts_api);
+        CREATE INDEX sid_list_access_id ON telegram(list_access_id);
         '''
-        cursor.execute(create_table_users)
+        cursor.execute(create_table_telegram)
 
 
-        # Нужно будет очисчать таблицу от старых сессий, в постгресс есть встроенная функция - партиционирования
+        # Account API Access:
+        # Пользователь может имень много доступов, но не более - count_account_api
+        # access_id - главный идентификатор доступа
+        create_table_account_api_access  = '''
+        CREATE TABLE IF NOT EXISTS account_api_access  (
+
+            access_id UUID PRIMARY KEY,                 -- UUID access_id
+            api_key VARCHAR(100) NOT NULL,              -- строка 'appkey'
+            api_value UUID UNIQUE NOT NULL,             -- UUID value
+
+            is_active BOOLEAN DEFAULT TRUE,             -- Для блокировки
+            access_type VARCHAR(20),                    -- "read-only", "full-access" и т.д.
+            last_visit TIMESTAMP,                       -- Дата последней активности
+
+            user_id_telegram BIGINT NOT NULL,           -- user_id telegram 
+
+            FOREIGN KEY (user_id_telegram) REFERENCES telegram(user_id) ON DELETE CASCADE
+        );
+        CREATE INDEX sid_access_id ON account_api_access(access_id);
+        CREATE INDEX sid_api_key ON account_api_access(api_key);
+        CREATE INDEX sid_is_api_value ON account_api_access(api_value);
+        CREATE INDEX sid_is_access_type ON account_api_access(access_type);
+        '''
+        cursor.execute(create_table_account_api_access)
+
+
+        # Table Statistic Request to API:
+        # Нужно партиционирование, или в админке кнопка - очистка таблицы
         create_table_statistics = '''
         CREATE TABLE IF NOT EXISTS statistics (
-            id BIGINT PRIMARY KEY,                      --(Телеграмм id)
-            time TIMESTAMP,
-            use_model VARCHAR(100),                     --(Используемая модель в сессии)
+            id SERIAL PRIMARY KEY,                      -- Просто порядковый номер
+            user_id BIGINT UNIQUE NOT NULL,             -- Телеграмм id
+            time TIMESTAMP NOT NULL,
+            use_model VARCHAR(100),                     -- Используемая модель в сессии
             sesion_token FLOAT,
             price_1_tok FLOAT,
             total_price FLOAT,
 
-            username_table_stat VARCHAR(50),
-            
-            FOREIGN KEY (username_table_stat) REFERENCES users(username)
+            access_id UUID NOT NULL,
+            FOREIGN KEY (access_id) REFERENCES account_api_access(access_id) ON DELETE CASCADE
         );
         '''
         cursor.execute(create_table_statistics)
@@ -97,25 +121,3 @@ create_tables_in_db()
 # time_zone TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 # UNIQUE - автоматом индексируются
 # INDEX idx_name (name)  -- Создание обычного индекса на колонке name
-
-
-
-# url VARCHAR(800),
-# in_date TIMESTAMP,
-# last_ping TIMESTAMP,
-# ip VARCHAR(500),
-# mouse BOOLEAN,
-# battery FLOAT,
-# canvas VARCHAR(300),
-# processors INTEGER,
-# ram INTEGER,
-# webgl VARCHAR(500),
-# touch INTEGER,
-# useragent VARCHAR(500),
-# language VARCHAR(10),
-# platform VARCHAR(50),
-# screenResolution VARCHAR(50),
-# timezoneoffset INTEGER,
-# plugins VARCHAR(150),
-# networkinfo VARCHAR(1000),
-# location VARCHAR(500),

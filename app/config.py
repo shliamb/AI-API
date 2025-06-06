@@ -1,11 +1,30 @@
 #### CONFIG ####
 LIMIT_TRY = 5
-TIME_OUT_ERR_USERNAME = 5 # sec.
-WAITING_TIME = 15 # min/
-TIME_CORRECTION = +3 # Moscow
+
+
+
+# TELEGRAMM
+NOTIFICATION = True
+COUNTS_QUANTITY = 2 # MAX Коллисчество подключений - аккаунтов телеграмм пользователю
 MONEY_TO_START = 0.3 # 1$ to start work
 MY_APP_KEY = "appkey" # Key to API Key
+
+TIME_CORRECTION = +3 # Moscow
 MIN_PAY = 1 # Minimum pay
+
+
+# FASTAPI
+REQUEST_LIMIT = 10 # Максимальное количество запросов с одного IP-адреса в течение TIME_WINDOW секунд.
+TIME_WINDOW = 60 # Интервал времени в секундах, в течение которого действует ограничение.
+
+
+
+
+
+
+TIME_CORRECTION = +3 # Moscow
+
+
 USERNAME_ADMIN = "Alex7"
 
 # Folders:
@@ -18,9 +37,7 @@ DEF_MOD_GROK = "grok-2-vision-latest"
 DEF_MOD_CLAUDE = "claude-3-haiku-20240307"
 DEF_CLAUDE_VERSION = "2023-06-01" # Специфичная для антропик вешь..
 
-# api.py
-REQUEST_LIMIT = 10 # Максимальное количество запросов с одного IP-адреса в течение TIME_WINDOW секунд.
-TIME_WINDOW = 60 # Интервал времени в секундах, в течение которого действует ограничение.
+
 
 
 

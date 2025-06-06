@@ -3,18 +3,18 @@ logging.basicConfig(level=logging.INFO, filename='./log/api.log', filemode='a', 
 # Base
 import asyncio
 import aiofiles
-# from pydantic import BaseModel
+from collections import defaultdict
+import json
 from typing import Optional, List
 from datetime import datetime, timedelta, timezone
 # import os
 # import shutil
 # import requests
+# from pydantic import BaseModel
 # Fasapi
 from fastapi import FastAPI, HTTPException, Request, status, UploadFile, File, Form, Header, Depends
 from fastapi.responses import Response, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-import json
-from collections import defaultdict
 import uvicorn
 # import gunicorn
 # Service
@@ -43,23 +43,17 @@ lock = asyncio.Lock() # "Creating" (Создание) lock.
 
 @app.middleware("http")
 async def rate_limit(request: Request, call_next):
-    '''
-    Middleware для ограничения частоты запросов (rate limiting) по IP-адресу.
+    '''Middleware для ограничения частоты запросов по IP (rate limiting).
     
-    Подсчитывает количество запросов от каждого IP в заданном временном окне (TIME_WINDOW).
-    Если количество запросов превышает лимит (REQUEST_LIMIT), возвращает ошибку 429.
+    Подсчитывает запросы от каждого IP в окне TIME_WINDOW секунд.
+    При превышении лимита REQUEST_LIMIT возвращает HTTP 429.
     
-    Использует:
-    - defaultdict для хранения временных меток запросов по IP
-    - asyncio.Lock() для безопасного доступа к общим данным из разных корутин
-    - Логирует превышение лимита
-    
-    Параметры:
-        request: Request - входящий HTTP-запрос
-        call_next - функция для вызова следующего middleware/обработчика
+    Args:
+        request: Входящий HTTP-запрос
+        call_next: Функция для вызова следующего обработчика
         
-    Возвращает:
-        Response: либо ответ от следующего обработчика, либо 429 при превышении лимита
+    Returns:
+        Response: Ответ сервера или HTTP 429 при превышении лимита
     '''
     ip = request.client.host
     now = datetime.now()

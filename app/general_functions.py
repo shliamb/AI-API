@@ -10,7 +10,7 @@ import asyncio
 from mutagen import File
 from io import BytesIO
 from config import PRICE, TIME_CORRECTION
-from worker_db import add_statistic, get_user_by_username, update_user_by_username
+#from worker_db import add_statistic, get_user_by_username, update_user_by_username
 
 # from config import price
 
@@ -22,7 +22,7 @@ async def day_utcnow():
     a = a + timedelta(hours=TIME_CORRECTION)
     day_str = a.strftime("%Y-%m-%d %H:%M:%S")
     day = datetime.strptime(day_str, '%Y-%m-%d %H:%M:%S')
-    logging.info("info: Getting the day and time from the server")
+    #logging.info("info: Getting the day and time from the server")
     return day or None
 
 # UNFORMAT TIME
@@ -32,51 +32,51 @@ async def unformat_date(date):
     return day_now, time_now
 
 
-# Calculation of the cost of used tokens
-async def calculation(username, model_version, used_tokens, input_data):
-    one_tok_price = None
+# # Calculation of the cost of used tokens
+# async def calculation(username, model_version, used_tokens, input_data):
+#     one_tok_price = None
     
-    for key, value in PRICE.items():
-        if key == model_version:
-            if input_data == "text":
-                one_tok_price = value / 1000000 # Price 1 token to USD
-                break
-            elif input_data == "img":
-                one_tok_price = value
-                break
-            elif input_data == "audio":
-                one_tok_price = value # Price 1 min
-                break
+#     for key, value in PRICE.items():
+#         if key == model_version:
+#             if input_data == "text":
+#                 one_tok_price = value / 1000000 # Price 1 token to USD
+#                 break
+#             elif input_data == "img":
+#                 one_tok_price = value
+#                 break
+#             elif input_data == "audio":
+#                 one_tok_price = value # Price 1 min
+#                 break
         
-    if one_tok_price == None:
-        print(f"The model {model_version} was not found in the price list")
-        logging.error(f"The model {model_version} was not found in the price list")
-        one_tok_price = 0.000095 # Sorry..
+#     if one_tok_price == None:
+#         print(f"The model {model_version} was not found in the price list")
+#         logging.error(f"The model {model_version} was not found in the price list")
+#         one_tok_price = 0.000095 # Sorry..
 
-    total_price = one_tok_price * used_tokens
+#     total_price = one_tok_price * used_tokens
 
-    # Collecting data
-    data_stat = {
-        "username_table_stat": username,
-        "time": await day_utcnow(),
-        "use_model": model_version,
-        "sesion_token": used_tokens,
-        "price_1_tok": one_tok_price,
-        "total_price": total_price,
-    }
+#     # Collecting data
+#     data_stat = {
+#         "username_table_stat": username,
+#         "time": await day_utcnow(),
+#         "use_model": model_version,
+#         "sesion_token": used_tokens,
+#         "price_1_tok": one_tok_price,
+#         "total_price": total_price,
+#     }
 
-    # Save statistic data to DB:
-    await add_statistic(data_stat)
+#     # Save statistic data to DB:
+#     await add_statistic(data_stat)
 
-    # Getting user data
-    user_data = await get_user_by_username(username)
-    new_money = user_data.money - total_price
-    data_money = {"money": new_money, "date_last_activ": await day_utcnow()}
+#     # Getting user data
+#     user_data = await get_user_by_username(username)
+#     new_money = user_data.money - total_price
+#     data_money = {"money": new_money, "date_last_activ": await day_utcnow()}
 
-    # The balance was changed taking into account the expense
-    await update_user_by_username(username, data_money)
+#     # The balance was changed taking into account the expense
+#     await update_user_by_username(username, data_money)
 
-    return total_price
+#     return total_price
 
 
 # Remove File OS
