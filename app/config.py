@@ -5,7 +5,7 @@ LIMIT_TRY = 5
 
 # TELEGRAMM
 NOTIFICATION = True
-COUNTS_QUANTITY = 2 # MAX Коллисчество подключений - аккаунтов телеграмм пользователю
+COUNTS_QUANTITY = 3 # MAX Коллисчество подключений - аккаунтов телеграмм пользователю
 MONEY_TO_START = 0.3 # 1$ to start work
 MY_APP_KEY = "appkey" # Key to API Key
 

@@ -26,7 +26,7 @@ from aiogram.fsm.state import State, StatesGroup
 # from aiogram.fsm.storage.memory import MemoryStorage
 # from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 # Service
-from worker_db import read_user, add_user, update_user, add_account, update_account
+from worker_db import read_user, add_user, update_user, add_account, update_account, read_accounts_user_id
 # from backupdb import backup_db
 # from restore_db import restore_db
 from general_functions import day_utcnow
@@ -91,9 +91,9 @@ async def registration_telegram_user(message: Message, state: FSMContext) -> Non
         return
 
     if language == "en":
-        await message.answer("Successful registration.\nNow you can add API accesses - /my_key.")
+        await message.answer("Successful registration.\nNow you can add API accesses - /accounts")
     elif language == "ru":
-        await message.answer("Успешная регистрация.\nТеперь вы можете добавлять доступы к API - /my_key.")
+        await message.answer("Успешная регистрация.\nТеперь вы можете добавлять доступы к API - /accounts")
 
     await state.clear()
 
@@ -192,48 +192,36 @@ async def main_menu(message: types.Message):
     notifications_ru = "ВКЛ." if raw_notifications else "ВЫКЛ."
     notifications_en = "ON" if raw_notifications else "OFF"
 
-    ru_text = f'''
+    # Русская версия
+    ru_text = (
+        f"<b>🎛 ГЛАВНОЕ МЕНЮ:</b>\n\n"
+        f"<b>🔑 АККАУНТЫ: {accounts} шт.</b>\n"
+        f"        Управление – /accounts\n\n"
+        f"<b>💳 БАЛАНС: {money}$</b>\n"
+        f"        Пополнить – /pay\n\n"
+        f"<b>📊 СТАТИСТИКА:</b>\n"
+        f"        Получить exel – /stat\n\n"
+        f"<b>🔌 НАСТРОЙКИ:</b>\n"
+        f"        Язык: <b>{language.upper()}</b> – /lang\n"
+        f"        Уведомления: <b>{notifications_ru}</b> – /note"
+    )
 
-<b>🎛 ГЛАВНОЕ МЕНЮ:</b>
+    # Английская версия
+    en_text = (
+        f"<b>🎛 MAIN MENU:</b>\n\n"
+        f"<b>🔑 ACCOUNTS: {accounts} pieces</b>\n"
+        f"        Management – /accounts\n\n"
+        f"<b>💳 MONEY BALANCE: {money}$</b>\n"
+        f"        Deposit – /pay\n\n"
+        f"<b>📊 STATISTICS:</b>\n"
+        f"        Get an exel – /stat\n\n"
+        f"<b>🔌 SETTINGS:</b>\n"
+        f"        Language: <b>{language.upper()}</b> – /lang\n"
+        f"        Notifications: <b>{notifications_en}</b> – /note"
+    )
 
-<b>🔑 АККАУНТЫ: {accounts} шт.</b>
-        Управление – /accounts
-
-<b>💳 БАЛАНС: {money}$</b>
-        Пополнить – /pay
-
-<b>📊 СТАТИСТИКА:</b>
-        Получить exel – /stat
-
-<b>🔌 НАСТРОЙКИ:</b>
-        Язык: <b>{(language).upper()}</b> – /lang
-        Увед-ия: <b>{notifications_ru}</b> – /note
-
-    '''
-
-    en_text = f'''
-
-<b>🎛 MAIN MENU:</b>
-
-<b>🔑 ACCOUNTS: {accounts} pieces</b>
-        Management – /accounts
-
-<b>💳 MONEY BALANCE: {money}$</b>
-        Deposit – /pay
-
-<b>📊 STATISTICS:</b>
-        Get an exel – /stat
-
-<b>🔌 SETTINGS:</b>
-        Language: <b>{(language).upper()}</b> – /lang
-        Notifications: <b>{notifications_en}</b> – /note
-
-    '''
-
-    if language == "en":
-        await message.answer(en_text, parse_mode="HTML")
-    else:
-        await message.answer(ru_text, parse_mode="HTML")
+    # Отправка сообщения
+    await message.answer(en_text if language == "en" else ru_text, parse_mode="HTML")
 
 
 
@@ -313,34 +301,57 @@ async def accounts_menu(message: types.Message):
     accounts = len(list_access_id)
     counts_api = data.get("counts_api")
 
-    ru_text = f'''
+    #
+    coints_text_ru = (
+        f"\n🔗 Добавить ({counts_api}) - /add_acc" if counts_api 
+        else "\n🔗 Больше добавить нельзя"
+    )
+    coints_text_en = (
+        f"\n🔗 Add ({counts_api}) - /add_acc" if counts_api
+        else "\n🔗 You can't add more"
+    )
 
-<b>🔑 АККАУНТЫ: {accounts} шт.</b>
-
-<b>🔌 1 Аккаунт</b>
-        ключ
-
+    #
+    all_accounts_user = await read_accounts_user_id(id)
+    text_accounts = []
+    for i, record in enumerate(all_accounts_user, start=1):
+        access_id = record.get("access_id")
+        api_key = record.get("api_key")
+        api_value = record.get("api_value")
         
+        account_info = (
+            f"\n\n<b>🔌 {i}. Аккаунт:</b>\n"
+            f"    <b>- access_id:</b> <code>{access_id}</code>\n"
+            f"    <b>- api_key:</b> <code>{api_key}</code>\n"
+            f"    <b>- api_value:</b> <code>{api_value}</code>"
+        )
+        text_accounts.append(account_info)
+    text_accounts = "".join(text_accounts)
 
-🔗 Добавить ({counts_api}) - /add_acc
+    #
+    text_del_acc_en = "\n💣 Delete accounts - /del_acc" if accounts else ""
+    text_del_acc_ru = "\n💣 Удалить аккаунты - /del_acc" if accounts else ""
 
+    #
+    ru_text = (
+        f"<b>🔑 АККАУНТЫ: {accounts} шт.</b>\n"
+        f"{text_accounts}\n"
+        f"{coints_text_ru}"
+        f"{text_del_acc_ru}\n\n"
+        "👈 Назад – /back"
+    )
 
-👈 Назад – /back
+    #
+    en_text = (
+        f"<b>🔑 ACCOUNTS: {accounts} pieces</b>\n"
+        f"{text_accounts}\n"
+        f"{coints_text_en}"
+        f"{text_del_acc_en}\n\n"
+        "👈 Back – /back"
+    )
 
-    '''
-
-    en_text = f'''
-
-<b>🎛 MAIN MENU:</b>
-
-<b>🔑 ACCOUNTS: {accounts} pieces</b>
-
-    '''
-
-    if language == "en":
-        await message.answer(en_text, parse_mode="HTML")
-    else:
-        await message.answer(ru_text, parse_mode="HTML")
+    # Отправляем сообщение
+    await message.answer(en_text if language == "en" else ru_text, parse_mode="HTML")
 
 
 
@@ -354,6 +365,20 @@ async def back_main_menu(message: types.Message):
 #### Push /add_acc ####
 @dp.message(Command("add_acc"))
 async def add_accounts(message: types.Message):
+
+    '''
+    list_access_id - хранит список ID для доступа к API в профиле Telegram-пользователя.
+
+    Особенности работы:
+    - В базе данных сохраняется как строка (JSON-формат)
+    - При чтении из базы автоматически преобразуется в список
+    - При сохранении обратно в базу конвертируется в строку
+
+    Пример формата данных:
+    - В Python: ['id1', 'id2', 'id3'] 
+    - В базе: "['id1', 'id2', 'id3']" (как JSON-строка)
+    '''
+
     await typing(message)
 
     id = user_id(message)
@@ -379,7 +404,6 @@ async def add_accounts(message: types.Message):
     counts_api = counts_api - 1
 
     update_data_account = {"access_id": new_access_id, "api_key": MY_APP_KEY, "api_value": uuid.uuid4(), "user_id_telegram": id}
-
     if not await add_account(update_data_account):
         logging.error(f"Error add_account user - {id}")
         return
