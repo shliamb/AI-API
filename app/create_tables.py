@@ -1,7 +1,8 @@
 from keys import USER_DB, PASSWORD_DB, DB_NAME
+import psycopg2
 import logging
 logging.basicConfig(format='%(message)s', level=logging.INFO, filename='./log/api.log')
-import psycopg2
+
 
 
 # Create TABLES:

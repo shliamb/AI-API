@@ -1,9 +1,12 @@
 from keys import USER_DB, PASSWORD_DB, DB_NAME
 import asyncpg
-# import asyncio
+#import json
+import asyncio
 import logging
 #logging.basicConfig(format='%(message)s', level=logging.INFO) # filename='./log/api.log',
 logging.basicConfig(format='%(message)s', level=logging.INFO)
+
+from config import MONEY_TO_START
 
 
 # Asinc onnection to DB:
@@ -263,6 +266,7 @@ async def read_accounts_user_id(user_id):
 
 
 
+
 # Update account:
 async def update_account(account_data):
     keys_list, values_list, i, connection = [], [], 1, None
@@ -455,3 +459,88 @@ async def delete_stat_table():
     finally:
         if connection:
             await connection.close()
+
+
+
+
+
+
+async def json_old_users():
+    '''Собираю всех пользователей, кто хоть раз платил и у кого счет больше чем тестовый'''
+    connection = None
+    try:
+        connection = await get_connection()
+        
+        # Выполняем запрос с LEFT JOIN
+        records = await connection.fetch(
+            '''
+            SELECT 
+                t.*,
+                a.*
+            FROM 
+                telegram t
+            LEFT JOIN 
+                account_api_access a ON t.user_id = a.user_id_telegram
+            WHERE 
+                t.money > $1 OR t.count_paid > $2
+            ''',
+            MONEY_TO_START, 0
+        )
+
+        # Логируем количество найденных записей
+        logging.info(f"Found {len(records)} records")
+        
+        if not records:
+            logging.warning("No users found with money > %s", MONEY_TO_START)
+            return []
+
+        # Обрабатываем записи
+        users = {}
+        for record in records:
+            record_dict = dict(record)
+            user_id = record_dict["user_id"]
+            
+            if user_id not in users:
+                users[user_id] = {
+                    "telegram_data": {
+                        "user_id": user_id,
+                        "name": record_dict.get("name"),
+                        "full_name": record_dict.get("full_name"),
+                        "first_name": record_dict.get("first_name"),
+                        "last_name": record_dict.get("last_name"),
+                        "counts_api": record_dict.get("counts_api"),
+                        "list_access_id": record_dict.get("list_access_id"),
+                        "last_visit": record_dict.get("last_visit"),
+                        "time_zone": record_dict.get("time_zone"),
+                        "language": record_dict.get("language"),
+                        "count_paid": record_dict.get("count_paid"),
+                        "money": record_dict.get("money"),
+                        "block_user": record_dict.get("block_user"),
+                        "god_user": record_dict.get("god_user"),
+                        "notifications": record_dict.get("notifications"),
+                    },
+                    "account_data": []
+                }
+            
+            # Если есть данные API
+            if record_dict.get("access_id") is not None:
+                users[user_id]["account_data"].append({
+                    "access_id": record_dict.get("access_id"),
+                    "api_key": record_dict.get("api_key"),
+                    "api_value": record_dict.get("api_value"),
+                    "is_active": record_dict.get("is_active"),
+                    "access_type": record_dict.get("access_type"),
+                    "last_visit": record_dict.get("last_visit"),
+                    "user_id_telegram": record_dict.get("user_id_telegram")
+                })
+
+        return list(users.values())
+    
+    except Exception as e:
+        logging.error(f"Error in json_old_users: {e}", exc_info=True)
+        return []
+    finally:
+        if connection:
+            await connection.close()
+
+# print(asyncio.run(json_old_users()))

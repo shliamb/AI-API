@@ -18,15 +18,15 @@ REQUEST_LIMIT = 10 # Максимальное количество запрос�
 TIME_WINDOW = 60 # Интервал времени в секундах, в течение которого действует ограничение.
 
 
-
-
-
-
 USERNAME_ADMIN = "Alex7"
+
+
 
 # Folders:
 UPLOADS = "./uploads/"
 AUDIO_FOLDER = "./audio/"
+PATH_JSON_USERS = "./json/"
+
 # AI Defoult:
 DEF_MOD_GOOGLE = "gemini-2.0-flash-exp"
 DEF_MOD_OPENAI = "gpt-4o-mini-2024-07-18"

@@ -26,11 +26,13 @@ from aiogram.fsm.state import State, StatesGroup
 # from aiogram.fsm.storage.memory import MemoryStorage
 # from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 # Service
-from worker_db import read_user, add_user, update_user, add_account, update_account, read_accounts_user_id, del_account, read_stat_for_user_id, read_users
+from worker_db import read_user, add_user, update_user, add_account, update_account, read_accounts_user_id, del_account, read_stat_for_user_id, read_users, delete_stat_table
 from backupdb import backup_db
 from restore_db import restore_db
 from general_functions import day_utcnow
 from create_tables import create_tables_in_db
+from restore_users_to_db import restore_users_to_db
+from get_json_old_users import get_json_old_users
 from config import MONEY_TO_START, MY_APP_KEY, COUNTS_QUANTITY, NOTIFICATION, MIN_PAY
 from keys import TOKEN_TELEGRAM, IS_ADMIN
 
@@ -575,8 +577,9 @@ async def confirm_callback_handler_d(callback_query: types.CallbackQuery):
 
     data_set = await read_user(id)
     new_money = data_set.get("money") + float(summ)
+    count_paid = data_set.get("count_paid") + 1
 
-    updated_data = {"user_id": id, "money": new_money}
+    updated_data = {"user_id": id, "money": new_money, "count_paid": count_paid}
     conf = await update_user(updated_data)
 
     if conf:
@@ -787,12 +790,12 @@ async def admin_main_menu(message: types.Message):
         f"        Backup DB – /bupDb\n"
         f"        Restore DB – /resDb\n"
         f"        Create Tab DB – /crTabDb\n"
+        f"        Down users – /dnlUsers\n"
         f"        Restore Users – /resUs\n\n"
         f"<b>🗑 CLEAR:</b>\n"
         f"        Stat Tab DB – /dStat\n"
-        f"        Logs – /dLogs\n"
-        f"        Get an exel – /stat\n"
-        f"        Get an exel – /stat\n\n"
+        f"        Logs – /dLogs\n\n"
+        # f"        Get an exel – /stat\n\n"
         f"<b>🧪 SPECIAL:</b>\n"
         f"        Paranoi mode – /para\n"
     )
@@ -974,6 +977,22 @@ async def admin_clear_log(message: types.Message):
 
 
 
+# Admin delete_stat_table /dStat
+@dp.message(Command("dStat"))
+async def admin_delete_stat_table(message: types.Message):
+    await typing(message)
+    id = user_id(message)
+
+    if id != IS_ADMIN:
+        return
+
+    if not await delete_stat_table():
+        logging.error("Error delete_stat_table !")
+        return
+
+    await message.answer("Table Statistic of DB is deleted", parse_mode="HTML")
+
+
 
 
 
@@ -1003,6 +1022,12 @@ async def restore_db_admin(message: types.Message, state: FSMContext):
 @dp.message(Restor_db.load_db)
 async def load_a_base(message: Message, state: FSMContext):
 
+    await typing(message)
+    id = user_id(message)
+
+    if id != IS_ADMIN:
+        return
+
     if not isinstance(message.document, types.Document):
         await message.answer("Вы передали не документ.")
         return
@@ -1031,6 +1056,48 @@ async def load_a_base(message: Message, state: FSMContext):
     await state.clear()
 
 
+
+
+
+
+
+
+# Resore OLD users to DB:
+@dp.message(Command('resUs'))
+async def restore_old_users_admin(message: types.Message):
+    await typing(message)
+    id = user_id(message)
+
+    if id != IS_ADMIN:
+        return
+
+    res_update_db = await restore_users_to_db()
+    await message.answer(f"Results of adding regular clients to DB:\n{res_update_db}")
+
+
+
+
+
+
+
+# Resore get_on_json_old_users:
+@dp.message(Command('dnlUsers'))
+async def get_on_json_old_users(message: types.Message):
+    await typing(message)
+    id = user_id(message)
+
+    if id != IS_ADMIN:
+        return
+
+    name_file = await get_json_old_users()
+    if not name_file:
+        await message.answer("Sory, error geting json file old users to DB")
+        return
+
+    if os.path.exists(name_file) and os.path.getsize(name_file) > 0:
+        await bot.send_document(message.chat.id, document=types.input_file.FSInputFile(name_file))
+    else:
+        await bot.send_message(message.chat.id, "File (name_file) is empty or missing.")        
 
 
 
