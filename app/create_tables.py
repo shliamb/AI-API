@@ -92,7 +92,7 @@ def create_tables_in_db():
 
         # Saving changes:
         connection.commit()
-        # print("Adding tables is done!")
+        #print("Adding tables is done!")
         logging.info("Adding tables is done!")
         return True
 

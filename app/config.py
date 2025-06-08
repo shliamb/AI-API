@@ -26,6 +26,7 @@ USERNAME_ADMIN = "Alex7"
 UPLOADS = "./uploads/"
 AUDIO_FOLDER = "./audio/"
 PATH_JSON_USERS = "./json/"
+DOWNLOAD = "./download/"
 
 # AI Defoult:
 DEF_MOD_GOOGLE = "gemini-2.0-flash-exp"

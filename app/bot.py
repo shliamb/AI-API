@@ -11,7 +11,7 @@ from io import StringIO, BytesIO
 import uuid
 import json
 from pathlib import Path # Работа с файловыми путями 
-# from datetime import datetime, timezone, timedelta
+from datetime import datetime
 # import time
 # import sys
 import csv
@@ -33,7 +33,7 @@ from general_functions import day_utcnow
 from create_tables import create_tables_in_db
 from restore_users_to_db import restore_users_to_db
 from get_json_old_users import get_json_old_users
-from config import MONEY_TO_START, MY_APP_KEY, COUNTS_QUANTITY, NOTIFICATION, MIN_PAY
+from config import MONEY_TO_START, MY_APP_KEY, COUNTS_QUANTITY, NOTIFICATION, MIN_PAY, DOWNLOAD
 from keys import TOKEN_TELEGRAM, IS_ADMIN
 
 
@@ -169,7 +169,7 @@ async def command_start_handler(message: Message, state: FSMContext) -> None:
         "last_name": last_name,
 
         "money": MONEY_TO_START,
-        "last_visit": await day_utcnow(),
+        "last_visit": datetime.now(),
         "language": language_code,
         "counts_api": COUNTS_QUANTITY,
         "notifications": NOTIFICATION
@@ -1040,7 +1040,7 @@ async def load_a_base(message: Message, state: FSMContext):
         return    
 
     file_name = f"uploaded-db-restore.sql"
-    file_path = f"./download_db/{file_name}"
+    file_path = f"{DOWNLOAD}{file_name}"
     await bot.download(message.document, file_path) # То что прикрепили и отправили, скачивается в папку с новым именем
 
     await bot.session.close()
@@ -1060,27 +1060,61 @@ async def load_a_base(message: Message, state: FSMContext):
 
 
 
-
+# Admin Restore Users to DB in Json
+class Restore_json(StatesGroup):
+    load_json = State()
 
 # Resore OLD users to DB:
 @dp.message(Command('resUs'))
-async def restore_old_users_admin(message: types.Message):
+async def restore_old_users_admin(message: types.Message, state: FSMContext):
     await typing(message)
     id = user_id(message)
 
     if id != IS_ADMIN:
         return
 
-    res_update_db = await restore_users_to_db()
-    await message.answer(f"Results of adding regular clients to DB:\n{res_update_db}")
+    await bot.send_message(message.chat.id, "Attach and send the necessary json file for recovery Users to DB.", parse_mode="Markdown", reply_markup=ReplyKeyboardRemove()) 
+    await state.set_state(Restore_json.load_json)
+
+
+@dp.message(Restore_json.load_json)
+async def load_json_users_to_db(message: Message, state: FSMContext):
+    await typing(message)
+    id = user_id(message)
+    
+    if not isinstance(message.document, types.Document):
+        await message.answer("It's not a documents")
+        return
+
+    file_extension = message.document.file_name.split('.')[-1]
+    allowed_extensions = ['json']
+
+    if file_extension not in allowed_extensions:
+        await message.answer("You have sent a non-json extension file.")
+        return 
+
+    file_name = f"uploaded-json-restore-users.json"
+    file_path = f"{DOWNLOAD}{file_name}"
+    await bot.download(message.document, file_path)
+
+    await bot.session.close()
+    await dp.storage.close()
+
+
+    res_update_db = await restore_users_to_db(file_path)
+
+    if res_update_db:
+        await message.answer(f"Results of adding regular Users to DB:\n{res_update_db}")
+    else:
+        await message.answer(f"Error of adding regular Users to DB:\n{res_update_db}")
+
+    await state.clear()
 
 
 
 
 
-
-
-# Resore get_on_json_old_users:
+# Get_on_json_old_users:
 @dp.message(Command('dnlUsers'))
 async def get_on_json_old_users(message: types.Message):
     await typing(message)
@@ -1091,7 +1125,7 @@ async def get_on_json_old_users(message: types.Message):
 
     name_file = await get_json_old_users()
     if not name_file:
-        await message.answer("Sory, error geting json file old users to DB")
+        await message.answer(f"No users found with money > {MONEY_TO_START}$")
         return
 
     if os.path.exists(name_file) and os.path.getsize(name_file) > 0:

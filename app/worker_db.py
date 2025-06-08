@@ -3,6 +3,7 @@ import asyncpg
 #import json
 import asyncio
 import logging
+from datetime import datetime, date
 #logging.basicConfig(format='%(message)s', level=logging.INFO) # filename='./log/api.log',
 logging.basicConfig(format='%(message)s', level=logging.INFO)
 
@@ -32,9 +33,9 @@ async def add_user(user_data):
 
     user_id = user_data.get("user_id")
     counts_api = user_data.get("counts_api")
-    if not user_id or not counts_api:
-        logging.error("Error add_user: Not enough data") 
-        return False
+    # if user_id is not None or counts_api is not None:
+    #     logging.error("Error add_user: Not enough data") !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    #     return False
 
 
     for key, value in user_data.items():
@@ -89,6 +90,18 @@ async def read_user(user_id):
     finally:
         if connection:
             await connection.close()
+
+
+# # import json
+# data = asyncio.run(read_user(1666495))
+# print(data)
+
+# # for key, value in data.items():
+# #     #json_list = n.get("list_access_id")
+# #     if key == "list_access_id":
+# #         print(json.loads(value))
+# print(data.get("list_access_id"))
+
 
 
 
@@ -176,7 +189,8 @@ async def add_account(account_data):
     api_value = account_data.get("api_value")
     user_id_telegram = account_data.get("user_id_telegram")
     if not access_id or not api_key or not api_value or not user_id_telegram:
-        logging.error("Error update_account: Not enough data") 
+        logging.error("Error update_account: Not enough data")
+        #print("Error update_account: Not enough data")
         return False
 
     for key, value in account_data.items():
@@ -200,7 +214,7 @@ async def add_account(account_data):
     
     except Exception as e:
         logging.error(f"Error add_account: {e}")
-        print(f"Error add_account: {e}")
+        #print(f"Error add_account: {e}")
         return False
     
     finally:
@@ -265,7 +279,7 @@ async def read_accounts_user_id(user_id):
             await connection.close()
 
 
-
+# print(asyncio.run(read_accounts_user_id(1666495)))
 
 # Update account:
 async def update_account(account_data):
@@ -297,7 +311,7 @@ async def update_account(account_data):
     
     except Exception as e:
         logging.error(f"Error update_account: {e}")
-        print(f"Error update_account: {e}")
+        #print(f"Error update_account: {e}")
         return False
     
     finally:
@@ -465,6 +479,33 @@ async def delete_stat_table():
 
 
 
+
+
+import uuid
+from datetime import datetime
+
+
+
+def extended_encoder(obj):
+    '''Кастомный сериализатор для нестандартных типов данных'''
+    if isinstance(obj, uuid.UUID):  # Обрабатываем UUID
+        return str(obj)
+    
+    # elif isinstance(obj, datetime):  # Обрабатываем дату/время
+    #     return obj.isoformat()
+    
+    elif hasattr(obj, '__dict__'):  # Обрабатываем объекты с атрибутами
+        return obj.__dict__
+    
+    else:
+        return obj
+    
+    # raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+
+
+
+
+
 async def json_old_users():
     '''Собираю всех пользователей, кто хоть раз платил и у кого счет больше чем тестовый'''
     connection = None
@@ -486,55 +527,53 @@ async def json_old_users():
             ''',
             MONEY_TO_START, 0
         )
-
-        # Логируем количество найденных записей
-        logging.info(f"Found {len(records)} records")
         
         if not records:
-            logging.warning("No users found with money > %s", MONEY_TO_START)
+            logging.warning("No users found with money > %s$", MONEY_TO_START)
             return []
 
-        # Обрабатываем записи
+
+
         users = {}
+        account_fields = {"access_id", "api_key", "api_value", "is_active", "user_id_telegram"}  # Поля аккаунта
+
         for record in records:
-            record_dict = dict(record)
-            user_id = record_dict["user_id"]
-            
+
+            user_id = dict(record)["user_id"]# дату пропускает date, потому, лишь для user_id
+
+            accounts_data = {}
+
             if user_id not in users:
-                users[user_id] = {
-                    "telegram_data": {
-                        "user_id": user_id,
-                        "name": record_dict.get("name"),
-                        "full_name": record_dict.get("full_name"),
-                        "first_name": record_dict.get("first_name"),
-                        "last_name": record_dict.get("last_name"),
-                        "counts_api": record_dict.get("counts_api"),
-                        "list_access_id": record_dict.get("list_access_id"),
-                        "last_visit": record_dict.get("last_visit"),
-                        "time_zone": record_dict.get("time_zone"),
-                        "language": record_dict.get("language"),
-                        "count_paid": record_dict.get("count_paid"),
-                        "money": record_dict.get("money"),
-                        "block_user": record_dict.get("block_user"),
-                        "god_user": record_dict.get("god_user"),
-                        "notifications": record_dict.get("notifications"),
-                    },
-                    "account_data": []
-                }
-            
-            # Если есть данные API
-            if record_dict.get("access_id") is not None:
-                users[user_id]["account_data"].append({
-                    "access_id": record_dict.get("access_id"),
-                    "api_key": record_dict.get("api_key"),
-                    "api_value": record_dict.get("api_value"),
-                    "is_active": record_dict.get("is_active"),
-                    "access_type": record_dict.get("access_type"),
-                    "last_visit": record_dict.get("last_visit"),
-                    "user_id_telegram": record_dict.get("user_id_telegram")
-                })
+                users[user_id] = {"telegram_data": {}, "account_data": []}
+
+                for key, value in record.items():
+
+                    if value is None:
+                        continue
+
+                    if key in account_fields:
+                        accounts_data[key] = extended_encoder(value)
+                    else:    
+                        users[user_id]["telegram_data"][key] = extended_encoder(value)
+
+                if accounts_data:
+                    users[user_id]["account_data"].append(accounts_data)
+            else:
+
+
+                for key, value in record.items():
+
+                    if value is None:
+                        continue
+
+                    if key in account_fields:
+                        accounts_data[key] = extended_encoder(value)
+
+                if accounts_data:
+                    users[user_id]["account_data"].append(accounts_data)
 
         return list(users.values())
+        # return users
     
     except Exception as e:
         logging.error(f"Error in json_old_users: {e}", exc_info=True)
@@ -543,4 +582,93 @@ async def json_old_users():
         if connection:
             await connection.close()
 
-# print(asyncio.run(json_old_users()))
+# res = asyncio.run(json_old_users())
+# print(res)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# async def json_old_users():
+#     '''Собираю всех пользователей, кто хоть раз платил и у кого счет больше чем тестовый'''
+#     connection = None
+#     try:
+#         connection = await get_connection()
+        
+#         # Выполняем запрос с LEFT JOIN
+#         records = await connection.fetch(
+#             '''
+#             SELECT 
+#                 t.*,
+#                 a.*
+#             FROM 
+#                 telegram t
+#             LEFT JOIN 
+#                 account_api_access a ON t.user_id = a.user_id_telegram
+#             WHERE 
+#                 t.money > $1 OR t.count_paid > $2
+#             ''',
+#             MONEY_TO_START, 0
+#         )
+        
+#         if not records:
+#             logging.warning("No users found with money > %s$", MONEY_TO_START)
+#             return []
+
+
+
+#         users = {}
+#         account_fields = {"access_id", "api_key", "api_value", "is_active", "user_id_telegram"}  # Поля аккаунта
+
+#         for record in records:
+
+#             record_dict = dict(record) # дату пропускает date, потому, лишь для user_id
+#             user_id = record_dict["user_id"]
+
+#             acc = {}
+
+#             if user_id not in users:
+#                 users[user_id] = {}
+#                 users[user_id]["telegram_data"] = {}
+#                 users[user_id]["account_data"] = []
+
+#                 for key, value in record.items():
+#                     if not value:
+#                         continue
+
+#                     if key == "access_id" or key == "api_key" or key == "api_value" or key == "is_active" or key == "user_id_telegram":
+#                         acc[key] = value
+#                     else:
+#                         users[user_id]["telegram_data"][key] = value
+
+#                 if acc:
+#                     users[user_id]["account_data"].append(acc)
+
+#         return list(users.values())
+#         # return users
+    
+#     except Exception as e:
+#         logging.error(f"Error in json_old_users: {e}", exc_info=True)
+#         return []
+#     finally:
+#         if connection:
+#             await connection.close()
+
+# res = asyncio.run(json_old_users())
+# print(res)

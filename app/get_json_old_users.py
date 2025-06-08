@@ -39,7 +39,6 @@ async def get_json_old_users():
         users_data = await json_old_users()
 
         if not users_data:
-            logging.info("Not have user ho money > 0.3")
             return False
 
         list_users_data = []
@@ -53,12 +52,12 @@ async def get_json_old_users():
                 try:
                     telegram_data['list_access_id'] = json.loads(list_access_id)
                 except json.JSONDecodeError:
-                    telegram_data['list_access_id'] = []
+                    telegram_data['list_access_id'] = str(list_access_id)
 
             new_rec_user = {**telegram_data, "account_data": account_data}
             list_users_data.append(new_rec_user)
 
-        
+        #print(list_users_data)
         # Создаем имя файла с текущей датой-временем
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         filename = f"{PATH_JSON_USERS}users_data_{timestamp}.json"
@@ -71,9 +70,9 @@ async def get_json_old_users():
             json.dump(
                 users_data, 
                 f, 
-                ensure_ascii=True, 
+                ensure_ascii=False, 
                 indent=4,
-                default=extended_encoder  # Используем наш сериализатор
+                default=extended_encoder
             )
         
         return filepath
@@ -82,6 +81,4 @@ async def get_json_old_users():
         logging.error(f"Error save file to JSON: {e}")
         return False
     
-
-# data = asyncio.run(get_json_old_users())
-# print(data)
+# print(asyncio.run(get_json_old_users()))
