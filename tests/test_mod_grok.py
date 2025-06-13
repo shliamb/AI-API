@@ -33,7 +33,7 @@ if response.status_code == 200:
 else:
     print(response.status_code, response.text)
 
-print(response)
+# print(response)
 
 
 

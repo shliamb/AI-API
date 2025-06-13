@@ -5,7 +5,7 @@ import asyncio
 import aiofiles
 from collections import defaultdict
 import json
-from typing import Optional #, List
+from typing import Optional, Union #, List
 import uuid
 from datetime import datetime, timedelta #, timezone
 # import os
@@ -73,7 +73,7 @@ async def rate_limit(request: Request, call_next):
 
 
 # Parsing JSON content:
-async def parse_json_content(content: str) -> str | dict:
+async def parse_json_content(content: str) -> Union[str, dict]:
     try:
         return json.loads(content)
     except (json.JSONDecodeError, TypeError) as e:

@@ -1,19 +1,19 @@
 from keys import USER_DB, PASSWORD_DB, DB_NAME
-from config import MONEY_TO_START, LOG_CONFIG_DB
+from config import MONEY_TO_START, LOG_CONFIG_DB, HOST
+import logging
+logging.basicConfig(**LOG_CONFIG_DB)
 import asyncpg
 # import json
 # import asyncio
 import logging
 import uuid
-import logging
-logging.basicConfig(**LOG_CONFIG_DB)
 
 
 
 # Asinc onnection to DB:
 async def get_connection():
     connection = await asyncpg.connect(
-        host="localhost", # app_postgres  localhost  имя контейнера
+        host=HOST, # app_postgres  localhost  имя контейнера
         database=DB_NAME,
         user=USER_DB,
         password=PASSWORD_DB
