@@ -1,32 +1,38 @@
-# Base
-from keys import API_KEY_GROK
+from config import LOG_CONFIG_AI, TIMEOUT_SERVER_AI
 import logging
-import aiohttp
+logging.basicConfig(**LOG_CONFIG_AI)
 import asyncio
-# Service
-from general_functions import encode_file
+import aiohttp
+import json
+from keys import API_KEY_GROK
+from general_functions import DictObj, encode_file
 from store_token_cost import calculate_token_cost
-from config import DEF_MOD_GROK
+
 
 
 
 # Main Text GROK Function
 async def grok_text(description: dict) -> dict:
+    '''Основной модуль GROK'''
 
-    access_id = description.get("access_id")
-    user_content = description.get("user_content")
-    system_content = description.get("system_content")
-    model_name = description.get("model", DEF_MOD_GROK)
+    dict_des = DictObj(description)
+    access_id = dict_des.access_id
+    user_content = dict_des.user_content
+    system_content = dict_des.system_content
+    model_name = dict_des.model
+    assist_content = dict_des.assist_content
+    file_path = dict_des.file_path
     # tools = description.get("tools")
-    assist_content = description.get("assist_content")
     # ?? 'response_format':'[generationConfig: {responseMimeType: "application/json",responseSchema: {type: SchemaType.ARRAY,items: {type: SchemaType.OBJECT,properties: {recipe_name: {type: SchemaType.STRING,},},},},}});]'
 
+    logging.info(f"{access_id} -> 'main API GROK'")
+    print(f"INFO: {access_id} -> 'main API GROK'")
 
-    image_path = None # Пока не нашел как передавать картинкун
 
-
+    file_path = None # Пока не нашел как передавать картинкун
 
     url = "https://api.x.ai/v1/chat/completions"
+
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {API_KEY_GROK}"
@@ -35,8 +41,8 @@ async def grok_text(description: dict) -> dict:
     data = {}
     contents = []
 
-    if image_path: # ? 
-        encoded_image = await encode_file(image_path)
+    if file_path: # ? 
+        encoded_image = await encode_file(file_path)
         contents.append({"role": "user", "content": [
             {
                 "type": "image",
@@ -69,33 +75,41 @@ async def grok_text(description: dict) -> dict:
 
 
     async with aiohttp.ClientSession() as session:
-        async with session.post(url, json=data, headers=headers) as response:
-            response = await response.json()
+        async with session.post(url, json=data, headers=headers, timeout=TIMEOUT_SERVER_AI) as response:
 
-            # content = response['choices'][0]['message']['content']
-            # total_tokens = response['usage']['total_tokens']
-            # text_tokens = response['usage']['prompt_tokens_details']['text_tokens']
-            # audio_tokens = response['usage']['prompt_tokens_details']['audio_tokens']
-            # image_tokens = response['usage']['prompt_tokens_details']['image_tokens']
-            # cached_tokens = response['usage']['prompt_tokens_details']['cached_tokens']
-
-            #print(content, total_tokens, text_tokens, audio_tokens, image_tokens, cached_tokens)
+            try:
+                result = await response.json()
+            except:
+                text_data = await response.text()
+                return {"response": text_data, "expenses": 0, "used_tokens": 0}
 
             # Tokens:
-            if response:
-                response_text = response['choices'][0]['message']['content']
-                total_token_count = response['usage']['total_tokens']
-            else:
-                logging.error("No response from Grok.")
-                return {"response": "No response from Grok."}
-
-            model_version = model_name
-            used_tokens = total_token_count
+            try:
+                response_text = result['choices'][0]['message']['content']
+                used_tokens = result['usage']['total_tokens']
+            except:
+                text_data = await response.text()
+                return {"response": text_data, "expenses": 0, "used_tokens": 0}
 
             # Calculation of money spent on tokens
-            expenses = await calculate_token_cost(access_id, model_version, used_tokens, input_data="text")
-
+            expenses = await calculate_token_cost(access_id, model_name, used_tokens, input_data="text")
             return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -123,7 +137,12 @@ async def grok_text(description: dict) -> dict:
 
 
 
-
+            # content = response['choices'][0]['message']['content']
+            # total_tokens = response['usage']['total_tokens']
+            # text_tokens = response['usage']['prompt_tokens_details']['text_tokens']
+            # audio_tokens = response['usage']['prompt_tokens_details']['audio_tokens']
+            # image_tokens = response['usage']['prompt_tokens_details']['image_tokens']
+            # cached_tokens = response['usage']['prompt_tokens_details']['cached_tokens']
 
 
 
@@ -239,3 +258,23 @@ async def grok_text(description: dict) -> dict:
             
 #             except:
 #                 return {"response": response, "expenses": 0, "used_tokens": 0}
+
+
+
+
+
+
+
+
+
+
+
+            # content_type = response.headers.get('Content-Type', '').lower()
+            
+            # if 'application/json' in content_type:
+            #     result = await response.json()
+            # else:
+            #     result = await response.text()
+            #     print(result)
+            #     print(type(result))
+            #     return result

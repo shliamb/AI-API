@@ -1,11 +1,10 @@
 import logging
 
 #### CONFIG ####
-LIMIT_TRY = 5
 
 
 # TELEGRAMM and DB
-HOST = "localhost"  # app_postgres or localhost
+HOST = "app_postgres"  # app_postgres or localhost
 TIMEOUT_SERVER_AI = 300 # 3 минуты ожидания от сервера ИИ
 LOG_CONFIG_DB = {
     'format': '%(levelname)s - %(asctime)s - %(name)s - %(message)s',
@@ -41,7 +40,7 @@ TIME_CORRECTION = +3 # Moscow
 # FASTAPI
 REQUEST_LIMIT = 10 # Максимальное количество запросов с одного IP-адреса в течение TIME_WINDOW секунд.
 TIME_WINDOW = 60 # Интервал времени в секундах, в течение которого действует ограничение.
-USERNAME_ADMIN = "Alex7"
+#USERNAME_ADMIN = "Alex7"
 
 
 

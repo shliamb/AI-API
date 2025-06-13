@@ -59,40 +59,44 @@ async def gemini_text(description: dict) -> dict:
         data["system_instruction"] = {"parts": {"text": system_content}}
 
 
-    # Gemini:
-    try:
-        async with aiohttp.ClientSession() as session:
-            #print(data,"\n")
-            async with session.post(url, json=data, headers=headers, timeout=TIMEOUT_SERVER_AI) as response:
-                try:
-                    response = await response.json()
 
-                    # Tokens:
-                    if response:
-                        response_text = response['candidates'][0]['content']['parts'][0]['text']
-                        total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
-                    else:
-                        logging.error("No response from Google Gemini.")
-                        return {"response": "No response from Google Gemini."}
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, json=data, headers=headers, timeout=TIMEOUT_SERVER_AI) as response:
 
-                    model_version = model_name
-                    used_tokens = total_token_count
+            try:
+                result = await response.json()
+            except:
+                text_data = await response.text()
+                return {"response": text_data, "expenses": 0, "used_tokens": 0}
 
-                    # Calculation of money spent on tokens
+            # Tokens:
+            try:
+                response_text = result['candidates'][0]['content']['parts'][0]['text']
+                used_tokens = result['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
+            except:
+                text_data = await response.text()
+                return {"response": text_data, "expenses": 0, "used_tokens": 0}
 
-                    expenses = await calculate_token_cost(access_id, model_version, used_tokens, input_data="text")
-                    return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
-                
-                except:
-                    return {"response": response, "expenses": 0, "used_tokens": 0}
-                
-    except asyncio.TimeoutError:
-        logging.error("TimeoutError of Gemini Server")
-        return {"response": "TimeoutError of Gemini Server", "expenses": 0, "used_tokens": 0}
-    
-    except Exception as e:
-        logging.error(f"UnexpectedError of Gemini main: {str(e)}")
-        return {"response": f"UnexpectedError of Gemini main: {str(e)}", "expenses": 0, "used_tokens": 0}
+            # Calculation of money spent on tokens
+            expenses = await calculate_token_cost(access_id, model_name, used_tokens, input_data="text")
+            return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

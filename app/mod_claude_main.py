@@ -77,37 +77,23 @@ async def claude_text(description: dict) -> dict:
 
 
 
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=data, headers=headers, timeout=TIMEOUT_SERVER_AI) as response:
-                try:
-                    response = await response.json()
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, json=data, headers=headers, timeout=TIMEOUT_SERVER_AI) as response:
 
-                    input_tokens = response['usage']['input_tokens']
-                    output_tokens = response['usage']['output_tokens']
+            try:
+                result = await response.json()
+            except:
+                text_data = await response.text()
+                return {"response": text_data, "expenses": 0, "used_tokens": 0}
 
-                    # Tokens:
-                    if response:
-                        response_text = response['content'][0]['text']
-                        total_token_count = input_tokens + output_tokens
-                    else:
-                        logging.error("No response from Anthropic Glaude.")
-                        return {"response": "No response from Anthropic Glaude."}
+            # Tokens:
+            try:
+                response_text = result['content'][0]['text']
+                used_tokens = result['usage']['input_tokens'] + result['usage']['output_tokens']
+            except:
+                return {"response": result, "expenses": 0, "used_tokens": 0}
 
-                    model_version = model_name
-                    used_tokens = total_token_count
-
-                    # Calculation of money spent on tokens
-                    expenses = await calculate_token_cost(access_id, model_version, used_tokens, input_data="text")
-                    return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
-                
-                except:
-                    return {"response": response, "expenses": 0, "used_tokens": 0}
-
-    except asyncio.TimeoutError:
-        logging.error("TimeoutError of CLAUDE ANTHROPIC Server")
-        return {"response": "TimeoutError of CLAUDE ANTHROPIC Server", "expenses": 0, "used_tokens": 0}
-    
-    except Exception as e:
-        logging.error(f"UnexpectedError of CLAUDE ANTHROPIC main: {str(e)}")
-        return {"response": f"UnexpectedError of CLAUDE ANTHROPIC main: {str(e)}", "expenses": 0, "used_tokens": 0}
+            # Calculation of money spent on tokens
+            expenses = await calculate_token_cost(access_id, model_name, used_tokens, input_data="text")
+            return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
+        

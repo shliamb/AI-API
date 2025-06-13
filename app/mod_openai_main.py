@@ -72,28 +72,22 @@ async def openai_text(description: dict) -> dict:
 
     # TOKENS:
     try:
-        response_id = response.id # !!!!
+        #response_id = response.id # !!!!
+        #model_version = response.model
         response_content = response.output_text
-        model_version = response.model
         used_tokens = response.usage.total_tokens # + response.usage.prompt_tokens
 
         # Calculation of money spent on tokens
-        expenses = await calculate_token_cost(access_id, model_version, used_tokens, input_data="text")
+        expenses = await calculate_token_cost(access_id, model_name, used_tokens, input_data="text")
         return {"response": response_content, "expenses": expenses, "used_tokens": used_tokens}
 
     except:
         try:
-            response_t = response.output_text
             logging.error(f"Error: Failed to calculate tokens OpenAI")
-            return {"response": response_t, "expenses": 0, "used_tokens": 0}
+            return {"response": response_content, "expenses": 0, "used_tokens": 0}
         except:
             logging.error(f"Error: Failed to calculate tokens OpenAI")
             return {"response": response, "expenses": 0, "used_tokens": 0}
-
-
-        
-
-
 
 
 

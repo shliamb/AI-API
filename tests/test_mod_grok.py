@@ -16,7 +16,7 @@ data = {
 }
 
 headers = {
-    "some_key": "d98f74a7-81de-4afd-b06d-94cb6cb821fc",
+    "appkey": "d98f74a7-81de-4afd-b06d-94cb6cb821fc",
 }
 
 if path_file:
@@ -34,6 +34,13 @@ else:
     print(response.status_code, response.text)
 
 print(response)
+
+
+
+
+
+
+# print(response)
 
 
 

@@ -1,18 +1,18 @@
-from config import LIMIT_TRY, PRICE, UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK, USERNAME_ADMIN, LOG_CONFIG_API, ALLOWED_HEADER_NAMES, SUPER_HEADER_NAMES #, TIME_OUT_ERR_USERNAME, WAITING_TIME
+from config import UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK, LOG_CONFIG_API, ALLOWED_HEADER_NAMES, SUPER_HEADER_NAMES #, TIME_OUT_ERR_USERNAME, WAITING_TIME, LIMIT_TRY, PRICE, USERNAME_ADMIN
 import logging
 logging.basicConfig(**LOG_CONFIG_API)
 import asyncio
 import aiofiles
 from collections import defaultdict
 import json
-from typing import Optional, List
+from typing import Optional #, List
 import uuid
 from datetime import datetime, timedelta #, timezone
 # import os
 # import shutil
 # import requests
 # from pydantic import BaseModel
-from fastapi import FastAPI, HTTPException, Request, status, UploadFile, File, Form, Header, Depends
+from fastapi import FastAPI, HTTPException, Request, status, UploadFile, File, Form, Depends #, Header
 from fastapi.responses import Response #, JSONResponse
 #from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -26,9 +26,6 @@ from mod_openai_voice_to_text import openai_voice_to_text
 from mod_gemini_main import gemini_text
 from mod_claude_main import claude_text
 from mod_grok_main import grok_text
-# from mod_openai_text_to_audio import speech_to_audio_openai
-# from mod_openai_transcription import transcription_openai
-# from mod_openai_translation import translation_openai
 # from mod_openai_quick_assist import oa_asist_custom_0525, oa_assist_retrieve, oa_assist_list, oa_assist_del, oa_thread_del, oa_returning_result_assist
 
 
@@ -729,66 +726,6 @@ if __name__ == "__main__":
     #          shutil.copyfileobj(audio.file, buffer)
     # else:
     #     audio_path = None
-
-
-
-
-
-
-
-
-
-# # Create translation into English OPENAI Endpoint:
-# @app.post("/api/translation-openai/", status_code=status.HTTP_200_OK)
-# async def point_translation_openai(
-#     username: str = Form(...),                      # !
-#     model: str = Form(None),                        # Only whisper-1 is free code
-#     response_format: str = Form(None),              # output format json, text, srt, verbose_json, or vtt.
-#     prompt: str = Form(None),                       # in English
-#     appkey: str = Header(...),                      # !
-#     audio: Optional[UploadFile] = File(),           # ! flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav или webm. In Telegram ogg.
-# ):
-
-#     # Choosing a price list.
-#     if not model:
-#         model = "whisper-1"
-
-#     # Verify user and her appkey
-#     confirm_verify = await verify_user_appkey(username, model, appkey)
-#     if confirm_verify["status_code"] != status.HTTP_200_OK:
-#         return confirm_verify
-
-#     # Collect data
-#     description = {
-#         "username": username,
-#     }
-    
-#     if model:
-#         description["model"] = model
-#     if response_format:
-#         description["response_format"] = response_format
-#     if prompt:
-#         description["prompt"] = prompt
-
-#     if audio:
-#         # Save audio to server
-#         name = random_name_2X()
-#         audio_path = f"{UPLOADS}{name}-{audio.filename}" # ./UPLOADS/I34-t47-in_audio_2.ogg
-#         async with aiofiles.open(audio_path, "wb") as buffer:
-#             while content := await audio.read(1024):  # Читаем файл порциями по 1024 байта
-#                 await buffer.write(content)
-#     else:
-#         audio_path = None
-
-#     # Working with OpenAI
-#     confirm_openai = await translation_openai(description, audio_path)
-
-#     # Remove file
-#     if audio_path:
-#         remove = await remove_file_os(audio_path)
-
-#     return confirm_openai
-
 
 
 
