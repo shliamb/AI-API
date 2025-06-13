@@ -1,7 +1,8 @@
 from keys import USER_DB, PASSWORD_DB, DB_NAME
+from config import HOST, LOG_CONFIG_DB
 import psycopg2
 import logging
-logging.basicConfig(format='%(message)s', level=logging.INFO, filename='./log/api.log')
+logging.basicConfig(**LOG_CONFIG_DB)
 
 
 
@@ -9,8 +10,8 @@ logging.basicConfig(format='%(message)s', level=logging.INFO, filename='./log/ap
 def create_tables_in_db():
 
     try:
-        # Conect to db:                   имя контейнера app_postgres   localhost
-        connection = psycopg2.connect(host="localhost", database=DB_NAME, user=USER_DB, password=PASSWORD_DB)
+        # Conect to db:
+        connection = psycopg2.connect(host=HOST, database=DB_NAME, user=USER_DB, password=PASSWORD_DB)
         
         cursor = connection.cursor()
 

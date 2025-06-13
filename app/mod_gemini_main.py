@@ -1,11 +1,12 @@
-# Base
+from config import LOG_CONFIG_AI, TIMEOUT_SERVER_AI
 import logging
-import aiohttp
+logging.basicConfig(**LOG_CONFIG_AI)
 import asyncio
-# Service
+import aiohttp
 from keys import API_KEY_GEMINI
-from general_functions import calculation, encode_file
-from config import DEF_MOD_GOOGLE
+from general_functions import DictObj, encode_file
+from store_token_cost import calculate_token_cost
+
 
 
 #
@@ -13,17 +14,18 @@ from config import DEF_MOD_GOOGLE
 #
 
 # Main Text Google Function
-async def mod_gemini(description, image_path):
+async def gemini_text(description: dict) -> dict:
+    '''Основной модуль Gemini Google'''
 
-    username = description.get("username")
-    user_content = description.get("user_content")
-    system_content = description.get("system_content")
-    model_name = description.get("model", DEF_MOD_GOOGLE)
+    dict_des = DictObj(description)
+    access_id = dict_des.access_id
+    user_content = dict_des.user_content
+    system_content = dict_des.system_content
+    model_name = dict_des.model
+    file_path = dict_des.file_path
     # tools = description.get("tools")
-    assist_content = description.get("assist_content")
+    assist_content = dict_des.assist_content
     # ?? 'response_format':'[generationConfig: {responseMimeType: "application/json",responseSchema: {type: SchemaType.ARRAY,items: {type: SchemaType.OBJECT,properties: {recipe_name: {type: SchemaType.STRING,},},},},}});]'
-
-
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={API_KEY_GEMINI}"
 
@@ -31,11 +33,15 @@ async def mod_gemini(description, image_path):
         'Content-Type': 'application/json'
     }
 
+    logging.info(f"{access_id} -> 'main API Gemini Google'")
+    print(f"INFO: {access_id} -> 'main API Gemini Google'")
+
+
     data = {}
     contents = []
 
-    if image_path:
-        encoded_image = await encode_file(image_path)
+    if file_path:
+        encoded_image = await encode_file(file_path)
         contents.append([{"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]}])
     else:
         if assist_content:
@@ -53,29 +59,40 @@ async def mod_gemini(description, image_path):
         data["system_instruction"] = {"parts": {"text": system_content}}
 
 
+    # Gemini:
+    try:
+        async with aiohttp.ClientSession() as session:
+            #print(data,"\n")
+            async with session.post(url, json=data, headers=headers, timeout=TIMEOUT_SERVER_AI) as response:
+                try:
+                    response = await response.json()
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, json=data, headers=headers) as response:
-            response = await response.json()
+                    # Tokens:
+                    if response:
+                        response_text = response['candidates'][0]['content']['parts'][0]['text']
+                        total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
+                    else:
+                        logging.error("No response from Google Gemini.")
+                        return {"response": "No response from Google Gemini."}
 
+                    model_version = model_name
+                    used_tokens = total_token_count
 
+                    # Calculation of money spent on tokens
 
-            # Tokens:
-            if response:
-                response_text = response['candidates'][0]['content']['parts'][0]['text']
-                total_token_count = response['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
-            else:
-                logging.error("No response from Google Gemini.")
-                return {"response": "No response from Google Gemini."}
-
-            model_version = model_name
-            used_tokens = total_token_count
-
-            # Calculation of money spent on tokens
-            expenses = await calculation(username, model_version, used_tokens, input_data="text")
-
-            return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
-
+                    expenses = await calculate_token_cost(access_id, model_version, used_tokens, input_data="text")
+                    return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
+                
+                except:
+                    return {"response": response, "expenses": 0, "used_tokens": 0}
+                
+    except asyncio.TimeoutError:
+        logging.error("TimeoutError of Gemini Server")
+        return {"response": "TimeoutError of Gemini Server", "expenses": 0, "used_tokens": 0}
+    
+    except Exception as e:
+        logging.error(f"UnexpectedError of Gemini main: {str(e)}")
+        return {"response": f"UnexpectedError of Gemini main: {str(e)}", "expenses": 0, "used_tokens": 0}
 
 
 

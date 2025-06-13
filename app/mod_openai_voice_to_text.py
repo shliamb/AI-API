@@ -1,43 +1,79 @@
-from openai import AsyncOpenAI, RateLimitError, OpenAIError
-from keys import API_KEY_OPENAI
+from config import LOG_CONFIG_AI, TIMEOUT_SERVER_AI
+import logging
+logging.basicConfig(**LOG_CONFIG_AI)
+import asyncio
 import aiofiles
-from general_functions import calculation, read_audio_file
+from openai import AsyncOpenAI, OpenAIError
+from keys import API_KEY_OPENAI
+from general_functions import DictObj, encode_file
+from store_token_cost import calculate_token_cost
+from general_functions import read_audio_file
 
 client = AsyncOpenAI(api_key=API_KEY_OPENAI)
 
-async def transcription_openai(description, audio_path):
 
-    username = description.get("username")
-    prompt = description.get("prompt")
-    language = description.get("language") # input language in ISO-639-1, will improve accuracy and latency - ru or en
-    model = description.get("model", "whisper-1") # whisper-1 only now
-    response_format = description.get("response_format", "text") # json, text, srt, verbose_json, or vtt
 
-    with open(audio_path, "rb") as file:
 
-        transcript = await client.audio.transcriptions.create(
-            model = model,
-            prompt = prompt,
-            language = language,
-            response_format = response_format,
-            # timestamp_granularities=["word"],
-            # timestamp_granularities=["segment"]
-            file = file,
-        )
 
-        length_of_audio = await read_audio_file(audio_path)   # mp3 (ID3v1 и ID3v2), flac, ogg Vorbis, acc (and M4A), wav, wma (limited support), aiff
 
-        # Statistic
-        min = length_of_audio / 60 # from minutes
-        model_version = model # just only whisper-1
+async def openai_voice_to_text(description):
+    '''Модуль OpenAI перевода голоса в текст'''
+
+    dict_des = DictObj(description)
+    access_id = dict_des.access_id
+    prompt = dict_des.prompt
+    language = dict_des.language # input language in ISO-639-1, will improve accuracy and latency - ru or en
+    model = dict_des.model or "whisper-1" # whisper-1 only now
+    response_format = dict_des.response_format or "text" # json, text, srt, verbose_json, or vtt
+    file_path = dict_des.file_path
+
+    logging.info(f"{access_id} -> 'main API OpenAI voice to text'")
+    print(f"INFO: {access_id} -> 'main API OpenAI voice to text'")
+
+    # OpenAI:
+    with open(file_path, "rb") as file:
+        try:
+            response = await client.audio.transcriptions.create(
+                model = model,
+                prompt = prompt,
+                language = language,
+                response_format = response_format,
+                # timestamp_granularities=["word"],
+                # timestamp_granularities=["segment"]
+                file = file,
+            )
+            print(f"INFO: 'main API OpenAI voice to text' -> get response")
+            logging.info(f"'main API OpenAI voice to text' -> get response")
+
+        except asyncio.TimeoutError:
+            logging.error("TimeoutError of OpenAI Server voice to text")
+            return {"response": "TimeoutError of OpenAI Server voice to text", "expenses": 0, "minutes": 0}
         
-        # Calculation of money spent on minutes + sec
-        expenses = await calculation(username, model_version, min, input_data="audio")
+        except OpenAIError as e:
+            logging.error(f"OpenAIError voice to text: {str(e)}")
+            return {"response": f"OpenAIError: {str(e)} voice to text", "expenses": 0, "minutes": 0}
+        
+        except Exception as e:
+            logging.error(f"UnexpectedError of OpenAI main voice to text: {str(e)}")
+            return {"response": f"UnexpectedError of OpenAI main voice to text: {str(e)}", "expenses": 0, "minutes": 0}
 
-        return {"response":transcript, "expenses": expenses, "minutes": min}
 
 
+        # TOKENS:
+        try:
+            length_of_audio = await read_audio_file(file_path)   # mp3 (ID3v1 и ID3v2), flac, ogg Vorbis, acc (and M4A), wav, wma (limited support), aiff
+            min = length_of_audio / 60 # from minutes
+            model_version = model # just only whisper-1
+    
+            # Calculation of money spent on minutes + sec
+            expenses = await calculate_token_cost(access_id, model_version, min, input_data="audio")
+            return {"response":response, "expenses": expenses, "minutes": min}
+        
+        except:
+            logging.error(f"Error: Failed to calculate tokens OpenAI: {e}")
+            return {"response": str(response), "expenses": 0, "used_tokens": 0}
 
+        
 
 
 

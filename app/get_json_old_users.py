@@ -1,14 +1,14 @@
 # Base:
-import asyncio
+from worker_db import json_old_users
+from config import PATH_JSON_USERS, LOG_CONFIG_DB
+# import asyncio
 import os
 import json
 import uuid
 from datetime import datetime
 import logging
-logging.basicConfig(format='%(message)s', level=logging.INFO, filename='./log/db.log')
-# System:
-from worker_db import json_old_users
-from config import PATH_JSON_USERS
+logging.basicConfig(**LOG_CONFIG_DB)
+
 
 
 

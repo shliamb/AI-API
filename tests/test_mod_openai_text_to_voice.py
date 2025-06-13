@@ -1,10 +1,11 @@
 import requests
+from config import HOST
 import base64
 
-url = "http://137.184.87.156:8000/api/speech-to-audio-openai/"
+url = f"http://{HOST}/api/openai-text-to-voice/"
 
 data = {
-        "username": "Shliamb5",
+        "access_id": "08a898f3-e6dd-49c2-93a7-fff0abc7ad31",
         "user_content": "А ну-у-у-у-ка! Подика сюда, мальчик.)",
         "voice": "nova", # alloy, echo, fable, onyx, nova, and shimmer
         "model": "tts-1", # tts-1 or tts-1-hd
@@ -13,7 +14,7 @@ data = {
 }
 
 headers = {
-    'appkey': 'a36c0e6c-6123-42e9-bcda-1c16e0c7e201',
+    "some_key": "d98f74a7-81de-4afd-b06d-94cb6cb821fc",
 }
 
 response = requests.post(url, headers=headers, data=data)
@@ -34,5 +35,10 @@ if response.status_code == 200:
             audio_file.write(audio_data)
 
         print(f"The audio file is saved as output_audio.{format_audio}")
+
+    elif isinstance(response, str):
+        print(f"Error: {response}")
+
 else:
-    print(f"Error: {response.status_code} - {response.text}")
+    if isinstance(response, str):
+        print(f"Error: {response}")

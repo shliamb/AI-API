@@ -1,13 +1,13 @@
 from keys import USER_DB, PASSWORD_DB, DB_NAME
+from config import MONEY_TO_START, LOG_CONFIG_DB
 import asyncpg
-#import json
-import asyncio
+# import json
+# import asyncio
 import logging
-from datetime import datetime, date
-#logging.basicConfig(format='%(message)s', level=logging.INFO) # filename='./log/api.log',
-logging.basicConfig(format='%(message)s', level=logging.INFO)
+import uuid
+import logging
+logging.basicConfig(**LOG_CONFIG_DB)
 
-from config import MONEY_TO_START
 
 
 # Asinc onnection to DB:
@@ -456,6 +456,7 @@ async def read_stat_for_access_id(access_id):
 
 # Delete_stat_table:
 async def delete_stat_table():
+    connection = None
 
     try:
         connection = await get_connection()
@@ -477,12 +478,6 @@ async def delete_stat_table():
 
 
 
-
-
-
-
-import uuid
-from datetime import datetime
 
 
 
@@ -605,70 +600,3 @@ async def json_old_users():
 
 
 
-# async def json_old_users():
-#     '''Собираю всех пользователей, кто хоть раз платил и у кого счет больше чем тестовый'''
-#     connection = None
-#     try:
-#         connection = await get_connection()
-        
-#         # Выполняем запрос с LEFT JOIN
-#         records = await connection.fetch(
-#             '''
-#             SELECT 
-#                 t.*,
-#                 a.*
-#             FROM 
-#                 telegram t
-#             LEFT JOIN 
-#                 account_api_access a ON t.user_id = a.user_id_telegram
-#             WHERE 
-#                 t.money > $1 OR t.count_paid > $2
-#             ''',
-#             MONEY_TO_START, 0
-#         )
-        
-#         if not records:
-#             logging.warning("No users found with money > %s$", MONEY_TO_START)
-#             return []
-
-
-
-#         users = {}
-#         account_fields = {"access_id", "api_key", "api_value", "is_active", "user_id_telegram"}  # Поля аккаунта
-
-#         for record in records:
-
-#             record_dict = dict(record) # дату пропускает date, потому, лишь для user_id
-#             user_id = record_dict["user_id"]
-
-#             acc = {}
-
-#             if user_id not in users:
-#                 users[user_id] = {}
-#                 users[user_id]["telegram_data"] = {}
-#                 users[user_id]["account_data"] = []
-
-#                 for key, value in record.items():
-#                     if not value:
-#                         continue
-
-#                     if key == "access_id" or key == "api_key" or key == "api_value" or key == "is_active" or key == "user_id_telegram":
-#                         acc[key] = value
-#                     else:
-#                         users[user_id]["telegram_data"][key] = value
-
-#                 if acc:
-#                     users[user_id]["account_data"].append(acc)
-
-#         return list(users.values())
-#         # return users
-    
-#     except Exception as e:
-#         logging.error(f"Error in json_old_users: {e}", exc_info=True)
-#         return []
-#     finally:
-#         if connection:
-#             await connection.close()
-
-# res = asyncio.run(json_old_users())
-# print(res)

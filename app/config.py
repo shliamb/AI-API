@@ -1,35 +1,60 @@
+import logging
+
 #### CONFIG ####
 LIMIT_TRY = 5
 
 
-
-# TELEGRAMM
+# TELEGRAMM and DB
+HOST = "localhost"  # app_postgres or localhost
+TIMEOUT_SERVER_AI = 300 # 3 минуты ожидания от сервера ИИ
+LOG_CONFIG_DB = {
+    'format': '%(levelname)s - %(asctime)s - %(name)s - %(message)s',
+    'level': logging.INFO,
+    'filename': './log/db.log'
+}
+LOG_CONFIG_BOT = {
+    'format': '%(levelname)s - %(asctime)s - %(name)s - %(message)s',
+    'level': logging.INFO, 
+    'filename': './log/bot.log', 
+    'filemode': 'a'
+}
+LOG_CONFIG_API = {
+    'format': '%(levelname)s - %(asctime)s - %(name)s - %(message)s',
+    'level': logging.INFO,
+    'filename': './log/api.log'
+}
+LOG_CONFIG_AI = {
+    'format': '%(levelname)s - %(asctime)s - %(name)s - %(message)s',
+    'level': logging.INFO,
+    'filename': './log/ai.log'
+}
 NOTIFICATION = True
 COUNTS_QUANTITY = 3 # MAX Коллисчество подключений - аккаунтов телеграмм пользователю
 MONEY_TO_START = 0.3 # 1$ to start work
-MY_APP_KEY = "appkey" # Key to API Key
+ALLOWED_HEADER_NAMES = {"appkey", "some_key", "bad_key"}  # возможные варианты названий
+GUEST_APP_KEY = "appkey"
+SUPER_HEADER_NAMES = "bad_key"
 MIN_PAY = 1 # Minimum pay
 TIME_CORRECTION = +3 # Moscow
-
 
 
 # FASTAPI
 REQUEST_LIMIT = 10 # Максимальное количество запросов с одного IP-адреса в течение TIME_WINDOW секунд.
 TIME_WINDOW = 60 # Интервал времени в секундах, в течение которого действует ограничение.
-
-
 USERNAME_ADMIN = "Alex7"
 
 
 
 # Folders:
+LOGS_FOLDER = "./log/"
 UPLOADS = "./uploads/"
 AUDIO_FOLDER = "./audio/"
 PATH_JSON_USERS = "./json/"
 DOWNLOAD = "./download/"
+BACKUP_DB = "./backup_db/"
 
-# AI Defoult:
-DEF_MOD_GOOGLE = "gemini-2.0-flash-exp"
+# AI Default:
+DEF_MOD_GOOGLE = "gemini-1.5-flash-latest"
 DEF_MOD_OPENAI = "gpt-4o-mini-2024-07-18"
 DEF_MOD_GROK = "grok-2-vision-latest"
 DEF_MOD_CLAUDE = "claude-3-haiku-20240307"

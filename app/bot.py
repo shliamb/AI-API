@@ -1,13 +1,14 @@
 # Base
+from config import MONEY_TO_START, GUEST_APP_KEY, COUNTS_QUANTITY, NOTIFICATION, MIN_PAY, DOWNLOAD, LOG_CONFIG_BOT, LOGS_FOLDER
+from keys import TOKEN_TELEGRAM, IS_ADMIN
 import logging
-logging.getLogger('aiogram').propagate = False # Блокировка логирование aiogram до его импорта
-logging.basicConfig(format='%(message)s', level=logging.INFO) # filename='./log/bot.log',
-# logging.basicConfig(level=logging.INFO, filename='./log/bot.log', filemode='a', format='%(levelname)s - %(asctime)s - %(name)s - %(message)s',) # При деплое активировать логирование в файл
-import re
+# logging.getLogger('aiogram').propagate = False # Блокировка логирование aiogram до его импорта
+logging.basicConfig(**LOG_CONFIG_BOT)
+# import re
 import random
 import os
 import asyncio
-from io import StringIO, BytesIO
+from io import StringIO #, BytesIO
 import uuid
 import json
 from pathlib import Path # Работа с файловыми путями 
@@ -16,25 +17,23 @@ from datetime import datetime
 # import sys
 import csv
 # Aiogram
-from aiogram import Bot, Dispatcher, types, F, Router
-from aiogram.enums import ParseMode
+from aiogram import Bot, Dispatcher, types, F #, Router
+# from aiogram.enums import ParseMode
 from aiogram.utils.markdown import hbold
-from aiogram.filters import CommandStart, Command, Filter
+from aiogram.filters import CommandStart, Command #, Filter
 from aiogram.types import Message, BotCommand, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton #, LabeledPrice, ContentType, InputFile, Document, PhotoSize
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 # from aiogram.fsm.storage.memory import MemoryStorage
 # from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 # Service
-from worker_db import read_user, add_user, update_user, add_account, update_account, read_accounts_user_id, del_account, read_stat_for_user_id, read_users, delete_stat_table
+from worker_db import read_user, add_user, update_user, add_account, read_accounts_user_id, del_account, read_stat_for_user_id, read_users, delete_stat_table
 from backupdb import backup_db
 from restore_db import restore_db
-from general_functions import day_utcnow
+# from general_functions import day_utcnow
 from create_tables import create_tables_in_db
 from restore_users_to_db import restore_users_to_db
 from get_json_old_users import get_json_old_users
-from config import MONEY_TO_START, MY_APP_KEY, COUNTS_QUANTITY, NOTIFICATION, MIN_PAY, DOWNLOAD
-from keys import TOKEN_TELEGRAM, IS_ADMIN
 
 
 dp = Dispatcher()
@@ -440,7 +439,7 @@ async def add_accounts(message: types.Message):
     list_access_id.append(str(new_access_id))
     counts_api = counts_api - 1
 
-    update_data_account = {"access_id": new_access_id, "api_key": MY_APP_KEY, "api_value": uuid.uuid4(), "user_id_telegram": id}
+    update_data_account = {"access_id": new_access_id, "api_key": GUEST_APP_KEY, "api_value": uuid.uuid4(), "user_id_telegram": id}
     if not await add_account(update_data_account):
         logging.error(f"Error add_account user - {id}")
         return
@@ -937,15 +936,24 @@ async def admin_get_log(message: types.Message):
     if id != IS_ADMIN:
         return
 
-    if os.path.exists("./log/bot.log") and os.path.getsize("./log/bot.log") > 0:
-        await bot.send_document(message.chat.id, document=types.input_file.FSInputFile("./log/bot.log"))
-    else:
-        await bot.send_message(message.chat.id, "The bot.log file is empty or missing.")
+    data_folder = Path(LOGS_FOLDER)
+    empts = True
+    for entry in data_folder.iterdir():
+        if entry.is_file() and entry.stat().st_size > 0:  # Проверяем, что файл не пустой
+            file_path = str(entry.absolute())  # Получаем абсолютный путь
+            try:
+                await bot.send_document(
+                    chat_id=message.from_user.id,
+                    document=types.input_file.FSInputFile(file_path)
+                )
+                empts = False
+                await asyncio.sleep(0.5)
+            except Exception as e:
+                logging.error(f"Error sending file log: {file_path}: {e}")
+    if empts:
+        await bot.send_message(message.chat.id, "There are no logging files or they are empty")
 
-    if os.path.exists("./log/api.log") and os.path.getsize("./log/api.log") > 0:
-        await bot.send_document(message.chat.id, document=types.input_file.FSInputFile("./log/api.log"))
-    else:
-        await bot.send_message(message.chat.id, "The api.log file is empty or missing.")
+
 
 
 # Admin clear logs /dLogs
@@ -957,21 +965,22 @@ async def admin_clear_log(message: types.Message):
     if id != IS_ADMIN:
         return
 
-    if os.path.exists("./log/bot.log") and os.path.getsize("./log/bot.log") > 0:
 
-        with open("./log/bot.log", 'w'):
-            pass
-        await bot.send_message(message.chat.id, "The bot.log file has been cleared successfully.")
-    else:
-        await bot.send_message(message.chat.id, "The bot.log file is empty or missing.")
+    data_folder = Path(LOGS_FOLDER)
+    for entry in data_folder.iterdir():
+        if entry.is_file() and entry.stat().st_size > 0:  # Проверяем, что файл не пустой
+            file_path = str(entry.absolute())  # Получаем абсолютный путь
+            try:
+                with open(file_path, 'w'):
+                    pass
+                await bot.send_message(message.chat.id, f"The '{file_path}' file has been clearing.")
+                await asyncio.sleep(0.5)
+            except Exception as e:
+                logging.error(f"Error clearing file log: {file_path}: {e}")
 
-    if os.path.exists("./log/api.log") and os.path.getsize("./log/api.log") > 0:
 
-        with open("./log/api.log", 'w'):
-            pass
-        await bot.send_message(message.chat.id, "The api.log file has been cleared successfully.")
-    else:
-        await bot.send_message(message.chat.id, "The api.log file is empty or missing.")
+
+
 
 
 

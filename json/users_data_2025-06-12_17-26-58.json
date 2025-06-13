@@ -1,0 +1,74 @@
+[
+    {
+        "telegram_data": {
+            "user_id": 1666495,
+            "name": "Shliamb",
+            "full_name": "Alex Prowler",
+            "first_name": "Alex",
+            "last_name": "Prowler",
+            "counts_api": 0,
+            "list_access_id": [
+                "ec5bc7c8-ec28-487b-b2f9-f6b711de4806",
+                "8080d0f5-f28a-495e-b408-8a27a0d377d3",
+                "f98a7ab6-8633-4701-ad38-a63b6f2a3774"
+            ],
+            "last_visit": "2025-06-09T02:50:43.234110",
+            "language": "ru",
+            "count_paid": 1,
+            "money": 4.3,
+            "block_user": false,
+            "god_user": false,
+            "notifications": false
+        },
+        "account_data": [
+            {
+                "access_id": "ec5bc7c8-ec28-487b-b2f9-f6b711de4806",
+                "api_key": "appkey",
+                "api_value": "95d818df-1be5-4d19-a623-02663e2ab221",
+                "is_active": true,
+                "user_id_telegram": 1666495
+            },
+            {
+                "access_id": "8080d0f5-f28a-495e-b408-8a27a0d377d3",
+                "api_key": "appkey",
+                "api_value": "d3ae79d6-6ae7-43c4-9562-c2cbc26dbc6c",
+                "is_active": true,
+                "user_id_telegram": 1666495
+            },
+            {
+                "access_id": "f98a7ab6-8633-4701-ad38-a63b6f2a3774",
+                "api_key": "appkey",
+                "api_value": "7d3ae0bf-b697-45f5-9c5a-f17b7e216dee",
+                "is_active": true,
+                "user_id_telegram": 1666495
+            }
+        ]
+    },
+    {
+        "telegram_data": {
+            "user_id": 6674458591,
+            "full_name": "Alex",
+            "first_name": "Alex",
+            "counts_api": 2,
+            "list_access_id": [
+                "0888119f-b5cc-4451-99dd-e5d0e6c287d6"
+            ],
+            "last_visit": "2025-06-09T02:51:17.038674",
+            "language": "ru",
+            "count_paid": 1,
+            "money": 10.3,
+            "block_user": false,
+            "god_user": false,
+            "notifications": true
+        },
+        "account_data": [
+            {
+                "access_id": "0888119f-b5cc-4451-99dd-e5d0e6c287d6",
+                "api_key": "appkey",
+                "api_value": "92b97b96-94a7-4e4d-91fe-2df477b5cf7e",
+                "is_active": true,
+                "user_id_telegram": 6674458591
+            }
+        ]
+    }
+]

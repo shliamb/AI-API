@@ -1,9 +1,11 @@
-from openai import AsyncOpenAI, RateLimitError, OpenAIError
+from config import LOG_CONFIG_AI, TIMEOUT_SERVER_AI
 import logging
-# from openai import OpenAI
+logging.basicConfig(**LOG_CONFIG_AI)
 from keys import API_KEY_OPENAI
-from general_functions import cleaner_model
-from general_functions import calculation
+import asyncio
+from openai import AsyncOpenAI, OpenAIError
+from general_functions import DictObj, cleaner_model
+from store_token_cost import calculate_token_cost
 
 
 
@@ -11,23 +13,28 @@ client = AsyncOpenAI(api_key=API_KEY_OPENAI)
 
 
 #### Create image
-async def mod_gen_dall_e(description):
+async def openai_img(description):
+    '''Генерация картинок от OpenAI'''
 
-    username = description.get("username")
-    user_content = description.get("user_content")
-    size = description.get("size", "1024x1024")
-    quality = description.get("quality", "standard") # hd ore standard
-    response_format = description.get("response_format", "url") # b64_json
-    n = description.get("n", 1)
-    style = description.get("style", "natural") # vivid ore natural
-    model = description.get("model", "dall-e-2-1024")
+    dict_des = DictObj(description)
+    access_id = dict_des.access_id
+    user_content = dict_des.user_content
+    size = dict_des.size
+    quality = dict_des.quality
+    response_format = dict_des.response_format
+    n = dict_des.n
+    style = dict_des.style
+    model = dict_des.model
     real_name_model = await cleaner_model(model) # dall-e-3
 
+    logging.info(f"{access_id} -> 'img-gen API OpenAI'")
+    print(f"INFO: {access_id} -> 'img-gen API OpenAI'")
+
     params = {
-    'prompt': user_content,
-    'size': size,
-    'response_format': response_format,  # url or b64_json
-    "model": real_name_model
+        "prompt": user_content,
+        "size": size,
+        "response_format": response_format,  # url or b64_json
+        "model": real_name_model
     }
 
     if real_name_model == "dall-e-3":
@@ -37,16 +44,57 @@ async def mod_gen_dall_e(description):
     elif real_name_model == "dall-e-2":
         params['n'] = n
 
-    response = await client.images.generate(**params)
+    try:
+        response = await asyncio.wait_for(client.images.generate(**params), timeout=TIMEOUT_SERVER_AI)
+        print(f"INFO: 'main API OpenAI' -> get response")
+        logging.info(f"'main API OpenAI' -> get response")
 
-    # Statistic
-    used_tokens = n
-    model_version = model # exemple - dall-e-3-hd-1792
+    except asyncio.TimeoutError:
+        logging.error("TimeoutError of OpenAI gen-img Server")
+        return {"response": "TimeoutError of OpenAI gen-img Server", "expenses": 0, "pictures": n}
     
-    # Calculation of money spent on tokens
-    expenses = await calculation(username, model_version, used_tokens, input_data="img")
+    except OpenAIError as e:
+        logging.error(f"OpenAIError gen-img: {str(e)}")
+        return {"response": f"OpenAIError gen-img: {str(e)}", "expenses": 0, "pictures": n}
+    
+    except Exception as e:
+        logging.error(f"UnexpectedError OpenAI gen-img: {str(e)}")
+        return {"response": f"UnexpectedError OpenAI gen-img: {str(e)}", "expenses": 0, "pictures": n}
 
-    return {"response": response.data[0].url, "expenses": expenses, "pictures": n}
+
+    # TOKENS:
+    try:
+        used_tokens = n
+        model_version = model # exemple - dall-e-3-hd-1792
+        response_img = response.data[0].url
+
+        # Calculation of money spent on tokens
+        expenses = await calculate_token_cost(access_id, model_version, used_tokens, input_data="img")
+        return {"response": response_img, "expenses": expenses, "pictures": n}
+
+    except:
+        response_content = response.output_text
+        logging.error(f"Error: Failed to calculate tokens OpenAI: {e}")
+        return {"response": response_content, "expenses": 0, "used_tokens": 0}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

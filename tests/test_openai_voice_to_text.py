@@ -1,9 +1,10 @@
 import requests
+from config import HOST
 
-url = "http://137.184.87.156:8000/api/transcription-openai/"
+url = f"http://{HOST}/api/openai-voice-to-text/"
 
 data = {
-        "username": "Shliamb5", # !
+        "access_id": "08a898f3-e6dd-49c2-93a7-fff0abc7ad31",
         "prompt": "переведи в текст",
         "language": "ru", # input language in ISO-639-1, will improve accuracy and latency - ru or en
         "model": "whisper-1", # whisper-1
@@ -13,13 +14,13 @@ data = {
 }
 
 headers = {
-    'appkey': 'a36c0e6c-6123-42e9-bcda-1c16e0c7e201',
+    "some_key": "d98f74a7-81de-4afd-b06d-94cb6cb821fc",
 }
 
 with open('./audio/in_audio_2.ogg', 'rb') as f:
     
     file = {
-        'audio': ('in_audio_2.ogg', f)
+        'file': ('in_audio_2.ogg', f)
     }
 
     response = requests.post(url, headers=headers, data=data, files=file)

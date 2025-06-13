@@ -1,10 +1,10 @@
 from keys import USER_DB, PASSWORD_DB, DB_NAME
+from config import LOG_CONFIG_DB, HOST, BACKUP_DB
 import subprocess
 import datetime
 import logging
+logging.basicConfig(**LOG_CONFIG_DB)
 
-# Параметры подключения к базе данных PostgreSQL
-backup_path = "./backup_db/"
 
 def backup_db():
     
@@ -12,8 +12,8 @@ def backup_db():
     backup_filename = f'{DB_NAME}_backup_{current_datetime}.sql'
 
     # Формирование команды для создания резервной копии с помощью pg_dump
-    pg_dump_command = f'PGPASSWORD={PASSWORD_DB} pg_dump -h postgres -p 5432 -U {USER_DB} -d {DB_NAME} -F c -f {backup_path}{backup_filename}' # В бинарный формат
-                                                            # postgres localhost
+    pg_dump_command = f'PGPASSWORD={PASSWORD_DB} pg_dump -h {HOST} -p 5432 -U {USER_DB} -d {DB_NAME} -F c -f {BACKUP_DB}{backup_filename}' # В бинарный формат
+                                                        
 
     try:
         subprocess.run(pg_dump_command, shell=True) # Выполнение команды через subprocess

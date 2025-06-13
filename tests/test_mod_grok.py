@@ -1,33 +1,39 @@
 import requests
+from config import HOST
 
-image = None
+path_file = None
 
-url = "http://137.184.87.156:8000/api/grok/"
-# url = "http://localhost:8000/api/grok/"
+#path_file = "./uploads/image45.png"
+
+url = f"http://{HOST}/api/grok/"
 
 data = {
-        'username': 'Shliamb5', # !
-        'user_content': 'Привет', # !
+        "access_id": "08a898f3-e6dd-49c2-93a7-fff0abc7ad31",
+        "user_content": "Привет",
         #'system_content': 'Ты личный асистент в Германии',
-        'model': 'grok-2-vision-latest',
+        "model": "grok-2-vision-latest",
         #'assist_content': '[{"user": "Привет, меня зовут Алекс."}, {"assistant": "Очень приятно Алекс, я Грок."}, {"user": "Мне 40 лет."}, {"assistant": "Ты в самом расвете сил!"}]',
 }
 
 headers = {
-    'appkey': 'a36c0e6c-6123-42e9-bcda-1c16e0c7e201',
+    "some_key": "d98f74a7-81de-4afd-b06d-94cb6cb821fc",
 }
 
-# with open('./uploads/image.jpg', 'rb') as file:
-#     image = {
-#         'image': ('image.jpg', file),  # !
-#     }
+if path_file:
+    with open(path_file, 'rb') as f:
+        file = {'file': ('image45.png', f)}
+        response = requests.post(url, headers=headers, data=data, files=file)
+else:
+    response = requests.post(url, headers=headers, data=data)
 
-response = requests.post(url, headers=headers, data=data, files=image)
+
 
 if response.status_code == 200:
     print(response.json())
 else:
     print(response.status_code, response.text)
+
+print(response)
 
 
 

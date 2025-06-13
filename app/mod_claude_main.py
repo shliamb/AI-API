@@ -1,27 +1,32 @@
-# Base
-from keys import API_KEY_CLAUDE
+from config import LOG_CONFIG_AI, DEF_CLAUDE_VERSION, TIMEOUT_SERVER_AI
 import logging
-import aiohttp
+logging.basicConfig(**LOG_CONFIG_AI)
 import asyncio
-# Claude
-# import anthropic
-# Service
-from general_functions import calculation, encode_file
-from config import DEF_MOD_CLAUDE, DEF_CLAUDE_VERSION
+import aiohttp
+from keys import API_KEY_CLAUDE
+from general_functions import DictObj, encode_file
+from store_token_cost import calculate_token_cost
+
+
 
 
 
 # Main Text ANTHROPIC Function
-async def mod_claude(description, image_path):
+async def claude_text(description: dict) -> dict:
+    '''Основной модуль CLAUDE ANTHROPIC'''
 
-    username = description.get("username")
-    user_content = description.get("user_content")
-    system_content = description.get("system_content")
-    model_name = description.get("model", DEF_MOD_CLAUDE)
+    dict_des = DictObj(description)
+    access_id = dict_des.access_id
+    user_content = dict_des.user_content
+    system_content = dict_des.system_content
+    model_name = dict_des.model
+    file_path = dict_des.file_path
+    assist_content = dict_des.assist_content
     # tools = description.get("tools")
-    assist_content = description.get("assist_content")
     # ?? 'response_format':'[generationConfig: {responseMimeType: "application/json",responseSchema: {type: SchemaType.ARRAY,items: {type: SchemaType.OBJECT,properties: {recipe_name: {type: SchemaType.STRING,},},},},}});]'
 
+    logging.info(f"{access_id} -> 'main API CLAUDE ANTHROPIC'")
+    print(f"INFO: {access_id} -> 'main API CLAUDE ANTHROPIC'")
 
 
     url = "https://api.anthropic.com/v1/messages"
@@ -35,8 +40,8 @@ async def mod_claude(description, image_path):
     data = {}
     contents = []
 
-    if image_path:
-        encoded_image = await encode_file(image_path)
+    if file_path:
+        encoded_image = await encode_file(file_path)
         contents.append({"role": "user", "content": [
             {
                 "type": "image",
@@ -71,26 +76,38 @@ async def mod_claude(description, image_path):
         data["system"] = system_content
 
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, json=data, headers=headers) as response:
-            response = await response.json()
 
-            input_tokens = response['usage']['input_tokens']
-            output_tokens = response['usage']['output_tokens']
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, json=data, headers=headers, timeout=TIMEOUT_SERVER_AI) as response:
+                try:
+                    response = await response.json()
 
-            # Tokens:
-            if response:
-                response_text = response['content'][0]['text']
-                total_token_count = input_tokens + output_tokens
-            else:
-                logging.error("No response from Anthropic Glaude.")
-                return {"response": "No response from Anthropic Glaude."}
+                    input_tokens = response['usage']['input_tokens']
+                    output_tokens = response['usage']['output_tokens']
 
-            model_version = model_name
-            used_tokens = total_token_count
+                    # Tokens:
+                    if response:
+                        response_text = response['content'][0]['text']
+                        total_token_count = input_tokens + output_tokens
+                    else:
+                        logging.error("No response from Anthropic Glaude.")
+                        return {"response": "No response from Anthropic Glaude."}
 
-            # Calculation of money spent on tokens
-            expenses = await calculation(username, model_version, used_tokens, input_data="text")
+                    model_version = model_name
+                    used_tokens = total_token_count
 
-            return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
+                    # Calculation of money spent on tokens
+                    expenses = await calculate_token_cost(access_id, model_version, used_tokens, input_data="text")
+                    return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
+                
+                except:
+                    return {"response": response, "expenses": 0, "used_tokens": 0}
 
+    except asyncio.TimeoutError:
+        logging.error("TimeoutError of CLAUDE ANTHROPIC Server")
+        return {"response": "TimeoutError of CLAUDE ANTHROPIC Server", "expenses": 0, "used_tokens": 0}
+    
+    except Exception as e:
+        logging.error(f"UnexpectedError of CLAUDE ANTHROPIC main: {str(e)}")
+        return {"response": f"UnexpectedError of CLAUDE ANTHROPIC main: {str(e)}", "expenses": 0, "used_tokens": 0}

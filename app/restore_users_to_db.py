@@ -1,12 +1,12 @@
 # Base:
-import asyncio
+from config import LOG_CONFIG_DB
+from worker_db import add_user, add_account
+# import asyncio
 import json
 import uuid
 from datetime import datetime
 import logging
-logging.basicConfig(format='%(message)s', level=logging.INFO, filename='./log/db.log')
-# System:
-from worker_db import add_user, update_user, add_account, update_account
+logging.basicConfig(**LOG_CONFIG_DB)
 
 
 
