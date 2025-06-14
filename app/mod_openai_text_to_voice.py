@@ -28,6 +28,9 @@ async def openai_text_to_voice(description: dict) -> str:
     print(f"INFO: {access_id} -> 'main API OpenAI text to voice'")
 
     try:
+        print("1")
+        print(model, voice, response_format, speed, user_content, TIMEOUT_SERVER_AI)
+
         response = await asyncio.wait_for(client.audio.speech.create(
             model = model,
             voice = voice,
@@ -60,6 +63,7 @@ async def openai_text_to_voice(description: dict) -> str:
 
     # TOKENS:
     try:
+        print("2")
         file_path = f"{AUDIO_FOLDER}{random_name()}-audio.{response_format}" # speech_file_path = Path('./audio/speech.mp3')
         
         async with aiofiles.open(file_path, 'wb') as audio_file:

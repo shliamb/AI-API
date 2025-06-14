@@ -77,7 +77,7 @@ def create_tables_in_db():
         create_table_statistics = '''
         CREATE TABLE IF NOT EXISTS statistics (
             id SERIAL PRIMARY KEY,                      -- Просто порядковый номер
-            user_id BIGINT UNIQUE NOT NULL,             -- Телеграмм id
+            user_id BIGINT NOT NULL,                    -- Телеграмм id
             time TIMESTAMP NOT NULL,
             use_model VARCHAR(100),                     -- Используемая модель в сессии
             sesion_token FLOAT,
