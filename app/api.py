@@ -14,7 +14,7 @@ from datetime import datetime, timedelta #, timezone
 # from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, Request, status, UploadFile, File, Form, Depends #, Header
 from fastapi.responses import Response #, JSONResponse
-#from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 # import gunicorn
 from worker_db import read_account_access_id, read_user
@@ -32,6 +32,18 @@ from mod_grok_main import grok_text
 app = FastAPI()
 
 PARANOIA_MODE = False
+
+
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 
 # # Block frequent requests from the same IP:
@@ -687,7 +699,7 @@ async def grok_api(
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=80)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
 
