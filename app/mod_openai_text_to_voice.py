@@ -34,7 +34,7 @@ async def openai_text_to_voice(description: dict) -> str:
 
         # Работает
         response = await client.audio.speech.create(
-            model = model, # "gpt-4o-mini-tts"
+            model = "gpt-4o-mini-tts", #model, # "gpt-4o-mini-tts"
             voice = voice, 
             response_format = response_format,
             #speed = speed,
