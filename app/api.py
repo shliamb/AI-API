@@ -34,41 +34,45 @@ app = FastAPI()
 PARANOIA_MODE = False
 
 
-# Block frequent requests from the same IP:
-ip_request_counts = defaultdict(list)
-lock = asyncio.Lock() # "Creating" (Создание) lock.
+# # Block frequent requests from the same IP:
+# ip_request_counts = defaultdict(list)
+# lock = asyncio.Lock() # "Creating" (Создание) lock.
 
-@app.middleware("http")
-async def rate_limit(request: Request, call_next):
-    '''Middleware для ограничения частоты запросов по IP (rate limiting).
+# @app.middleware("http")
+# async def rate_limit(request: Request, call_next):
+#     '''Middleware для ограничения частоты запросов по IP (rate limiting).
     
-    Подсчитывает запросы от каждого IP в окне TIME_WINDOW секунд.
-    При превышении лимита REQUEST_LIMIT возвращает HTTP 429.
+#     Подсчитывает запросы от каждого IP в окне TIME_WINDOW секунд.
+#     При превышении лимита REQUEST_LIMIT возвращает HTTP 429.
     
-    Args:
-        request: Входящий HTTP-запрос
-        call_next: Функция для вызова следующего обработчика
+#     Args:
+#         request: Входящий HTTP-запрос
+#         call_next: Функция для вызова следующего обработчика
         
-    Returns:
-        Response: Ответ сервера или HTTP 429 при превышении лимита
-    '''
-    ip = request.client.host
-    now = datetime.now()
-    time_window_start = now - timedelta(seconds=TIME_WINDOW)
+#     Returns:
+#         Response: Ответ сервера или HTTP 429 при превышении лимита
+#     '''
+#     ip = request.client.host
+#     now = datetime.now()
+#     time_window_start = now - timedelta(seconds=TIME_WINDOW)
 
-    async with lock: # "Acquiring" (Получение) lock.
-        ip_request_counts[ip] = [t for t in ip_request_counts[ip] if t > time_window_start]
-        ip_request_counts[ip].append(now)
-        request_count = len(ip_request_counts[ip])
+#     async with lock: # "Acquiring" (Получение) lock.
+#         ip_request_counts[ip] = [t for t in ip_request_counts[ip] if t > time_window_start]
+#         ip_request_counts[ip].append(now)
+#         request_count = len(ip_request_counts[ip])
 
-    if request_count > REQUEST_LIMIT:
-        logging.error(f"Rate limit exceeded for IP: {ip}")
-        return Response(status_code=429, content="Too Many Requests")
+#     if request_count > REQUEST_LIMIT:
+#         logging.error(f"Rate limit exceeded for IP: {ip}")
+#         return Response(status_code=429, content="Too Many Requests")
 
-    response = await call_next(request)
-    return response
+#     response = await call_next(request)
+#     return response
 
 
+
+
+@app.get("/")
+def root(): return {"status": "OK"}
 
 
 
