@@ -21,7 +21,7 @@ async def openai_text_to_voice(description: dict) -> str:
     user_content = dict_des.user_content
     voice = dict_des.voice or "nova"                        # alloy, echo, fable, onyx, nova, and shimmer
     model = dict_des.model or "tts-1"                       # tts-1 or tts-1-hd
-    response_format = dict_des.response_format or "mp3"     # mp3, opus, aac, flac, wav, and pcm
+    response_format = dict_des.response_format or "opus"     # mp3, opus, aac, flac, wav, and pcm
     speed = dict_des.speed                                  # 0.25 to 4.0. default - 1.0
 
     logging.info(f"{access_id} -> 'main API OpenAI text to voice'")
@@ -29,15 +29,25 @@ async def openai_text_to_voice(description: dict) -> str:
 
     try:
         print("1")
-        print(model, voice, response_format, speed, user_content, TIMEOUT_SERVER_AI)
+        #print(model, voice, response_format, speed, user_content, TIMEOUT_SERVER_AI)
 
-        response = await asyncio.wait_for(client.audio.speech.create(
-            model = model,
+        response = await asyncio.wait_for(client.audio.speech.acreate(
+            model = "gpt-4o-mini-tts", #model,
             voice = voice,
             response_format = response_format,
             speed = speed,
             input = user_content
         ), timeout=TIMEOUT_SERVER_AI)
+
+
+
+        # response = await client.audio.speech.acreate(
+        #     model="gpt-4o-mini-tts",
+        #     voice="alloy",
+        #     input=text
+        # )
+        # output_path.write_bytes(response.content)
+
 
         print(f"INFO: 'main API OpenAI text to voice' -> get response")
         logging.info(f"'main API OpenAI text to voice' -> get response")

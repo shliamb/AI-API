@@ -416,7 +416,7 @@ async def point_speech_to_audio_openai(
     description = {
         "access_id": access_id,
         "user_content": user_content,
-        "model": model or "tts-1",
+        "model": model or "gpt-4o-mini-tts",
         "voice": voice,
         "response_format": response_format,
         "speed": speed

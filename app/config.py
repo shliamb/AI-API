@@ -112,6 +112,7 @@ PRICE = {
     # Audio to 1M characters:
     'tts-1': 18, # / 1M characters
     'tts-1-hd': 36, # / 1M characters
+    'gpt-4o-mini-tts': 15.12, # / 1M characters
     'whisper-1': 0.0072, # minute (rounded to the nearest second)
 
     # Elon Musk Grok to 1M tokens:
