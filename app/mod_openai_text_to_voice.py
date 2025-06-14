@@ -31,13 +31,13 @@ async def openai_text_to_voice(description: dict) -> str:
         print("1")
         #print(model, voice, response_format, speed, user_content, TIMEOUT_SERVER_AI)
 
-        response = await client.audio.speech.create(
+        response = await asyncio.wait_for(client.audio.speech.create(
             model = model,
             voice = voice,
             response_format = response_format,
             speed = speed,
             input = user_content
-        )
+        ), timeout=TIMEOUT_SERVER_AI)
 
         print(f"INFO: 'main API OpenAI text to voice' -> get response")
         logging.info(f"'main API OpenAI text to voice' -> get response")
@@ -54,6 +54,7 @@ async def openai_text_to_voice(description: dict) -> str:
 
     except OpenAIError as e:  # Используем прямое имя модуля
         print("4")
+        print(f"OpenAI API error: {str(e)}")
         logging.error(f"OpenAI API error: {str(e)}", exc_info=True)
         return str(e)  # Всегда возвращаем строку с описанием ошибки
 
