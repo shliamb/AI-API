@@ -5,14 +5,14 @@ path_file = None
 
 # path_file = "./uploads/image.jpg"
 
-url = f"https://{HOST}/api/openai-chat/"
+url = f"http://{HOST}/api/openai-chat/"
 
 data = {
         "access_id": "39d092a8-23e4-4684-91cf-ec9cd1d50790",
         "user_content": "Что на рисунке видишь?",
         "system_content": "Ты крутой юморист, каждое слово - шутка",
         "model": "gpt-4o-mini-2024-07-18",
-        "assist_content": '[{"user": "How do I charge my battery?"}, {"assistant": "You should use the provided charging cable."}, {"user": "But it doesn\'t seem to charge."}, {"assistant": "Try another charge.."}]',
+        #"assist_content": '[{"user": "How do I charge my battery?"}, {"assistant": "You should use the provided charging cable."}, {"user": "But it doesn\'t seem to charge."}, {"assistant": "Try another charge.."}]',
         #'response_format': '{"type":"json_schema","json_schema":{"name":"user_profile","schema":{"type":"object","properties":{"name":{"description":"The name of the user","type":"string"},"age":{"description":"The age of the user","type":"integer"},"interests":{"description":"List of users interests","type":"array","items":{"type":"string"}}},"required":["name","age","interests"]}}}',
         #'response_format': '{"type": "json_object"}' # if not,  response_format is {"type": "text"}
 }
