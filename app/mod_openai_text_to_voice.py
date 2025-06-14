@@ -59,6 +59,7 @@ async def openai_text_to_voice(description: dict) -> str:
 
     except asyncio.TimeoutError as e:
         print("3")
+        print(f"OpenAI Server timeout: {str(e)}")
         logging.error(f"OpenAI Server timeout: {str(e)}", exc_info=True)
         return response if isinstance(response, str) else None
 
@@ -70,6 +71,7 @@ async def openai_text_to_voice(description: dict) -> str:
 
     except Exception as e:
         print("5")
+        print(f"Unexpected error in text-to-voice: {str(e)}")
         logging.critical(f"Unexpected error in text-to-voice: {str(e)}", exc_info=True)
         return f"Internal error: {str(e)}" if str(e) else None
         
