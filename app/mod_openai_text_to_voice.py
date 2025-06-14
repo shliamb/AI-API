@@ -29,7 +29,7 @@ async def openai_text_to_voice(description: dict) -> str:
 
     try:
         print("1")
-        #print(model, voice, response_format, speed, user_content, TIMEOUT_SERVER_AI)
+        print(model, voice, response_format, speed, user_content, TIMEOUT_SERVER_AI)
 
         response = await asyncio.wait_for(client.audio.speech.create(
             model = model,
