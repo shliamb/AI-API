@@ -24,7 +24,7 @@ services:
       dockerfile: Dockerfile.api
     container_name: fastapi_app
     ports:
-      - "8000:8000"
+      - "8001:80"
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_USER: ${USER_DB}
