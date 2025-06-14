@@ -28,71 +28,33 @@ async def openai_text_to_voice(description: dict) -> str:
     print(f"INFO: {access_id} -> 'main API OpenAI text to voice'")
 
     try:
-        print("1")
-        print(model, voice, response_format, speed, user_content, TIMEOUT_SERVER_AI)
-
-
-        # Работает
-        response = await client.audio.speech.create(
+        response = await asyncio.wait_for(client.audio.speech.create(
             model = "gpt-4o-mini-tts", #model, # "gpt-4o-mini-tts"
             voice = voice, 
             response_format = response_format,
-            #speed = speed,
+            speed = speed,
             input = user_content
-        )
-
-
-        # file_path = f"{AUDIO_FOLDER}{random_name()}-audio.{response_format}"
-
-        # async with client.audio.speech.with_streaming_response.create(
-        # model="gpt-4o-mini-tts",
-        # voice="alloy",
-        # input="The quick brown fox jumped over the lazy dog."
-        # ) as response:
-        #     await response.stream_to_file(file_path)
-        #     print("69")
-        #     print(file_path)
-        #     return file_path
-
-        # response = await client.audio.speech.acreate(
-        #     model="gpt-4o-mini-tts",
-        #     voice="alloy",
-        #     input=text
-        # )
-        # output_path.write_bytes(response.content)
-
-        # response = await asyncio.wait_for(client.audio.speech.create(
-        #     model = "gpt-4o-mini-tts", #model,
-        #     voice = "alloy", #voice,
-        #     response_format = response_format,
-        #     speed = speed,
-        #     input = user_content
-        # ), timeout=TIMEOUT_SERVER_AI)
-
+        ), 
+        timeout=TIMEOUT_SERVER_AI)
 
         print(f"INFO: 'main API OpenAI text to voice' -> get response")
         logging.info(f"'main API OpenAI text to voice' -> get response")
 
-        # if isinstance(response, str):
-        #     print("2")
-        #     logging.error("Error: OpenAi Server text to voice")
-        #     return response
-
     except asyncio.TimeoutError as e:
-        print("3")
-        print(f"OpenAI Server timeout: {str(e)}")
+        # print("3")
+        # print(f"OpenAI Server timeout: {str(e)}")
         logging.error(f"OpenAI Server timeout: {str(e)}", exc_info=True)
         return response if isinstance(response, str) else None
 
     except OpenAIError as e:  # Используем прямое имя модуля
-        print("4")
-        print(f"OpenAI API error: {str(e)}")
+        # print("4")
+        # print(f"OpenAI API error: {str(e)}")
         logging.error(f"OpenAI API error: {str(e)}", exc_info=True)
         return str(e)  # Всегда возвращаем строку с описанием ошибки
 
     except Exception as e:
-        print("5")
-        print(f"Unexpected error in text-to-voice: {str(e)}")
+        # print("5")
+        # print(f"Unexpected error in text-to-voice: {str(e)}")
         logging.critical(f"Unexpected error in text-to-voice: {str(e)}", exc_info=True)
         return f"Internal error: {str(e)}" if str(e) else None
         
@@ -101,7 +63,6 @@ async def openai_text_to_voice(description: dict) -> str:
 
     # TOKENS:
     try:
-        print("6")
         file_path = f"{AUDIO_FOLDER}{random_name()}-audio.{response_format}" # speech_file_path = Path('./audio/speech.mp3')
         
         async with aiofiles.open(file_path, 'wb') as audio_file:
@@ -113,12 +74,12 @@ async def openai_text_to_voice(description: dict) -> str:
             model_version = model # just only tts-1
 
 
-            print(access_id, model_version, used_tokens)
+            # print(access_id, model_version, used_tokens)
             if not await calculate_token_cost(access_id, model_version, used_tokens, input_data="text"):
                 logging.error("Error: Failed to calculate tokens OpenAI main text to voice")
                 return "Error: Failed to calculate tokens OpenAI main text to voice"
 
-            print(file_path)
+            # print(file_path)
             return file_path
         
     except:
