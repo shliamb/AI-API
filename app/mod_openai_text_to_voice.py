@@ -31,13 +31,13 @@ async def openai_text_to_voice(description: dict) -> str:
         print("1")
         #print(model, voice, response_format, speed, user_content, TIMEOUT_SERVER_AI)
 
-        response = await asyncio.wait_for(client.audio.speech.acreate(
+        response = await client.audio.speech.create(
             model = "gpt-4o-mini-tts", #model,
-            voice = voice,
-            response_format = response_format,
-            speed = speed,
+            voice = "alloy", #voice,
+            #response_format = response_format,
+            # speed = speed,
             input = user_content
-        ), timeout=TIMEOUT_SERVER_AI)
+        )
 
 
 
@@ -47,6 +47,14 @@ async def openai_text_to_voice(description: dict) -> str:
         #     input=text
         # )
         # output_path.write_bytes(response.content)
+
+        # response = await asyncio.wait_for(client.audio.speech.create(
+        #     model = "gpt-4o-mini-tts", #model,
+        #     voice = "alloy", #voice,
+        #     response_format = response_format,
+        #     speed = speed,
+        #     input = user_content
+        # ), timeout=TIMEOUT_SERVER_AI)
 
 
         print(f"INFO: 'main API OpenAI text to voice' -> get response")
