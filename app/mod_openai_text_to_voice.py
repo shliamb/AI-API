@@ -51,12 +51,12 @@ async def openai_text_to_voice(description: dict) -> str:
 
         file_path = f"{AUDIO_FOLDER}{random_name()}-audio.{response_format}"
 
-        with client.audio.speech.with_streaming_response.create(
+        async with client.audio.speech.with_streaming_response.create(
         model="gpt-4o-mini-tts",
         voice="alloy",
         input="The quick brown fox jumped over the lazy dog."
         ) as response:
-            response.stream_to_file(file_path)
+            await response.stream_to_file(file_path)
             print("69")
             print(file_path)
             return file_path
