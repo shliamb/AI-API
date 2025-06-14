@@ -7,8 +7,9 @@ path_file = None
 
 url = f"http://{HOST}/api/grok/"
 
+
 data = {
-        "access_id": "08a898f3-e6dd-49c2-93a7-fff0abc7ad31",
+        "access_id": "39d092a8-23e4-4684-91cf-ec9cd1d50790",
         "user_content": "Привет",
         #'system_content': 'Ты личный асистент в Германии',
         "model": "grok-2-vision-latest",
@@ -16,7 +17,7 @@ data = {
 }
 
 headers = {
-    "appkey": "d98f74a7-81de-4afd-b06d-94cb6cb821fc",
+    "appkey": "a9446aa4-cf9a-461e-898c-fce4d84efc01",
 }
 
 if path_file:

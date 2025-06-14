@@ -5,10 +5,10 @@ path_file = None
 
 # path_file = "./uploads/image.jpg"
 
-url = f"http://{HOST}/api/openai-chat/"
+url = f"https://{HOST}/api/openai-chat/"
 
 data = {
-        "access_id": "08a898f3-e6dd-49c2-93a7-fff0abc7ad31",
+        "access_id": "39d092a8-23e4-4684-91cf-ec9cd1d50790",
         "user_content": "Что на рисунке видишь?",
         "system_content": "Ты крутой юморист, каждое слово - шутка",
         "model": "gpt-4o-mini-2024-07-18",
@@ -18,7 +18,7 @@ data = {
 }
 
 headers = {
-    "some_key": "d98f74a7-81de-4afd-b06d-94cb6cb821fc",
+    "appkey": "a9446aa4-cf9a-461e-898c-fce4d84efc01",
 }
 
 if path_file:
