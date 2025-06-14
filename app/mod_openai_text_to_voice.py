@@ -40,26 +40,26 @@ async def openai_text_to_voice(description: dict) -> str:
         # )
 
         # Работает
-        # response = await client.audio.speech.create(
-        #     model = "gpt-4o-mini-tts", #model,
-        #     voice = "alloy", #voice,
-        #     #response_format = response_format,
-        #     # speed = speed,
-        #     input = user_content
-        # )
+        response = await client.audio.speech.create(
+            model = "gpt-4o-mini-tts", #model,
+            voice = "alloy", #voice,
+            response_format = response_format,
+            #speed = speed,
+            input = user_content
+        )
 
 
-        file_path = f"{AUDIO_FOLDER}{random_name()}-audio.{response_format}"
+        # file_path = f"{AUDIO_FOLDER}{random_name()}-audio.{response_format}"
 
-        async with client.audio.speech.with_streaming_response.create(
-        model="gpt-4o-mini-tts",
-        voice="alloy",
-        input="The quick brown fox jumped over the lazy dog."
-        ) as response:
-            await response.stream_to_file(file_path)
-            print("69")
-            print(file_path)
-            return file_path
+        # async with client.audio.speech.with_streaming_response.create(
+        # model="gpt-4o-mini-tts",
+        # voice="alloy",
+        # input="The quick brown fox jumped over the lazy dog."
+        # ) as response:
+        #     await response.stream_to_file(file_path)
+        #     print("69")
+        #     print(file_path)
+        #     return file_path
 
         # response = await client.audio.speech.acreate(
         #     model="gpt-4o-mini-tts",
@@ -106,28 +106,31 @@ async def openai_text_to_voice(description: dict) -> str:
 
 
 
-    # # TOKENS:
-    # try:
-    #     print("6")
-    #     file_path = f"{AUDIO_FOLDER}{random_name()}-audio.{response_format}" # speech_file_path = Path('./audio/speech.mp3')
+    # TOKENS:
+    try:
+        print("6")
+        file_path = f"{AUDIO_FOLDER}{random_name()}-audio.{response_format}" # speech_file_path = Path('./audio/speech.mp3')
         
-    #     async with aiofiles.open(file_path, 'wb') as audio_file:
-    #         await audio_file.write(response.content)
-    #         # Statistic *** Ебанный костыль, пока что не знаю как подругому сделать ****   Available encodings: ['gpt2', 'r50k_base', 'p50k_base', 'p50k_edit', 'cl100k_base', 'o200k_base']
-    #         enc = tiktoken.get_encoding("gpt2")
-    #         tokens = enc.encode(user_content)
-    #         used_tokens = len(tokens)
-    #         model_version = model # just only tts-1
+        async with aiofiles.open(file_path, 'wb') as audio_file:
+            await audio_file.write(response.content)
+            # Statistic *** Ебанный костыль, пока что не знаю как подругому сделать ****   Available encodings: ['gpt2', 'r50k_base', 'p50k_base', 'p50k_edit', 'cl100k_base', 'o200k_base']
+            enc = tiktoken.get_encoding("gpt2")
+            tokens = enc.encode(user_content)
+            used_tokens = len(tokens)
+            model_version = model # just only tts-1
 
-    #         if not await calculate_token_cost(access_id, model_version, used_tokens, input_data="text"):
-    #             logging.error("Error: Failed to calculate tokens OpenAI main text to voice")
-    #             return "Error: Failed to calculate tokens OpenAI main text to voice"
 
-    #         return file_path
+            print(access_id, model_version, used_tokens)
+            if not await calculate_token_cost(access_id, model_version, used_tokens, input_data="text"):
+                logging.error("Error: Failed to calculate tokens OpenAI main text to voice")
+                return "Error: Failed to calculate tokens OpenAI main text to voice"
+
+            print(file_path)
+            return file_path
         
-    # except:
-    #     logging.error(f"Error: Failed to calculate tokens OpenAI main text to voice: {e}")
-    #     return f"Error: Failed to calculate tokens OpenAI main text to voice: {e}"
+    except:
+        logging.error(f"Error: Failed to calculate tokens OpenAI main text to voice: {e}")
+        return f"Error: Failed to calculate tokens OpenAI main text to voice: {e}"
 
 
 
