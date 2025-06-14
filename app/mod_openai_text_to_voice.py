@@ -29,20 +29,13 @@ async def openai_text_to_voice(description: dict) -> str:
 
     try:
         print("1")
-        #print(model, voice, response_format, speed, user_content, TIMEOUT_SERVER_AI)
+        print(model, voice, response_format, speed, user_content, TIMEOUT_SERVER_AI)
 
-        # response = await client.audio.speech.with_streaming_response.create(
-        #     model = "gpt-4o-mini-tts", #model,
-        #     voice = "alloy", #voice,
-        #     #response_format = response_format,
-        #     # speed = speed,
-        #     input = user_content
-        # )
 
         # Работает
         response = await client.audio.speech.create(
-            model = "gpt-4o-mini-tts", #model,
-            voice = "alloy", #voice,
+            model = model, # "gpt-4o-mini-tts"
+            voice = voice, 
             response_format = response_format,
             #speed = speed,
             input = user_content

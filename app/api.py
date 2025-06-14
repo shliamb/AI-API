@@ -422,22 +422,26 @@ async def point_speech_to_audio_openai(
         "speed": speed
     }
 
+    print("description:", description)
+
     file_path = None
     try:
         file_path = await openai_text_to_voice(description)
-        if isinstance(file_path, str):
-            logging.error("Error: OpenAI openai-text-to-voice")
-            return {"system": file_path}
+        # if isinstance(file_path, str):
+        #     logging.error("Error: OpenAI openai-text-to-voice")
+        #     return {"system": file_path}
         
         encoded_file = await encode_file(file_path)
         return {"b64_json": encoded_file}
     
     except Exception as e:
         logging.error(f"Error in voice processing: {str(e)}", exc_info=True)
+        print(f"Error in voice processing: {str(e)}")
         return {"system": f"Error in voice processing openai_text_to_voice: {str(e)}"}
 
     finally:
         if file_path and not await remove_file_os(file_path):
+            print(f"Failed to remove file - {file_path}")
             logging.error(f"Failed to remove file - {file_path}")
 
 
