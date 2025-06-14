@@ -20,16 +20,18 @@ async def openai_text_to_voice(description: dict) -> str:
     access_id = dict_des.access_id
     user_content = dict_des.user_content
     voice = dict_des.voice or "nova"                        # alloy, echo, fable, onyx, nova, and shimmer
-    model = dict_des.model or "tts-1"                       # tts-1 or tts-1-hd
+    model = dict_des.model or "gpt-4o-mini-tts"                       # tts-1 or tts-1-hd
     response_format = dict_des.response_format or "opus"     # mp3, opus, aac, flac, wav, and pcm
     speed = dict_des.speed                                  # 0.25 to 4.0. default - 1.0
 
     logging.info(f"{access_id} -> 'main API OpenAI text to voice'")
     print(f"INFO: {access_id} -> 'main API OpenAI text to voice'")
 
+    print(model, "\n")
+
     try:
         response = await asyncio.wait_for(client.audio.speech.create(
-            model = "gpt-4o-mini-tts", #model, # "gpt-4o-mini-tts"
+            model = model, # "gpt-4o-mini-tts"
             voice = voice, 
             response_format = response_format,
             speed = speed,
