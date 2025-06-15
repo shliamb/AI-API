@@ -1,6 +1,5 @@
-from config import LOG_CONFIG_AI, TIMEOUT_SERVER_AI
-import logging
-logging.basicConfig(**LOG_CONFIG_AI)
+from config import LOG_CONFIG_AI, TIMEOUT_SERVER_AI, setup_logger
+logger_ai = setup_logger('ai', LOG_CONFIG_AI)
 import asyncio
 from openai import AsyncOpenAI, OpenAIError
 from keys import API_KEY_OPENAI
@@ -26,7 +25,7 @@ async def openai_text(description: dict) -> dict:
     response_format = dict_des.response_format
     file_path = dict_des.file_path
 
-    logging.info(f"{access_id} -> 'main API OpenAI'")
+    logger_ai.info(f"{access_id} -> 'main API OpenAI'")
     print(f"INFO: {access_id} -> 'main API OpenAI'")
 
 
@@ -53,19 +52,19 @@ async def openai_text(description: dict) -> dict:
 
     try:
         response = await asyncio.wait_for(client.responses.create(model = model_name, input = messages_ai), timeout=TIMEOUT_SERVER_AI)    #, #response_format = response_format, instructions = instructions
-        print(f"INFO: 'main API OpenAI' -> get response")
-        logging.info(f"'main API OpenAI' -> get response")
+        #print(f"INFO: 'main API OpenAI' -> get response")
+        logger_ai.info(f"'main API OpenAI' -> get response")
 
     except asyncio.TimeoutError:
-        logging.error("TimeoutError of OpenAI Server")
+        logger_ai.error("TimeoutError of OpenAI Server")
         return {"response": "TimeoutError of OpenAI Server", "expenses": 0, "used_tokens": 0}
     
     except OpenAIError as e:
-        logging.error(f"OpenAIError: {str(e)}")
+        logger_ai.error(f"OpenAIError: {str(e)}")
         return {"response": f"OpenAIError: {str(e)}", "expenses": 0, "used_tokens": 0}
     
     except Exception as e:
-        logging.error(f"UnexpectedError of OpenAI main: {str(e)}")
+        logger_ai.error(f"UnexpectedError of OpenAI main: {str(e)}")
         return {"response": f"UnexpectedError of OpenAI main: {str(e)}", "expenses": 0, "used_tokens": 0}
 
 
@@ -83,10 +82,10 @@ async def openai_text(description: dict) -> dict:
 
     except:
         try:
-            logging.error(f"Error: Failed to calculate tokens OpenAI")
+            logger_ai.error(f"Error: Failed to calculate tokens OpenAI")
             return {"response": response_content, "expenses": 0, "used_tokens": 0}
         except:
-            logging.error(f"Error: Failed to calculate tokens OpenAI")
+            logger_ai.error(f"Error: Failed to calculate tokens OpenAI")
             return {"response": response, "expenses": 0, "used_tokens": 0}
 
 

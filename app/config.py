@@ -1,15 +1,33 @@
+#### LOGGING ####
 import logging
 
-#### CONFIG ####
+def setup_logger(name, log_config):
+    logger = logging.getLogger(name)
+    logger.setLevel(log_config['level'])
+    
+    # Удаляем все существующие handlers
+    logger.handlers = []
+    
+    formatter = logging.Formatter(log_config['format'])
+    
+    file_handler = logging.FileHandler(log_config['filename'], mode=log_config['filemode'])
+    file_handler.setFormatter(formatter)
+    
+    logger.addHandler(file_handler)
+    return logger
 
 
-# TELEGRAMM and DB
-HOST = "app_postgres"  # app_postgres or localhost
-TIMEOUT_SERVER_AI = 300 # 3 минуты ожидания от сервера ИИ
+LOG_CONFIG_API = {
+    'format': '%(levelname)s - %(asctime)s - %(name)s - %(message)s',
+    'level': logging.INFO,
+    'filename': './log/api.log',
+    'filemode': 'a'
+}
 LOG_CONFIG_DB = {
     'format': '%(levelname)s - %(asctime)s - %(name)s - %(message)s',
     'level': logging.INFO,
-    'filename': './log/db.log'
+    'filename': './log/db.log',
+    'filemode': 'a'
 }
 LOG_CONFIG_BOT = {
     'format': '%(levelname)s - %(asctime)s - %(name)s - %(message)s',
@@ -17,16 +35,17 @@ LOG_CONFIG_BOT = {
     'filename': './log/bot.log', 
     'filemode': 'a'
 }
-LOG_CONFIG_API = {
-    'format': '%(levelname)s - %(asctime)s - %(name)s - %(message)s',
-    'level': logging.INFO,
-    'filename': './log/api.log'
-}
 LOG_CONFIG_AI = {
     'format': '%(levelname)s - %(asctime)s - %(name)s - %(message)s',
-    'level': logging.INFO,
-    'filename': './log/ai.log'
+    'level': logging.INFO, 
+    'filename': './log/ai.log', 
+    'filemode': 'a'
 }
+
+
+# TELEGRAMM and DB
+HOST = "app_postgres"  # app_postgres or localhost
+TIMEOUT_SERVER_AI = 300 # 3 минуты ожидания от сервера ИИ
 NOTIFICATION = True
 COUNTS_QUANTITY = 3 # MAX Коллисчество подключений - аккаунтов телеграмм пользователю
 MONEY_TO_START = 0.3 # 1$ to start work

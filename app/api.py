@@ -1,6 +1,5 @@
-from config import UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK, LOG_CONFIG_API, ALLOWED_HEADER_NAMES, SUPER_HEADER_NAMES #, TIME_OUT_ERR_USERNAME, WAITING_TIME, LIMIT_TRY, PRICE, USERNAME_ADMIN
-import logging
-logging.basicConfig(**LOG_CONFIG_API)
+from config import UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK, LOG_CONFIG_API, ALLOWED_HEADER_NAMES, SUPER_HEADER_NAMES, setup_logger #, TIME_OUT_ERR_USERNAME, WAITING_TIME, LIMIT_TRY, PRICE, USERNAME_ADMIN
+logger_api = setup_logger('bot', LOG_CONFIG_API)
 import asyncio
 import aiofiles
 from collections import defaultdict
@@ -74,7 +73,7 @@ async def rate_limit(request: Request, call_next):
         request_count = len(ip_request_counts[ip])
 
     if request_count > REQUEST_LIMIT:
-        logging.error(f"Rate limit exceeded for IP: {ip}")
+        logger_api.error(f"Rate limit exceeded for IP: {ip}")
         return Response(status_code=429, content="Too Many Requests")
 
     response = await call_next(request)
@@ -104,7 +103,7 @@ async def verify_uuid(some: str) -> bool:
         uuid_obj = uuid.UUID(some, version=4)
         return str(uuid_obj) == some
     except:
-        logging.error(f"Error: Invalid API Name Key format: {some}")
+        logger_api.error(f"Error: Invalid API Name Key format: {some}")
         return False
 
 
@@ -116,14 +115,14 @@ async def verify_user(access_id: uuid, appkey: uuid) -> bool:
 
     # If no accounts found:
     if not data_access_user:
-        logging.error(f"Error: Invalid Access ID API: {access_id}")
+        logger_api.error(f"Error: Invalid Access ID API: {access_id}")
         return False
     
     data_access = DictObj(data_access_user)
     
     # Check the key value:
     if str(data_access.api_value) != appkey:
-        logging.error(f"Error: Invalid Access ID or API Value: {access_id} | {appkey}")
+        logger_api.error(f"Error: Invalid Access ID or API Value: {access_id} | {appkey}")
         return False
     
     # Get Telegram user data:
@@ -132,12 +131,12 @@ async def verify_user(access_id: uuid, appkey: uuid) -> bool:
 
     # Check user balance:
     if data_user.money <= 0 :
-        logging.error(f"Error: Don't have money: {access_id} | {appkey}")
+        logger_api.error(f"Error: Don't have money: {access_id} | {appkey}")
         return False
 
     # Check if user is blocked:
     if data_user.block_user:
-        logging.error(f"Error: User has blocked: {access_id} | {appkey}")
+        logger_api.error(f"Error: User has blocked: {access_id} | {appkey}")
         return False
     
     return True
@@ -155,17 +154,17 @@ async def verify_appkey(request: Request) -> str:
 
     # Validate UUID:
     if not await verify_uuid(received_key):
-        logging.error(f"Invalid API Name format: {received_key}")
+        logger_api.error(f"Invalid API Name format: {received_key}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid API Name format")
 
     # In paranoia mode, only super users can access:
     if PARANOIA_MODE == True and header_name != SUPER_HEADER_NAMES:
-        logging.info(f"Temporary issue – we're working on it! : {header_name}")
+        logger_api.info(f"Temporary issue – we're working on it! : {header_name}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Temporary issue – we're working on it!")
 
     # In normal mode, rejects invalid names:
     elif not received_key:
-        logging.error(f"Missing or invalid API Name header: {received_key}")
+        logger_api.error(f"Missing or invalid API Name header: {received_key}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing or invalid API Name header")
 
     return received_key
@@ -202,8 +201,8 @@ async def openai_api(
     if not await verify_user(access_id, appkey):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Wrong Access ID, API Key, or no money, or just blocked)")
     
-    # Logging
-    logging.info(f"{access_id} -> proxy API: 'openai-chat'")
+    # logger_api
+    logger_api.info(f"{access_id} -> proxy API: 'openai-chat'")
     print(f"INFO: {access_id} -> proxy API: 'openai-chat'")
 
     # Parse optional JSON content
@@ -232,10 +231,10 @@ async def openai_api(
         answer = await openai_text(description)
     except:
         answer = "Error: mod_openai dont response"
-        logging.error(answer)
+        logger_api.error(answer)
     finally:
         if file_path and not await remove_file_os(file_path):
-            logging.error(f"Failed to remove file - {file_path}")
+            logger_api.error(f"Failed to remove file - {file_path}")
 
     return answer
 
@@ -263,41 +262,41 @@ async def dall_e_point(
     if not await verify_user(access_id, appkey):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Wrong Access ID, API Key, or no money, or just blocked)")
     
-    # Logging
-    logging.info(f"{access_id} -> proxy API: 'openai-img'")
+    # logger_api
+    logger_api.info(f"{access_id} -> proxy API: 'openai-img'")
     print(f"INFO: {access_id} -> proxy API: 'openai-img'")
     
     # Check mistakes:
     if len(user_content) > 4000 and model == "dall-e-3":
-        logging.error("Error! Not support > 4000 simbol")
+        logger_api.error("Error! Not support > 4000 simbol")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Error! Not support > 4000 simbol",
         )
 
     if len(user_content) > 1000 and model == "dall-e-2":
-        logging.error("Error! Not support > 1000 simbols dall-e-2")
+        logger_api.error("Error! Not support > 1000 simbols dall-e-2")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Error! Not support > 1000 simbols dall-e-2",
         )
 
     if quality and model == "dall-e-2":
-        logging.error("Error! Not support quality dall-e-2.")
+        logger_api.error("Error! Not support quality dall-e-2.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Error! Not support quality dall-e-2.",
         )
 
     if size and size == "1792x1024" and model == "dall-e-2":
-        logging.error("Error! Not support 1792x1024 to dall-e-2.")
+        logger_api.error("Error! Not support 1792x1024 to dall-e-2.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Error! Not support 1792x1024 to dall-e-2.",
         )
 
     if size and size == "1024x1792" and model == "dall-e-2":
-        logging.error("Error! Not support 1024x1792 to dall-e-2.")
+        logger_api.error("Error! Not support 1024x1792 to dall-e-2.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Error! Not support 1024x1792 to dall-e-2.",
@@ -305,13 +304,13 @@ async def dall_e_point(
 
     if model == "dall-e-3":
         if size and size == "256x256" or size and size == "512x512":
-            logging.error("Error! Not support 512x512 and 256x256 to dall-e-3.")
+            logger_api.error("Error! Not support 512x512 and 256x256 to dall-e-3.")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Error! Not support 512x512 and 256x256 to dall-e-3.",
             )
         if n and n > 1:
-            logging.error("Error! Not support n > 1 to dall-e-3.")
+            logger_api.error("Error! Not support n > 1 to dall-e-3.")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Error! Not support n > 1 to dall-e-3.",
@@ -319,13 +318,13 @@ async def dall_e_point(
         
     if model == "dall-e-2":
         if n and n > 10:
-            logging.error("Error! Not support n > 10 to dall-e-2.")
+            logger_api.error("Error! Not support n > 10 to dall-e-2.")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Error! Not support n > 10 to dall-e-2.",
             )
         if style:
-            logging.error("Error! Not support style to dall-e-2.")
+            logger_api.error("Error! Not support style to dall-e-2.")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Error! Not support style to dall-e-2.",
@@ -378,7 +377,7 @@ async def dall_e_point(
         answer_img = await openai_img(description)
     except:
         answer_img = "Error: mod_openai_img dont response"
-        logging.error(answer_img)
+        logger_api.error(answer_img)
 
     return answer_img
 
@@ -408,8 +407,8 @@ async def point_speech_to_audio_openai(
     if not await verify_user(access_id, appkey):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Wrong Access ID, API Key, or no money, or just blocked)")
     
-    # Logging
-    logging.info(f"{access_id} -> proxy API: 'openai-text-to-voice'")
+    # logger_api
+    logger_api.info(f"{access_id} -> proxy API: 'openai-text-to-voice'")
     print(f"INFO: {access_id} -> proxy API: 'openai-text-to-voice'")
 
     # Prepare request description
@@ -429,14 +428,14 @@ async def point_speech_to_audio_openai(
         return {"b64_json": encoded_file}
     
     except Exception as e:
-        logging.error(f"Error in voice processing: {str(e)}", exc_info=True)
+        logger_api.error(f"Error in voice processing: {str(e)}", exc_info=True)
         #print(f"Error in voice processing: {str(e)}")
         return {"system": f"Error in voice processing openai_text_to_voice: {str(e)}"}
 
     finally:
         if file_path and not await remove_file_os(file_path):
             #print(f"Failed to remove file - {file_path}")
-            logging.error(f"Failed to remove file - {file_path}")
+            logger_api.error(f"Failed to remove file - {file_path}")
 
 
 
@@ -460,8 +459,8 @@ async def point_transcription_openai(
     if not await verify_user(access_id, appkey):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Wrong Access ID, API Key, or no money, or just blocked)")
     
-    # Logging
-    logging.info(f"{access_id} -> proxy API: 'openai-voice-to-text'")
+    # logger_api
+    logger_api.info(f"{access_id} -> proxy API: 'openai-voice-to-text'")
     print(f"INFO: {access_id} -> proxy API: 'openai-voice-to-text'")
 
     # Handle file upload if present
@@ -485,10 +484,10 @@ async def point_transcription_openai(
         answer_text = await openai_voice_to_text(description)
     except:
         answer_text = "Error: mod_openai openai-voice-to-text dont response"
-        logging.error(answer_text)
+        logger_api.error(answer_text)
     finally:
         if file_path and not await remove_file_os(file_path):
-            logging.error(f"Failed to remove file - {file_path}")
+            logger_api.error(f"Failed to remove file - {file_path}")
 
     return answer_text
 
@@ -523,8 +522,8 @@ async def gemini_api(
     if not await verify_user(access_id, appkey):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Wrong Access ID, API Key, or no money, or just blocked)")
     
-    # Logging
-    logging.info(f"{access_id} -> proxy API: 'gemini'")
+    # logger_api
+    logger_api.info(f"{access_id} -> proxy API: 'gemini'")
     print(f"INFO: {access_id} -> proxy API: 'gemini'")
 
     # Parse optional JSON content
@@ -553,10 +552,10 @@ async def gemini_api(
         answer = await gemini_text(description)
     except:
         answer = "Error: mod_gemini dont response"
-        logging.error(answer)
+        logger_api.error(answer)
     finally:
         if file_path and not await remove_file_os(file_path):
-            logging.error(f"Failed to remove file - {file_path}")
+            logger_api.error(f"Failed to remove file - {file_path}")
 
     return answer
 
@@ -584,8 +583,8 @@ async def claude_api(
     if not await verify_user(access_id, appkey):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Wrong Access ID, API Key, or no money, or just blocked)")
     
-    # Logging
-    logging.info(f"{access_id} -> proxy API: 'claude'")
+    # logger_api
+    logger_api.info(f"{access_id} -> proxy API: 'claude'")
     print(f"INFO: {access_id} -> proxy API: 'claude'")
 
     # Parse optional JSON content
@@ -614,10 +613,10 @@ async def claude_api(
         answer = await claude_text(description)
     except:
         answer = "Error: mod_claude dont response"
-        logging.error(answer)
+        logger_api.error(answer)
     finally:
         if file_path and not await remove_file_os(file_path):
-            logging.error(f"Failed to remove file - {file_path}")
+            logger_api.error(f"Failed to remove file - {file_path}")
 
     return answer
 
@@ -647,8 +646,8 @@ async def grok_api(
     if not await verify_user(access_id, appkey):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Wrong Access ID, API Key, or no money, or just blocked)")
     
-    # Logging
-    logging.info(f"{access_id} -> proxy API: 'Grok'")
+    # logger_api
+    logger_api.info(f"{access_id} -> proxy API: 'Grok'")
     print(f"INFO: {access_id} -> proxy API: 'Grok'")
 
     # Parse optional JSON content
@@ -677,10 +676,10 @@ async def grok_api(
         answer = await grok_text(description)
     except:
         answer = "Error: grok_text dont response"
-        logging.error(answer)
+        logger_api.error(answer)
     finally:
         if file_path and not await remove_file_os(file_path):
-            logging.error(f"Failed to remove file - {file_path}")
+            logger_api.error(f"Failed to remove file - {file_path}")
 
     return answer
 
@@ -770,13 +769,13 @@ if __name__ == "__main__":
 
 #     if username != USERNAME_ADMIN:
 #         error_msg = f"Access denied for user '{username}'"
-#         logging.error(error_msg)
+#         logger_api.error(error_msg)
 #         return error_msg
 
 #     # Verify user and their appkey (подтверждение авторизации):
 #     verification = await verify_user_appkey(username, model, appkey)
 #     if verification.get("status_code") != status.HTTP_200_OK:
-#         logging.error("User verification failed: %s", verification)
+#         logger_api.error("User verification failed: %s", verification)
 #         return verification
 
 #     # Сбор данных запроса в один dict: 
@@ -807,7 +806,7 @@ if __name__ == "__main__":
 
 #     if username != USERNAME_ADMIN:
 #         error_msg = f"Access denied for user '{username}'"
-#         logging.error(error_msg)
+#         logger_api.error(error_msg)
 #         return error_msg
 
 #     model = "assistent-oa" # Пока что не знаю как и че делать с этим..
@@ -815,7 +814,7 @@ if __name__ == "__main__":
 #     # Verify user and their appkey (подтверждение авторизации):
 #     verification = await verify_user_appkey(username, model, appkey)
 #     if verification.get("status_code") != status.HTTP_200_OK:
-#         logging.error("User verification failed: %s", verification)
+#         logger_api.error("User verification failed: %s", verification)
 #         return verification
 
 
@@ -834,7 +833,7 @@ if __name__ == "__main__":
 
 #     if username != USERNAME_ADMIN:
 #         error_msg = f"Access denied for user '{username}'"
-#         logging.error(error_msg)
+#         logger_api.error(error_msg)
 #         return error_msg
 
 #     model = "assistent-oa" # Пока что не знаю как и че делать с этим..
@@ -842,7 +841,7 @@ if __name__ == "__main__":
 #     # Verify user and their appkey (подтверждение авторизации):
 #     verification = await verify_user_appkey(username, model, appkey)
 #     if verification.get("status_code") != status.HTTP_200_OK:
-#         logging.error("User verification failed: %s", verification)
+#         logger_api.error("User verification failed: %s", verification)
 #         return verification
 
 #     return await oa_assist_list()
@@ -861,7 +860,7 @@ if __name__ == "__main__":
 
 #     if username != USERNAME_ADMIN:
 #         error_msg = f"Access denied for user '{username}'"
-#         logging.error(error_msg)
+#         logger_api.error(error_msg)
 #         return error_msg
 
 #     model = "assistent-oa" # Пока что не знаю как и че делать с этим..
@@ -869,7 +868,7 @@ if __name__ == "__main__":
 #     # Verify user and their appkey (подтверждение авторизации):
 #     verification = await verify_user_appkey(username, model, appkey)
 #     if verification.get("status_code") != status.HTTP_200_OK:
-#         logging.error("User verification failed: %s", verification)
+#         logger_api.error("User verification failed: %s", verification)
 #         return verification
     
 #     return await oa_assist_del(assistant_id)
@@ -889,7 +888,7 @@ if __name__ == "__main__":
 
 #     if username != USERNAME_ADMIN:
 #         error_msg = f"Access denied for user '{username}'"
-#         logging.error(error_msg)
+#         logger_api.error(error_msg)
 #         return error_msg
 
 #     model = "assistent-oa" # Пока что не знаю как и че делать с этим..
@@ -897,7 +896,7 @@ if __name__ == "__main__":
 #     # Verify user and their appkey (подтверждение авторизации):
 #     verification = await verify_user_appkey(username, model, appkey)
 #     if verification.get("status_code") != status.HTTP_200_OK:
-#         logging.error("User verification failed: %s", verification)
+#         logger_api.error("User verification failed: %s", verification)
 #         return verification
     
 #     return await oa_thread_del(thread_id)
@@ -919,7 +918,7 @@ if __name__ == "__main__":
 
 #     if username != USERNAME_ADMIN:
 #         error_msg = f"Access denied for user '{username}'"
-#         logging.error(error_msg)
+#         logger_api.error(error_msg)
 #         return error_msg
 
 #     model = "assistent-oa" # Пока что не знаю как и че делать с этим..
@@ -927,7 +926,7 @@ if __name__ == "__main__":
 #     # Verify user and their appkey (подтверждение авторизации):
 #     verification = await verify_user_appkey(username, model, appkey)
 #     if verification.get("status_code") != status.HTTP_200_OK:
-#         logging.error("User verification failed: %s", verification)
+#         logger_api.error("User verification failed: %s", verification)
 #         return verification
     
 #     return await oa_returning_result_assist(run_id, thread_id, tool_outputs)

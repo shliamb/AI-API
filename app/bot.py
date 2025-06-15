@@ -1,9 +1,8 @@
 # Base
-from config import MONEY_TO_START, GUEST_APP_KEY, COUNTS_QUANTITY, NOTIFICATION, MIN_PAY, DOWNLOAD, LOG_CONFIG_BOT, LOGS_FOLDER
+from config import MONEY_TO_START, GUEST_APP_KEY, COUNTS_QUANTITY, NOTIFICATION, MIN_PAY, DOWNLOAD, LOG_CONFIG_BOT, LOGS_FOLDER, setup_logger
 from keys import TOKEN_TELEGRAM, IS_ADMIN
-import logging
-# logging.getLogger('aiogram').propagate = False # Блокировка логирование aiogram до его импорта
-logging.basicConfig(**LOG_CONFIG_BOT)
+# logger_bot.getLogger('aiogram').propagate = False # Блокировка логирование aiogram до его импорта
+logger_bot = setup_logger('bot', LOG_CONFIG_BOT)
 # import re
 import random
 import os
@@ -91,7 +90,7 @@ async def registration_telegram_user(message: Message, state: FSMContext) -> Non
     language = user_data.get("language")
 
     if message.text != answerq:
-        logging.error(f"Error bot: user registration wrong captcha id: {id}")
+        logger_bot.error(f"Error bot: user registration wrong captcha id: {id}")
         if language == "en":
             await message.answer("Wrong answer, try again - /start")
         elif language == "ru":
@@ -101,7 +100,7 @@ async def registration_telegram_user(message: Message, state: FSMContext) -> Non
 
     confirm = await add_user(user_data)
     if not confirm:
-        logging.error(f"Error bot: Don't save new user: {id}")
+        logger_bot.error(f"Error bot: Don't save new user: {id}")
         return
 
     if language == "en":
@@ -441,12 +440,12 @@ async def add_accounts(message: types.Message):
 
     update_data_account = {"access_id": new_access_id, "api_key": GUEST_APP_KEY, "api_value": uuid.uuid4(), "user_id_telegram": id}
     if not await add_account(update_data_account):
-        logging.error(f"Error add_account user - {id}")
+        logger_bot.error(f"Error add_account user - {id}")
         return
 
     update_data_user = {"user_id": id, "counts_api": counts_api, "list_access_id": json.dumps(list_access_id)}
     if not await update_user(update_data_user):
-        logging.error(f"Error update_user user - {id}")
+        logger_bot.error(f"Error update_user user - {id}")
         return
 
     await accounts_menu(message)
@@ -479,13 +478,13 @@ async def delete_accouts_user(message: types.Message):
     if list_access_id:
         for access_id in list_access_id:
             if not await del_account(access_id):
-                logging.error(f"Error del_accounts user - {id}, access_id - {access_id}")
+                logger_bot.error(f"Error del_accounts user - {id}, access_id - {access_id}")
                 await message.answer("Ошибка удаления Аккаунтов" if language == "ru" else "Account Deletion Error", parse_mode="HTML")
                 return
 
     new_data = {"user_id": id, "counts_api": COUNTS_QUANTITY, "list_access_id": None}
     if not await update_user(new_data):
-        logging.error(f"Error delete_accouts_user - update_user  - {id}")
+        logger_bot.error(f"Error delete_accouts_user - update_user  - {id}")
         await message.answer("Ошибка сброса counts_api" if language == "ru" else "Counts_api reset error", parse_mode="HTML")
         return
 
@@ -650,7 +649,7 @@ async def get_stat_user(message: types.Message):
     try:
         await bot.send_document(chat_id=message.chat.id, document=buffered_input_file)
     except:
-        logging.error(f"Error sending documentb User stat")
+        logger_bot.error(f"Error sending documentb User stat")
         await message.answer("Ошибка сбора статистики" if language == "ru" else "Statistics collection error", parse_mode="HTML")
 
 
@@ -867,10 +866,10 @@ async def backup(message: types.Message):
 
     for file_to_delete in sorted_files[3:]: # Оставляем последние 3 файла, удаляем остальные
         os.remove(file_to_delete)
-    logging.info("Remove all file DB, saved 3 latest files.")
+    logger_bot.info("Remove all file DB, saved 3 latest files.")
 
     last_downloaded_file = sorted_files[0] if sorted_files else None   # Последний скачанный файл будет первым в отсортированном списке (новейшим) (адрес)
-    logging.info("Download last DB file.")
+    logger_bot.info("Download last DB file.")
 
     await message.bot.send_document(chat_id=message.chat.id, document=types.input_file.FSInputFile(last_downloaded_file))
 
@@ -927,7 +926,7 @@ async def get_admin_stat(message: types.Message):
     try:
         await bot.send_document(chat_id=message.chat.id, document=buffered_input_file)
     except:
-        logging.error(f"Error sending document Admin stat")
+        logger_bot.error(f"Error sending document Admin stat")
 
 
 
@@ -953,9 +952,9 @@ async def admin_get_log(message: types.Message):
                 empts = False
                 await asyncio.sleep(0.5)
             except Exception as e:
-                logging.error(f"Error sending file log: {file_path}: {e}")
+                logger_bot.error(f"Error sending file log: {file_path}: {e}")
     if empts:
-        await bot.send_message(message.chat.id, "There are no logging files or they are empty")
+        await bot.send_message(message.chat.id, "There are no logger_bot files or they are empty")
 
 
 
@@ -980,7 +979,7 @@ async def admin_clear_log(message: types.Message):
                 await bot.send_message(message.chat.id, f"The '{file_path}' file has been clearing.")
                 await asyncio.sleep(0.5)
             except Exception as e:
-                logging.error(f"Error clearing file log: {file_path}: {e}")
+                logger_bot.error(f"Error clearing file log: {file_path}: {e}")
 
 
 
@@ -1000,7 +999,7 @@ async def admin_delete_stat_table(message: types.Message):
         return
 
     if not await delete_stat_table():
-        logging.error("Error delete_stat_table !")
+        logger_bot.error("Error delete_stat_table !")
         return
 
     await message.answer("Table Statistic of DB is deleted", parse_mode="HTML")
@@ -1168,7 +1167,7 @@ if __name__ == "__main__":
     try:
         asyncio.run(main_bot())
     except Exception as e:
-        logging.error(f"An error occurred: {e}.")
+        logger_bot.error(f"An error occurred: {e}.")
         print(f"An error occurred: {e}.")
 
 

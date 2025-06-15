@@ -1,9 +1,8 @@
 from keys import USER_DB, PASSWORD_DB, DB_NAME
-from config import LOG_CONFIG_DB, HOST, BACKUP_DB
+from config import LOG_CONFIG_DB, HOST, BACKUP_DB, setup_logger
 import subprocess
 import datetime
-import logging
-logging.basicConfig(**LOG_CONFIG_DB)
+logger_db = setup_logger('db', LOG_CONFIG_DB)
 
 
 def backup_db():
@@ -17,11 +16,11 @@ def backup_db():
 
     try:
         subprocess.run(pg_dump_command, shell=True) # Выполнение команды через subprocess
-        logging.info("Backup Data Base is Completed.")
+        logger_db.info("Backup Data Base is Completed.")
         return True
 
     except subprocess.CalledProcessError as e:
-        logging.error(f"Error when creating a backup: {e}")
+        logger_db.error(f"Error when creating a backup: {e}")
         return False
 
 

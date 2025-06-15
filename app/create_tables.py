@@ -1,8 +1,7 @@
 from keys import USER_DB, PASSWORD_DB, DB_NAME
-from config import HOST, LOG_CONFIG_DB
+from config import HOST, LOG_CONFIG_DB, setup_logger
 import psycopg2
-import logging
-logging.basicConfig(**LOG_CONFIG_DB)
+logger_db = setup_logger('db', LOG_CONFIG_DB)
 
 
 
@@ -94,12 +93,12 @@ def create_tables_in_db():
         # Saving changes:
         connection.commit()
         #print("Adding tables is done!")
-        logging.info("Adding tables is done!")
+        logger_db.info("Adding tables is done!")
         return True
 
     except Exception as error:
         # print("Error:", error)
-        logging.error("Error create tables:", error)
+        logger_db.error("Error create tables:", error)
         return False
 
     finally:

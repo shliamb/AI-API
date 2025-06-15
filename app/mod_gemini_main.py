@@ -1,7 +1,6 @@
-from config import LOG_CONFIG_AI, TIMEOUT_SERVER_AI
-import logging
-logging.basicConfig(**LOG_CONFIG_AI)
-import asyncio
+from config import LOG_CONFIG_AI, TIMEOUT_SERVER_AI, setup_logger
+logger_ai = setup_logger('ai', LOG_CONFIG_AI)
+#import asyncio
 import aiohttp
 from keys import API_KEY_GEMINI
 from general_functions import DictObj, encode_file
@@ -33,7 +32,7 @@ async def gemini_text(description: dict) -> dict:
         'Content-Type': 'application/json'
     }
 
-    logging.info(f"{access_id} -> 'main API Gemini Google'")
+    logger_ai.info(f"{access_id} -> 'main API Gemini Google'")
     print(f"INFO: {access_id} -> 'main API Gemini Google'")
 
 

@@ -1,7 +1,6 @@
-from config import LOG_CONFIG_AI, DEF_CLAUDE_VERSION, TIMEOUT_SERVER_AI
-import logging
-logging.basicConfig(**LOG_CONFIG_AI)
-import asyncio
+from config import LOG_CONFIG_AI, DEF_CLAUDE_VERSION, TIMEOUT_SERVER_AI, setup_logger
+logger_ai = setup_logger('ai', LOG_CONFIG_AI)
+#import asyncio
 import aiohttp
 from keys import API_KEY_CLAUDE
 from general_functions import DictObj, encode_file
@@ -25,7 +24,7 @@ async def claude_text(description: dict) -> dict:
     # tools = description.get("tools")
     # ?? 'response_format':'[generationConfig: {responseMimeType: "application/json",responseSchema: {type: SchemaType.ARRAY,items: {type: SchemaType.OBJECT,properties: {recipe_name: {type: SchemaType.STRING,},},},},}});]'
 
-    logging.info(f"{access_id} -> 'main API CLAUDE ANTHROPIC'")
+    logger_ai.info(f"{access_id} -> 'main API CLAUDE ANTHROPIC'")
     print(f"INFO: {access_id} -> 'main API CLAUDE ANTHROPIC'")
 
 

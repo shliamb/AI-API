@@ -1,12 +1,11 @@
 # Base:
-from config import LOG_CONFIG_DB
+from config import LOG_CONFIG_DB, setup_logger
 from worker_db import add_user, add_account
 # import asyncio
 import json
 import uuid
 from datetime import datetime
-import logging
-logging.basicConfig(**LOG_CONFIG_DB)
+logger_db = setup_logger('db', LOG_CONFIG_DB)
 
 
 
@@ -67,7 +66,7 @@ async def restore_users_to_db(file_path):
 
         except Exception as err:
             err_add_usr += 1
-            logging.error(f"Fail update user_id: {clear_data_user.get('user_id')}, reason: {err}")
+            logger_db.error(f"Fail update user_id: {clear_data_user.get('user_id')}, reason: {err}")
         
 
 
@@ -106,7 +105,7 @@ async def restore_users_to_db(file_path):
 
         except Exception as err:
             err_met_pay += 1
-            logging.error(f"Fail update user_id: {clear_data_account.get('user_id_telegram')}, reason: {err}")
+            logger_db.error(f"Fail update user_id: {clear_data_account.get('user_id_telegram')}, reason: {err}")
 
 
     return {"status": "good", "added users": qty_add_usr, "errors users": err_add_usr, "added accounts": qty_met_pay, "errors accounts": err_met_pay}

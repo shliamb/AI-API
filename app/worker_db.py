@@ -1,11 +1,9 @@
 from keys import USER_DB, PASSWORD_DB, DB_NAME
-from config import MONEY_TO_START, LOG_CONFIG_DB, HOST
-import logging
-logging.basicConfig(**LOG_CONFIG_DB)
+from config import MONEY_TO_START, LOG_CONFIG_DB, HOST, setup_logger
+logger_db = setup_logger('db', LOG_CONFIG_DB)
 import asyncpg
 # import json
 # import asyncio
-import logging
 import uuid
 
 
@@ -31,10 +29,10 @@ async def get_connection():
 async def add_user(user_data):
     keys_list, values_list, num_list, i, connection = [], [], [], 1, None 
 
-    user_id = user_data.get("user_id")
-    counts_api = user_data.get("counts_api")
+    # user_id = user_data.get("user_id")
+    # counts_api = user_data.get("counts_api")
     # if user_id is not None or counts_api is not None:
-    #     logging.error("Error add_user: Not enough data") !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    #     logger_db.error("Error add_user: Not enough data") !!!!!!!!!
     #     return False
 
 
@@ -58,7 +56,7 @@ async def add_user(user_data):
         return True
     
     except Exception as e:
-        logging.error(f"Error add_user: {e}")
+        logger_db.error(f"Error add_user: {e}")
         return False
     
     finally:
@@ -84,7 +82,7 @@ async def read_user(user_id):
         return dict(*result)
     
     except Exception as e:
-        logging.error(f"Error read_user: {e}")
+        logger_db.error(f"Error read_user: {e}")
         return False
 
     finally:
@@ -126,7 +124,7 @@ async def read_users():
         return users
     
     except Exception as e:
-        logging.error(f"Error read_users: {e}")
+        logger_db.error(f"Error read_users: {e}")
         return False
 
     finally:
@@ -141,7 +139,7 @@ async def update_user(user_data):
 
     user_id = user_data.get("user_id")
     if not user_id:
-        logging.error("Error update_user: Not enough data") 
+        logger_db.error("Error update_user: Not enough data") 
         return False
 
     for key, value in user_data.items():
@@ -164,7 +162,7 @@ async def update_user(user_data):
         return True
     
     except Exception as e:
-        logging.error(f"Error update_user: {e}")
+        logger_db.error(f"Error update_user: {e}")
         return False
     
     finally:
@@ -189,7 +187,7 @@ async def add_account(account_data):
     api_value = account_data.get("api_value")
     user_id_telegram = account_data.get("user_id_telegram")
     if not access_id or not api_key or not api_value or not user_id_telegram:
-        logging.error("Error update_account: Not enough data")
+        logger_db.error("Error update_account: Not enough data")
         #print("Error update_account: Not enough data")
         return False
 
@@ -213,7 +211,7 @@ async def add_account(account_data):
         return True
     
     except Exception as e:
-        logging.error(f"Error add_account: {e}")
+        logger_db.error(f"Error add_account: {e}")
         #print(f"Error add_account: {e}")
         return False
     
@@ -241,7 +239,7 @@ async def read_account_access_id(access_id):
         return dict(*result)
     
     except Exception as e:
-        logging.error(f"Error read_account_access_id: {e}")
+        logger_db.error(f"Error read_account_access_id: {e}")
         return False
 
     finally:
@@ -271,7 +269,7 @@ async def read_accounts_user_id(user_id):
         return accounts
     
     except Exception as e:
-        logging.error(f"Error read_accounts_user_id: {e}")
+        logger_db.error(f"Error read_accounts_user_id: {e}")
         return False
 
     finally:
@@ -287,7 +285,7 @@ async def update_account(account_data):
 
     access_id = account_data.get("access_id")
     if not access_id:
-        logging.error("Error update_account: Not enough data") 
+        logger_db.error("Error update_account: Not enough data") 
         return False
 
     for key, value in account_data.items():
@@ -310,7 +308,7 @@ async def update_account(account_data):
         return True
     
     except Exception as e:
-        logging.error(f"Error update_account: {e}")
+        logger_db.error(f"Error update_account: {e}")
         #print(f"Error update_account: {e}")
         return False
     
@@ -324,7 +322,7 @@ async def del_account(access_id):
     connection = None
 
     if not access_id:
-        logging.error("Error del_account: Where is access_id?") 
+        logger_db.error("Error del_account: Where is access_id?") 
         return False
 
     try:
@@ -338,7 +336,7 @@ async def del_account(access_id):
         return True
     
     except Exception as e:
-        logging.error(f"Error del_account: {e}")
+        logger_db.error(f"Error del_account: {e}")
         return False
     
     finally:
@@ -363,7 +361,7 @@ async def add_record_stat(stat_data):
     time = stat_data.get("time")
     access_id = stat_data.get("access_id")
     if not user_id or not time or not access_id:
-        logging.error("Error add_record_stat: Not enough data") 
+        logger_db.error("Error add_record_stat: Not enough data") 
         return False
 
     for key, value in stat_data.items():
@@ -386,7 +384,7 @@ async def add_record_stat(stat_data):
         return True
     
     except Exception as e:
-        logging.error(f"Error add_record_stat: {e}")
+        logger_db.error(f"Error add_record_stat: {e}")
         return False
     
     finally:
@@ -415,7 +413,7 @@ async def read_stat_for_user_id(user_id):
         return list_stat
     
     except Exception as e:
-        logging.error(f"Error read_stat_for_user_id: {e}")
+        logger_db.error(f"Error read_stat_for_user_id: {e}")
         return False
 
     finally:
@@ -445,7 +443,7 @@ async def read_stat_for_access_id(access_id):
         return list_stat
     
     except Exception as e:
-        logging.error(f"Error read_stat_for_access_id: {e}")
+        logger_db.error(f"Error read_stat_for_access_id: {e}")
         return False
 
     finally:
@@ -468,7 +466,7 @@ async def delete_stat_table():
         return True
     
     except Exception as e:
-        logging.error(f"Error delete_stat_table: {e}")
+        logger_db.error(f"Error delete_stat_table: {e}")
         return False
     
     finally:
@@ -524,7 +522,7 @@ async def json_old_users():
         )
         
         if not records:
-            logging.warning("No users found with money > %s$", MONEY_TO_START)
+            logger_db.warning("No users found with money > %s$", MONEY_TO_START)
             return []
 
 
@@ -571,7 +569,7 @@ async def json_old_users():
         # return users
     
     except Exception as e:
-        logging.error(f"Error in json_old_users: {e}", exc_info=True)
+        logger_db.error(f"Error in json_old_users: {e}", exc_info=True)
         return []
     finally:
         if connection:

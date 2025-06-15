@@ -1,6 +1,5 @@
-from config import TIME_CORRECTION, LOG_CONFIG_BOT, PRICE
+from config import TIME_CORRECTION, LOG_CONFIG_BOT, setup_logger
 from datetime import datetime, timezone, timedelta
-import logging
 import random
 import string
 import os
@@ -10,10 +9,8 @@ import aiofiles
 import asyncio
 from mutagen import File
 from io import BytesIO
-import logging
-logging.basicConfig(**LOG_CONFIG_BOT)
-#from worker_db import add_statistic, get_user_by_username, update_user_by_username
-# from config import price
+logger_bot = setup_logger('bot', LOG_CONFIG_BOT)
+
 
 
 
@@ -31,7 +28,7 @@ async def day_utcnow():
     a = a + timedelta(hours=TIME_CORRECTION)
     day_str = a.strftime("%Y-%m-%d %H:%M:%S")
     day = datetime.strptime(day_str, '%Y-%m-%d %H:%M:%S')
-    #logging.info("info: Getting the day and time from the server")
+    #logger_bot.info("info: Getting the day and time from the server")
     return day or None
 
 # UNFORMAT TIME
@@ -46,11 +43,11 @@ async def unformat_date(date):
 #     if os.path.exists(file_path):
 #         os.remove(file_path)
 #         #print(f"The {file_path} file was successfully deleted.")
-#         logging.info(f"The {file_path} file was successfully deleted.")
+#         logger_bot.info(f"The {file_path} file was successfully deleted.")
 #         return True
 #     else:
 #         #print(f"The {file_path} file does not exist.")
-#         logging.error(f"The {file_path} file does not exist.")
+#         logger_bot.error(f"The {file_path} file does not exist.")
 #         return False
 
 # Remove File OS Async
@@ -59,10 +56,10 @@ async def remove_file_os(file_path):
     
     if await loop.run_in_executor(None, os.path.exists, file_path):
         await loop.run_in_executor(None, os.remove, file_path)
-        logging.info(f"The {file_path} file was successfully deleted.")
+        logger_bot.info(f"The {file_path} file was successfully deleted.")
         return True
     else:
-        logging.error(f"The {file_path} file does not exist.")
+        logger_bot.error(f"The {file_path} file does not exist.")
         return False
     
 
@@ -101,8 +98,8 @@ async def read_audio_file(file_path: str) -> float: # mp3 (ID3v1 и ID3v2), flac
         audio = File(audio_file)
         
         if audio is None or audio.info is None:
-            print("The audio file could not be uploaded.")
-            logging.error("The audio file could not be uploaded.")
+            #print("The audio file could not be uploaded.")
+            logger_bot.error("The audio file could not be uploaded.")
         else:
             # print(audio.pprint())
             duration = audio.info.length  # Получаем длину в секундах

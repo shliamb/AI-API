@@ -1,6 +1,6 @@
 # Base
 import logging
-logging.basicConfig(format='%(levelname)s - %(message)s', level=logging.INFO)
+#logger_ai = setup_logger('ai', LOG_CONFIG_AI)
 from openai import AsyncOpenAI, RateLimitError, OpenAIError
 from typing import List, Optional, Union
 # import asyncio

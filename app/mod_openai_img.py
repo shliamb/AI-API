@@ -1,6 +1,5 @@
-from config import LOG_CONFIG_AI, TIMEOUT_SERVER_AI
-import logging
-logging.basicConfig(**LOG_CONFIG_AI)
+from config import LOG_CONFIG_AI, TIMEOUT_SERVER_AI, setup_logger
+logger_ai = setup_logger('ai', LOG_CONFIG_AI)
 from keys import API_KEY_OPENAI
 import asyncio
 from openai import AsyncOpenAI, OpenAIError
@@ -27,7 +26,7 @@ async def openai_img(description):
     model = dict_des.model
     real_name_model = await cleaner_model(model) # dall-e-3
 
-    logging.info(f"{access_id} -> 'img-gen API OpenAI'")
+    logger_ai.info(f"{access_id} -> 'img-gen API OpenAI'")
     print(f"INFO: {access_id} -> 'img-gen API OpenAI'")
 
     params = {
@@ -46,19 +45,19 @@ async def openai_img(description):
 
     try:
         response = await asyncio.wait_for(client.images.generate(**params), timeout=TIMEOUT_SERVER_AI)
-        print(f"INFO: 'main API OpenAI' -> get response")
-        logging.info(f"'main API OpenAI' -> get response")
+        #print(f"INFO: 'main API OpenAI' -> get response")
+        logger_ai.info(f"'main API OpenAI' -> get response")
 
     except asyncio.TimeoutError:
-        logging.error("TimeoutError of OpenAI gen-img Server")
+        logger_ai.error("TimeoutError of OpenAI gen-img Server")
         return {"response": "TimeoutError of OpenAI gen-img Server", "expenses": 0, "pictures": n}
     
     except OpenAIError as e:
-        logging.error(f"OpenAIError gen-img: {str(e)}")
+        logger_ai.error(f"OpenAIError gen-img: {str(e)}")
         return {"response": f"OpenAIError gen-img: {str(e)}", "expenses": 0, "pictures": n}
     
     except Exception as e:
-        logging.error(f"UnexpectedError OpenAI gen-img: {str(e)}")
+        logger_ai.error(f"UnexpectedError OpenAI gen-img: {str(e)}")
         return {"response": f"UnexpectedError OpenAI gen-img: {str(e)}", "expenses": 0, "pictures": n}
 
 
@@ -74,7 +73,7 @@ async def openai_img(description):
 
     except:
         response_content = response.output_text
-        logging.error(f"Error: Failed to calculate tokens OpenAI: {e}")
+        logger_ai.error(f"Error: Failed to calculate tokens OpenAI: {e}")
         return {"response": response_content, "expenses": 0, "used_tokens": 0}
 
 

@@ -1,13 +1,12 @@
 # Base:
 from worker_db import json_old_users
-from config import PATH_JSON_USERS, LOG_CONFIG_DB
+from config import PATH_JSON_USERS, LOG_CONFIG_DB, setup_logger
 # import asyncio
 import os
 import json
 import uuid
 from datetime import datetime
-import logging
-logging.basicConfig(**LOG_CONFIG_DB)
+logger_db = setup_logger('db', LOG_CONFIG_DB)
 
 
 
@@ -78,7 +77,7 @@ async def get_json_old_users():
         return filepath
 
     except Exception as e:
-        logging.error(f"Error save file to JSON: {e}")
+        logger_db.error(f"Error save file to JSON: {e}")
         return False
     
 # print(asyncio.run(get_json_old_users()))

@@ -1,6 +1,5 @@
-from config import AUDIO_FOLDER, LOG_CONFIG_AI, TIMEOUT_SERVER_AI
-import logging
-logging.basicConfig(**LOG_CONFIG_AI)
+from config import AUDIO_FOLDER, LOG_CONFIG_AI, TIMEOUT_SERVER_AI, setup_logger
+logger_ai = setup_logger('ai', LOG_CONFIG_AI)
 from openai import AsyncOpenAI, OpenAIError
 import aiofiles
 import tiktoken
@@ -24,7 +23,7 @@ async def openai_text_to_voice(description: dict) -> str:
     response_format = dict_des.response_format or "opus"     # mp3, opus, aac, flac, wav, and pcm
     speed = dict_des.speed                                  # 0.25 to 4.0. default - 1.0
 
-    logging.info(f"{access_id} -> 'main API OpenAI text to voice'")
+    logger_ai.info(f"{access_id} -> 'main API OpenAI text to voice'")
     print(f"INFO: {access_id} -> 'main API OpenAI text to voice'")
 
     try:
@@ -38,24 +37,18 @@ async def openai_text_to_voice(description: dict) -> str:
         timeout=TIMEOUT_SERVER_AI)
 
         print(f"INFO: 'main API OpenAI text to voice' -> get response")
-        logging.info(f"'main API OpenAI text to voice' -> get response")
+        logger_ai.info(f"'main API OpenAI text to voice' -> get response")
 
     except asyncio.TimeoutError as e:
-        # print("3")
-        # print(f"OpenAI Server timeout: {str(e)}")
-        logging.error(f"OpenAI Server timeout: {str(e)}", exc_info=True)
+        logger_ai.error(f"OpenAI Server timeout: {str(e)}", exc_info=True)
         return response if isinstance(response, str) else None
 
     except OpenAIError as e:  # Используем прямое имя модуля
-        # print("4")
-        # print(f"OpenAI API error: {str(e)}")
-        logging.error(f"OpenAI API error: {str(e)}", exc_info=True)
+        logger_ai.error(f"OpenAI API error: {str(e)}", exc_info=True)
         return str(e)  # Всегда возвращаем строку с описанием ошибки
 
     except Exception as e:
-        # print("5")
-        # print(f"Unexpected error in text-to-voice: {str(e)}")
-        logging.critical(f"Unexpected error in text-to-voice: {str(e)}", exc_info=True)
+        logger_ai.critical(f"Unexpected error in text-to-voice: {str(e)}", exc_info=True)
         return f"Internal error: {str(e)}" if str(e) else None
         
 
@@ -73,17 +66,14 @@ async def openai_text_to_voice(description: dict) -> str:
             used_tokens = len(tokens)
             model_version = model # just only tts-1
 
-
-            # print(access_id, model_version, used_tokens)
             if not await calculate_token_cost(access_id, model_version, used_tokens, input_data="text"):
-                logging.error("Error: Failed to calculate tokens OpenAI main text to voice")
+                logger_ai.error("Error: Failed to calculate tokens OpenAI main text to voice")
                 return "Error: Failed to calculate tokens OpenAI main text to voice"
 
-            # print(file_path)
             return file_path
         
     except:
-        logging.error(f"Error: Failed to calculate tokens OpenAI main text to voice: {e}")
+        logger_ai.error(f"Error: Failed to calculate tokens OpenAI main text to voice: {e}")
         return f"Error: Failed to calculate tokens OpenAI main text to voice: {e}"
 
 

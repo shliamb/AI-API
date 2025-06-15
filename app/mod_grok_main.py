@@ -1,9 +1,8 @@
-from config import LOG_CONFIG_AI, TIMEOUT_SERVER_AI
-import logging
-logging.basicConfig(**LOG_CONFIG_AI)
-import asyncio
+from config import LOG_CONFIG_AI, TIMEOUT_SERVER_AI, setup_logger
+logger_ai = setup_logger('ai', LOG_CONFIG_AI)
+#import asyncio
 import aiohttp
-import json
+#import json
 from keys import API_KEY_GROK
 from general_functions import DictObj, encode_file
 from store_token_cost import calculate_token_cost
@@ -25,7 +24,7 @@ async def grok_text(description: dict) -> dict:
     # tools = description.get("tools")
     # ?? 'response_format':'[generationConfig: {responseMimeType: "application/json",responseSchema: {type: SchemaType.ARRAY,items: {type: SchemaType.OBJECT,properties: {recipe_name: {type: SchemaType.STRING,},},},},}});]'
 
-    logging.info(f"{access_id} -> 'main API GROK'")
+    logger_ai.info(f"{access_id} -> 'main API GROK'")
     print(f"INFO: {access_id} -> 'main API GROK'")
 
 

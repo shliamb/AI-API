@@ -1,11 +1,10 @@
-from config import LOG_CONFIG_AI, TIMEOUT_SERVER_AI
-import logging
-logging.basicConfig(**LOG_CONFIG_AI)
+from config import LOG_CONFIG_AI, setup_logger #, TIMEOUT_SERVER_AI
+logger_ai = setup_logger('ai', LOG_CONFIG_AI)
 import asyncio
-import aiofiles
+#import aiofiles
 from openai import AsyncOpenAI, OpenAIError
 from keys import API_KEY_OPENAI
-from general_functions import DictObj, encode_file
+from general_functions import DictObj#, encode_file
 from store_token_cost import calculate_token_cost
 from general_functions import read_audio_file
 
@@ -27,7 +26,7 @@ async def openai_voice_to_text(description):
     response_format = dict_des.response_format or "text" # json, text, srt, verbose_json, or vtt
     file_path = dict_des.file_path
 
-    logging.info(f"{access_id} -> 'main API OpenAI voice to text'")
+    logger_ai.info(f"{access_id} -> 'main API OpenAI voice to text'")
     print(f"INFO: {access_id} -> 'main API OpenAI voice to text'")
 
     # OpenAI:
@@ -43,18 +42,18 @@ async def openai_voice_to_text(description):
                 file = file,
             )
             print(f"INFO: 'main API OpenAI voice to text' -> get response")
-            logging.info(f"'main API OpenAI voice to text' -> get response")
+            logger_ai.info(f"'main API OpenAI voice to text' -> get response")
 
         except asyncio.TimeoutError:
-            logging.error("TimeoutError of OpenAI Server voice to text")
+            logger_ai.error("TimeoutError of OpenAI Server voice to text")
             return {"response": "TimeoutError of OpenAI Server voice to text", "expenses": 0, "minutes": 0}
         
         except OpenAIError as e:
-            logging.error(f"OpenAIError voice to text: {str(e)}")
+            logger_ai.error(f"OpenAIError voice to text: {str(e)}")
             return {"response": f"OpenAIError: {str(e)} voice to text", "expenses": 0, "minutes": 0}
         
         except Exception as e:
-            logging.error(f"UnexpectedError of OpenAI main voice to text: {str(e)}")
+            logger_ai.error(f"UnexpectedError of OpenAI main voice to text: {str(e)}")
             return {"response": f"UnexpectedError of OpenAI main voice to text: {str(e)}", "expenses": 0, "minutes": 0}
 
 
@@ -70,7 +69,7 @@ async def openai_voice_to_text(description):
             return {"response":response, "expenses": expenses, "minutes": min}
         
         except:
-            logging.error(f"Error: Failed to calculate tokens OpenAI: {e}")
+            logger_ai.error(f"Error: Failed to calculate tokens OpenAI: {e}")
             return {"response": str(response), "expenses": 0, "used_tokens": 0}
 
         
