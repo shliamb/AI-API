@@ -7,9 +7,9 @@ from config import UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME
 # logging.getLogger("uvicorn.access").disabled = True
 # logging.getLogger("aiogram").disabled = True
 logger_api = setup_logger('api', LOG_CONFIG_API)
-logger_api.getLogger("uvicorn").disabled = True
-logger_api.getLogger("uvicorn.access").disabled = True
-logger_api.getLogger("aiogram").disabled = True
+# logging.getLogger("uvicorn").disabled = True
+# logging.getLogger("uvicorn.access").disabled = True
+# logging.getLogger("aiogram").disabled = True
 import asyncio
 import aiofiles
 import json
