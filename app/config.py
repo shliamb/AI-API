@@ -82,7 +82,8 @@ PRICE = {
     'o1': 90, # o1-2024-12-17
     'o1-preview': 90,
 
-    'o3': 60, # o3-2025-04-16 
+    'o3-pro': 120, # o3-pro-2025-06-10   !!!!
+    'o3': 12, # o3-2025-04-16
 
     'o4-mini': 6.6, # o4-mini-2025-04-16 
     'o3-mini': 6.6, # 
@@ -137,6 +138,9 @@ PRICE = {
 
     # Antropic Claude to 1M tokens:  Context window - 200k, 
     # New:
+    'claude-opus-4-latest': 21.6, # claude-opus-4-20250514
+    'claude-sonnet-4-latest': 21.6, # claude-sonnet-4-20250514
+
     'claude-3-7-sonnet-latest': 21.6, # 200K context window Most intelligent model, with visible step‑by‑step reasoning claude-3-7-sonnet-20250219
     'claude-3-5-sonnet-latest': 21.6, # output 8192 tokens
     'claude-3-5-haiku-latest': 5.76, # no vision and output 8192 tokens

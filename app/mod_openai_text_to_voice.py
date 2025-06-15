@@ -27,8 +27,6 @@ async def openai_text_to_voice(description: dict) -> str:
     logging.info(f"{access_id} -> 'main API OpenAI text to voice'")
     print(f"INFO: {access_id} -> 'main API OpenAI text to voice'")
 
-    print(model, "\n")
-
     try:
         response = await asyncio.wait_for(client.audio.speech.create(
             model = model, # "gpt-4o-mini-tts"

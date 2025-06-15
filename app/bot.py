@@ -673,7 +673,8 @@ async def get_prices(message: types.Message):
         'gpt-4.1-nano': 0.6,
         'gpt-4.5-preview': 270,
         'o1': 90,
-        'o3': 60,
+        'o3-pro': 120,
+        'o3': 12,
         'o1-preview': 90,
         'o1-mini': 6.6,
         'o3-mini': 6.6,
@@ -706,6 +707,8 @@ async def get_prices(message: types.Message):
         'grok-beta': 24,
 
     The language model from Anthropic is 1 million in $:
+        'claude-opus-4-latest': 21.6,
+        'claude-sonnet-4-latest': 21.6,
         'claude-3-7-sonnet-latest': 21.6,
         'claude-3-5-sonnet-latest': 21.6,
         'claude-3-5-haiku-latest': 5.76,
