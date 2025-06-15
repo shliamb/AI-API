@@ -711,7 +711,9 @@ async def grok_api(
 
 
 
-
+# uvicorn_logger = setup_logger('uvicorn', LOG_CONFIG_API)
+# uvicorn_error_logger = setup_logger('uvicorn.error', LOG_CONFIG_API)
+# uvicorn_access_logger = setup_logger('uvicorn.access', LOG_CONFIG_API)
 
 
 
@@ -719,7 +721,12 @@ async def grok_api(
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=8000,
+        log_config=None
+    )
 
 
 
