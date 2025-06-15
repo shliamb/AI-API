@@ -6,10 +6,15 @@ from config import UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME
 # logging.getLogger("uvicorn").disabled = True
 # logging.getLogger("uvicorn.access").disabled = True
 # logging.getLogger("aiogram").disabled = True
-logger_api = setup_logger('api', LOG_CONFIG_API)
+
+# logger_api = setup_logger('api', LOG_CONFIG_API)
+
 # logging.getLogger("uvicorn").disabled = True
 # logging.getLogger("uvicorn.access").disabled = True
 # logging.getLogger("aiogram").disabled = True
+
+
+
 import asyncio
 import aiofiles
 import json
@@ -26,6 +31,11 @@ from fastapi import FastAPI, HTTPException, Request, Response, status, UploadFil
 from fastapi.responses import Response #, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+
+
+import logging
+import loggingconf  # noqa: F401  # только импортируем, конфиг применится
+
 # import gunicorn
 from worker_db import read_account_access_id, read_user
 from general_functions import DictObj, random_name, remove_file_os, encode_file #, day_utcnow, unformat_date, random_name_2X, encode_file
@@ -40,6 +50,7 @@ from mod_grok_main import grok_text
 
 
 app = FastAPI()
+logger_api = logging.getLogger(__name__)
 
 PARANOIA_MODE = False
 
