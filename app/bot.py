@@ -29,7 +29,6 @@ from aiogram.fsm.state import State, StatesGroup
 from worker_db import read_user, add_user, update_user, add_account, read_accounts_user_id, del_account, read_stat_for_user_id, read_users, delete_stat_table
 from backupdb import backup_db
 from restore_db import restore_db
-# from general_functions import day_utcnow
 from create_tables import create_tables_in_db
 from restore_users_to_db import restore_users_to_db
 from get_json_old_users import get_json_old_users

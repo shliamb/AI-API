@@ -1,5 +1,5 @@
 from config import UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK, LOG_CONFIG_API, ALLOWED_HEADER_NAMES, SUPER_HEADER_NAMES, MAX_DEQUE_LEN, setup_logger #, TIME_OUT_ERR_USERNAME, WAITING_TIME, LIMIT_TRY, PRICE, USERNAME_ADMIN
-logger_api = setup_logger('bot', LOG_CONFIG_API)
+logger_api = setup_logger('api', LOG_CONFIG_API)
 import asyncio
 import aiofiles
 from collections import defaultdict
