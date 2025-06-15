@@ -1,7 +1,8 @@
 # Base
 from config import MONEY_TO_START, GUEST_APP_KEY, COUNTS_QUANTITY, NOTIFICATION, MIN_PAY, DOWNLOAD, LOG_CONFIG_BOT, LOGS_FOLDER, setup_logger
 from keys import TOKEN_TELEGRAM, IS_ADMIN
-# logger_bot.getLogger('aiogram').propagate = False # Блокировка логирование aiogram до его импорта
+#import logging
+#logging.getLogger('aiogram').propagate = False # Блокировка логирование aiogram до его импорта
 logger_bot = setup_logger('bot', LOG_CONFIG_BOT)
 # import re
 import random

@@ -1,12 +1,17 @@
 #### LOGGING ####
 import logging
 
+
+
 def setup_logger(name, log_config):
     logger = logging.getLogger(name)
     logger.setLevel(log_config['level'])
     
     # Удаляем все существующие handlers
     logger.handlers = []
+
+    # ВАЖНО: отключаем propagation к root logger
+    logger.propagate = False
     
     formatter = logging.Formatter(log_config['format'])
     
