@@ -1,18 +1,20 @@
 from config import UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK, LOG_CONFIG_API, ALLOWED_HEADER_NAMES, SUPER_HEADER_NAMES, MAX_DEQUE_LEN, setup_logger #, TIME_OUT_ERR_USERNAME, WAITING_TIME, LIMIT_TRY, PRICE, USERNAME_ADMIN
-#import logging
-# В самом начале приложения, ДО импорта FastAPI/aiogram
-#logging.getLogger().handlers = []  # Очищаем root logger
-#logging.basicConfig(level=logging.CRITICAL)  # Отключаем почти все
-# logging.getLogger("uvicorn").disabled = True
-# logging.getLogger("uvicorn.access").disabled = True
-# logging.getLogger("aiogram").disabled = True
 
 # logger_api = setup_logger('api', LOG_CONFIG_API)
 
-# logging.getLogger("uvicorn").disabled = True
-# logging.getLogger("uvicorn.access").disabled = True
-# logging.getLogger("aiogram").disabled = True
+import logging
 
+# Настройка логгера
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('./log/api.log'),
+        logging.StreamHandler()  # для вывода в консоль тоже
+    ]
+)
+
+logger_api = logging.getLogger(__name__)
 
 
 import asyncio
@@ -32,10 +34,6 @@ from fastapi.responses import Response #, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-
-import logging
-import loggingconf  # noqa: F401  # только импортируем, конфиг применится
-
 # import gunicorn
 from worker_db import read_account_access_id, read_user
 from general_functions import DictObj, random_name, remove_file_os, encode_file #, day_utcnow, unformat_date, random_name_2X, encode_file
@@ -50,7 +48,7 @@ from mod_grok_main import grok_text
 
 
 app = FastAPI()
-logger_api = logging.getLogger(__name__)
+
 
 PARANOIA_MODE = False
 
