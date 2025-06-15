@@ -4,17 +4,17 @@ from config import UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME
 
 import logging
 
-# Настройка логгера
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('./log/api.log'),
-        logging.StreamHandler()  # для вывода в консоль тоже
-    ]
-)
+# # Настройка логгера
+# logging.basicConfig(
+#     level=logging.INFO,
+#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+#     handlers=[
+#         logging.FileHandler('./log/api.log'),
+#         logging.StreamHandler()  # для вывода в консоль тоже
+#     ]
+# )
 
-logger_api = logging.getLogger(__name__)
+# logger_api = logging.getLogger(__name__)
 
 
 import asyncio
@@ -45,6 +45,25 @@ from mod_gemini_main import gemini_text
 from mod_claude_main import claude_text
 from mod_grok_main import grok_text
 # from mod_openai_quick_assist import oa_asist_custom_0525, oa_assist_retrieve, oa_assist_list, oa_assist_del, oa_thread_del, oa_returning_result_assist
+
+
+# Настройка логгера ДО создания app
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('./log/api.log', mode='a'),
+    ],
+    force=True  # Принудительно перезаписать существующие настройки
+)
+
+# Отключить консольный вывод uvicorn
+logging.getLogger("uvicorn.access").handlers = []
+logging.getLogger("uvicorn").handlers = []
+
+logger_api = logging.getLogger(__name__)
+
+
 
 
 app = FastAPI()
