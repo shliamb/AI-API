@@ -12,6 +12,10 @@ client = AsyncOpenAI(api_key=API_KEY_OPENAI)
 
 
 
+logger_ai.info("INFO: Hi i am here, ai!")
+
+
+
 # Основной модуль OpenAI:
 async def openai_text(description: dict) -> dict:
     '''Основной модуль OpenAI'''

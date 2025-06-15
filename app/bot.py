@@ -41,6 +41,9 @@ bot = Bot(TOKEN_TELEGRAM)
 PARANOIA_MODE = False
 
 
+logger_bot.info("INFO: Hi i am here, bot!")
+
+
 
 #########
 # Get User_ID

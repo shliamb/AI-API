@@ -36,6 +36,8 @@ app = FastAPI()
 PARANOIA_MODE = False
 
 
+logger_api.info("INFO: Hi i am here, api!")
+
 
 app.add_middleware(
     CORSMiddleware,
