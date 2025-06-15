@@ -3,6 +3,10 @@ from config import MONEY_TO_START, GUEST_APP_KEY, COUNTS_QUANTITY, NOTIFICATION,
 from keys import TOKEN_TELEGRAM, IS_ADMIN
 #import logging
 #logging.getLogger('aiogram').propagate = False # Блокировка логирование aiogram до его импорта
+# or
+# В самом начале приложения, ДО импорта FastAPI/aiogram
+# logging.getLogger().handlers = []  # Очищаем root logger
+# logging.basicConfig(level=logging.CRITICAL)  # Отключаем почти все
 logger_bot = setup_logger('bot', LOG_CONFIG_BOT)
 # import re
 import random
