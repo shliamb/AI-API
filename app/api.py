@@ -1,4 +1,4 @@
-from config import UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK, LOG_CONFIG_API, ALLOWED_HEADER_NAMES, SUPER_HEADER_NAMES, setup_logger #, TIME_OUT_ERR_USERNAME, WAITING_TIME, LIMIT_TRY, PRICE, USERNAME_ADMIN
+from config import UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK, LOG_CONFIG_API, ALLOWED_HEADER_NAMES, SUPER_HEADER_NAMES, MAX_DEQUE_LEN, setup_logger #, TIME_OUT_ERR_USERNAME, WAITING_TIME, LIMIT_TRY, PRICE, USERNAME_ADMIN
 logger_api = setup_logger('bot', LOG_CONFIG_API)
 import asyncio
 import aiofiles
@@ -6,12 +6,15 @@ from collections import defaultdict
 import json
 from typing import Optional, Union #, List
 import uuid
+import time
 from datetime import datetime, timedelta #, timezone
+from collections import defaultdict, deque
+from typing import Deque
 # import os
 # import shutil
 # import requests
 # from pydantic import BaseModel
-from fastapi import FastAPI, HTTPException, Request, status, UploadFile, File, Form, Depends #, Header
+from fastapi import FastAPI, HTTPException, Request, Response, status, UploadFile, File, Form, Depends #, Header
 from fastapi.responses import Response #, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -34,7 +37,6 @@ PARANOIA_MODE = False
 
 
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -43,47 +45,68 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --------------------------------------------------------------------
+_ip_hits: dict[str, Deque[float]] = defaultdict(deque)
+lock = asyncio.Lock()
 
 
-# Block frequent requests from the same IP:
-ip_request_counts = defaultdict(list)
-lock = asyncio.Lock() # "Creating" (Создание) lock.
+def _client_ip(request: Request) -> str:
+    """IP клиента с учётом прокси."""
+    xff = request.headers.get("x-forwarded-for")
+    return xff.split(",")[0].strip() if xff else request.client.host
+
 
 @app.middleware("http")
-async def rate_limit(request: Request, call_next):
-    '''Middleware для ограничения частоты запросов по IP (rate limiting).
-    
-    Подсчитывает запросы от каждого IP в окне TIME_WINDOW секунд.
-    При превышении лимита REQUEST_LIMIT возвращает HTTP 429.
-    
-    Args:
-        request: Входящий HTTP-запрос
-        call_next: Функция для вызова следующего обработчика
-        
-    Returns:
-        Response: Ответ сервера или HTTP 429 при превышении лимита
-    '''
-    ip = request.client.host
-    now = datetime.now()
-    time_window_start = now - timedelta(seconds=TIME_WINDOW)
+async def rate_limit_and_log(request: Request, call_next):
+    start_ts = time.time()
+    ip = _client_ip(request)
 
-    async with lock: # "Acquiring" (Получение) lock.
-        ip_request_counts[ip] = [t for t in ip_request_counts[ip] if t > time_window_start]
-        ip_request_counts[ip].append(now)
-        request_count = len(ip_request_counts[ip])
+    # ----------- Логируем входящий запрос ---------------------------------
+    method = request.method
+    path   = request.url.path
+    query  = request.url.query
 
-    if request_count > REQUEST_LIMIT:
-        logger_api.error(f"Rate limit exceeded for IP: {ip}")
+    try:
+        body_bytes = await request.body()
+        body = body_bytes.decode(errors="replace")[:200]
+    except Exception:
+        body = "<unable to read body>"
+
+    logger_api.info(f'{ip} -> {method} {path}?{query} | body={body}')
+
+    # ----------- Rate-limit ----------------------------------------------
+    async with lock:
+        hits = _ip_hits[ip]
+        now = time.time()
+        boundary = now - TIME_WINDOW
+        # чистим старые записи
+        while hits and hits[0] < boundary:
+            hits.popleft()
+        hits.append(now)
+        if len(hits) > MAX_DEQUE_LEN:
+            hits.popleft()  # для надёжности, чтобы очередь не пухла
+        exceeded = len(hits) > REQUEST_LIMIT
+
+    if exceeded:
+        logger_api.warning(f"429 Too Many Requests for {ip} ({len(hits)}/{REQUEST_LIMIT})")
         return Response(status_code=429, content="Too Many Requests")
 
-    response = await call_next(request)
+    # ----------- Продолжаем обработку ------------------------------------
+    try:
+        response = await call_next(request)
+    except Exception as exc:
+        logger_api.exception(f"Error while processing request from {ip}")
+        raise exc
+
+    elapsed_ms = (time.time() - start_ts) * 1000
+    logger_api.info(f'{ip} <- {method} {path} | {response.status_code} | {elapsed_ms:.1f}ms')
     return response
 
 
 
 
-# @app.get("/")
-# def root(): return {"status": "OK"}
+
+
 
 
 
@@ -941,6 +964,75 @@ if __name__ == "__main__":
 
 
 
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+
+
+# # Block frequent requests from the same IP:
+# ip_request_counts = defaultdict(list)
+# lock = asyncio.Lock() # "Creating" (Создание) lock.
+
+# @app.middleware("http")
+# async def rate_limit_and_log(request: Request, call_next):
+#     '''Middleware для ограничения частоты запросов по IP (rate limiting).
+    
+#     Подсчитывает запросы от каждого IP в окне TIME_WINDOW секунд.
+#     При превышении лимита REQUEST_LIMIT возвращает HTTP 429.
+    
+#     Args:
+#         request: Входящий HTTP-запрос
+#         call_next: Функция для вызова следующего обработчика
+        
+#     Returns:
+#         Response: Ответ сервера или HTTP 429 при превышении лимита
+
+#     Логирует запросы.
+#     '''
+#     ip = request.client.host
+#     now = datetime.now()
+#     time_window_start = now - timedelta(seconds=TIME_WINDOW)
+
+#     # ---- request data ------------------------------------------------------
+#     client_host = request.client.host
+#     method      = request.method
+#     url_path    = request.url.path
+#     query       = request.url.query
+#     try:
+#         body = await request.body()
+#         body = body.decode() if body else ""
+#     except Exception:
+#         body = "<unable to read body>"
+#     # ------------------------------------------------------------------------
+
+#     logger_api.info(f"{client_host} -> {method} {url_path}?{query} | body={body[:200]}")
+
+
+
+#     async with lock: # "Acquiring" (Получение) lock.
+#         ip_request_counts[ip] = [t for t in ip_request_counts[ip] if t > time_window_start]
+#         ip_request_counts[ip].append(now)
+#         request_count = len(ip_request_counts[ip])
+
+#     if request_count > REQUEST_LIMIT:
+#         logger_api.error(f"Rate limit exceeded for IP: {ip}")
+#         return Response(status_code=429, content="Too Many Requests")
+
+#     response = await call_next(request)
+
+#     elapsed = (datetime.now() - now) * 1000
+#     logger_api.info(
+#         f"{client_host} <- {method} {url_path} | "
+#         f"status={response.status_code} | {elapsed:.1f}ms"
+#     )
+
+
+#     return response
 
 
 

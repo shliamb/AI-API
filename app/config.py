@@ -57,10 +57,9 @@ TIME_CORRECTION = +3 # Moscow
 
 
 # FASTAPI
-REQUEST_LIMIT = 10 # Максимальное количество запросов с одного IP-адреса в течение TIME_WINDOW секунд.
-TIME_WINDOW = 60 # Интервал времени в секундах, в течение которого действует ограничение.
-#USERNAME_ADMIN = "Alex7"
-
+REQUEST_LIMIT = 30 # сколько запросов…
+TIME_WINDOW = 60 # …за сколько секунд
+MAX_DEQUE_LEN = REQUEST_LIMIT + 5  # жёсткий предел длины очереди
 
 
 # Folders:

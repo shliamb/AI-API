@@ -954,7 +954,7 @@ async def admin_get_log(message: types.Message):
             except Exception as e:
                 logger_bot.error(f"Error sending file log: {file_path}: {e}")
     if empts:
-        await bot.send_message(message.chat.id, "There are no logger_bot files or they are empty")
+        await bot.send_message(message.chat.id, "There are no log files or they are empty")
 
 
 
@@ -968,8 +968,8 @@ async def admin_clear_log(message: types.Message):
     if id != IS_ADMIN:
         return
 
-
     data_folder = Path(LOGS_FOLDER)
+    empts = True
     for entry in data_folder.iterdir():
         if entry.is_file() and entry.stat().st_size > 0:  # Проверяем, что файл не пустой
             file_path = str(entry.absolute())  # Получаем абсолютный путь
@@ -977,9 +977,14 @@ async def admin_clear_log(message: types.Message):
                 with open(file_path, 'w'):
                     pass
                 await bot.send_message(message.chat.id, f"The '{file_path}' file has been clearing.")
+                empts = False
                 await asyncio.sleep(0.5)
             except Exception as e:
                 logger_bot.error(f"Error clearing file log: {file_path}: {e}")
+        
+    if empts:
+        await bot.send_message(message.chat.id, "There are no log files or they are empty")
+
 
 
 
