@@ -728,6 +728,7 @@ async def get_prices(message: types.Message):
     Voice generation of 1M characters in $:
         'tts-1': 18,
         'tts-1-hd': 36,
+        'gpt-4o-mini-tts': 15.12,
 
     Transcription from audio to text min. in $:
         'whisper-1': 0.0072,
