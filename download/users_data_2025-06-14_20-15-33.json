@@ -1,0 +1,31 @@
+[
+    {
+        "telegram_data": {
+            "user_id": 1666495,
+            "name": "Shliamb",
+            "full_name": "Alex Prowler",
+            "first_name": "Alex",
+            "last_name": "Prowler",
+            "counts_api": 5,
+            "list_access_id": [
+                "a66c5349-e2df-47a8-919f-3570c521872d"
+            ],
+            "last_visit": "2025-06-14T20:14:59.517579",
+            "language": "ru",
+            "count_paid": 1,
+            "money": 100.0,
+            "block_user": false,
+            "god_user": false,
+            "notifications": true
+        },
+        "account_data": [
+            {
+                "access_id": "a66c5349-e2df-47a8-919f-3570c521872d",
+                "api_key": "bad_key",
+                "api_value": "4af25a70-29d8-4a1e-8b68-f582014305c7",
+                "is_active": true,
+                "user_id_telegram": 1666495
+            }
+        ]
+    }
+]

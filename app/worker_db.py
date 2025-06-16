@@ -70,7 +70,7 @@ async def add_user(user_data):
 async def read_user(user_id):
     connection = None
     try:
-        logger_db.info(f"INFO: Reade user_id:{user_id}")
+        #logger_db.info(f"INFO: Reade user_id:{user_id}")
 
         connection = await get_connection()
         result = await connection.fetch(

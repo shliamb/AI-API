@@ -204,7 +204,7 @@ async def main_menu(message: types.Message):
         await forced_start(message)
         return
 
-    logger_bot.info(f"Tap menu user_id: {id}")
+    #logger_bot.info(f"Tap menu user_id: {id}")
 
     language = data.get("language")
     money = round(data.get("money"), 2)
