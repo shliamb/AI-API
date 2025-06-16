@@ -1,5 +1,6 @@
-from config import LOG_CONFIG_AI, TIMEOUT_SERVER_AI, setup_logger
-logger_ai = setup_logger('ai', LOG_CONFIG_AI)
+from config import TIMEOUT_SERVER_AI
+from setup_config_logger import setup_logger
+logger_ai = setup_logger('ai', '/log/ai.log')
 #import asyncio
 import aiohttp
 #import json

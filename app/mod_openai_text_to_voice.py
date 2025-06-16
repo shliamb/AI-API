@@ -1,5 +1,6 @@
-from config import AUDIO_FOLDER, LOG_CONFIG_AI, TIMEOUT_SERVER_AI, setup_logger
-logger_ai = setup_logger('ai', LOG_CONFIG_AI)
+from config import AUDIO_FOLDER, TIMEOUT_SERVER_AI
+from setup_config_logger import setup_logger
+logger_ai = setup_logger('ai', '/log/ai.log')
 from openai import AsyncOpenAI, OpenAIError
 import aiofiles
 import tiktoken
@@ -10,6 +11,9 @@ from keys import API_KEY_OPENAI
 
 
 client = AsyncOpenAI(api_key=API_KEY_OPENAI)
+
+
+
 
 
 async def openai_text_to_voice(description: dict) -> str:

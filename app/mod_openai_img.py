@@ -1,5 +1,6 @@
-from config import LOG_CONFIG_AI, TIMEOUT_SERVER_AI, setup_logger
-logger_ai = setup_logger('ai', LOG_CONFIG_AI)
+from config import TIMEOUT_SERVER_AI
+from setup_config_logger import setup_logger
+logger_ai = setup_logger('ai', '/log/ai.log')
 from keys import API_KEY_OPENAI
 import asyncio
 from openai import AsyncOpenAI, OpenAIError

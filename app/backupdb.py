@@ -1,8 +1,9 @@
 from keys import USER_DB, PASSWORD_DB, DB_NAME
-from config import LOG_CONFIG_DB, HOST, BACKUP_DB, setup_logger
+from config import HOST, BACKUP_DB
 import subprocess
 import datetime
-logger_db = setup_logger('db', LOG_CONFIG_DB)
+from setup_config_logger import setup_logger
+logger_db = setup_logger('db', '/log/db.log')
 
 
 def backup_db():

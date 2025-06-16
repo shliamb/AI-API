@@ -7,7 +7,7 @@ services:
     container_name: app_postgres
     environment:
       POSTGRES_USER: ${USER_DB}
-      POSTGRES_PASSWORD: ${PASWOR_DB}
+      POSTGRES_PASSWORD: ${PASSWORD_DB}
       POSTGRES_DB: ${DB_NAME}
     ports:
       - "127.0.0.1:5432:5432"
@@ -29,12 +29,14 @@ services:
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_USER: ${USER_DB}
-      POSTGRES_PASSWORD: ${PASWOR_DB}
+      POSTGRES_PASSWORD: ${PASSWORD_DB}
       POSTGRES_DB: ${DB_NAME}
     depends_on:
       - postgres
     networks:
       - db-network
+    volumes:
+      - shared_logs:/log
 
 
   bot:
@@ -45,7 +47,7 @@ services:
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_USER: ${USER_DB}
-      POSTGRES_PASSWORD: ${PASWOR_DB}
+      POSTGRES_PASSWORD: ${PASSWORD_DB}
       POSTGRES_DB: ${DB_NAME}
     depends_on:
       - postgres
@@ -53,9 +55,12 @@ services:
       - db-network
     # ports:
     #   - "8081:80"
+    volumes:
+      - shared_logs:/log
 
 volumes:
   postgres_data:
+  shared_logs:
 
 networks:
   db-network:

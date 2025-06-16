@@ -15,5 +15,6 @@ API_KEY_CLAUDE = os.environ.get('CLAUDE_KEY')
 API_KEY_GROK = os.environ.get('GROK_KEY')
 USER_DB = os.environ.get('USER_DB')
 DB_NAME = os.environ.get('DB_NAME')
-PASSWORD_DB = os.environ.get('PASWOR_DB')
+PASSWORD_DB = os.environ.get('PASSWORD_DB')
 IS_ADMIN = int(os.environ.get('ADMIN'))
+

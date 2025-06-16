@@ -13,9 +13,11 @@ RUN apt-get update && apt-get install -y apt-utils \
     postgresql-contrib \
     postgresql-client 
 
+
 COPY . .
 
 CMD ["python", "app/run_api.py"]
 
 
 #### CMD ["uvicorn", "app.api:app", "--host", "0.0.0.0", "--port", "80"] ####, "--log-level=critical"]
+#### CMD ["python", "app/run_api.py"]

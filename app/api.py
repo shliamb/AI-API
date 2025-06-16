@@ -1,15 +1,18 @@
-from config import UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK, LOG_CONFIG_API, ALLOWED_HEADER_NAMES, SUPER_HEADER_NAMES, MAX_DEQUE_LEN, setup_logger #, TIME_OUT_ERR_USERNAME, WAITING_TIME, LIMIT_TRY, PRICE, USERNAME_ADMIN
+from config import UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK, ALLOWED_HEADER_NAMES, SUPER_HEADER_NAMES, MAX_DEQUE_LEN #, TIME_OUT_ERR_USERNAME, WAITING_TIME, LIMIT_TRY, PRICE, USERNAME_ADMIN
 
-logging_api = setup_logger('api', LOG_CONFIG_API)
+from setup_config_logger import setup_logger
+logger_api = setup_logger('api', '/log/api.log')
 
 import asyncio
 import aiofiles
 import json
-from typing import Optional, Deque, Union #, List
+from typing import Optional, Dict, List, Union, Deque #, List
 import uuid
 import time
-#from datetime import datetime, timedelta #, timezone
+from datetime import datetime, timedelta #, timezone
 from collections import defaultdict, deque
+from contextlib import asynccontextmanager
+import urllib.parse
 # import os
 # import shutil
 # import requests
@@ -34,88 +37,143 @@ from mod_grok_main import grok_text
 
 
 
-
 app = FastAPI()
-
 
 PARANOIA_MODE = False
 
 
-logging_api.info("INFO: Hi i am here, api!")
 
 
 
 
-
-
-
-
+# Конфигурация CORS:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["POST"],  # Только нужные методы "GET", "POST", "PUT", "DELETE"
+    allow_headers=["*"]
 )
 
-# --------------------------------------------------------------------
-_ip_hits: dict[str, Deque[float]] = defaultdict(deque)
-lock = asyncio.Lock()
 
 
-def _client_ip(request: Request) -> str:
-    """IP клиента с учётом прокси."""
-    xff = request.headers.get("x-forwarded-for")
-    return xff.split(",")[0].strip() if xff else request.client.host
+'''
+1. **Класс RateLimiter** - инкапсуляция логики
+2. **time.time()** вместо datetime - быстрее
+3. **Очистка памяти** - автоматическое удаление старых IP
+4. **Реальный IP** - учет прокси и балансировщиков
+5. **Retry-After заголовок** - информирует клиента о времени ожидания
+6. **Фоновая очистка** - предотвращает утечки памяти
+'''
 
+
+# Rate limiting
+class RateLimiter:
+    def __init__(self, request_limit: int = REQUEST_LIMIT, time_window: int = TIME_WINDOW):
+        self.request_limit = request_limit
+        self.time_window = time_window
+        self.ip_requests: Dict[str, List[float]] = defaultdict(list)
+        self.lock = asyncio.Lock()
+    
+    async def is_allowed(self, ip: str) -> bool:
+        now = time.time()
+        cutoff = now - self.time_window
+        
+        async with self.lock:
+            # Очистка старых записей
+            self.ip_requests[ip] = [t for t in self.ip_requests[ip] if t > cutoff]
+            
+            if len(self.ip_requests[ip]) >= self.request_limit:
+                return False
+            
+            self.ip_requests[ip].append(now)
+            return True
+    
+    async def cleanup_old_ips(self):
+        """Периодическая очистка неактивных IP"""
+        now = time.time()
+        cutoff = now - self.time_window * 2
+        
+        async with self.lock:
+            inactive_ips = [
+                ip for ip, timestamps in self.ip_requests.items()
+                if not timestamps or max(timestamps) < cutoff
+            ]
+            for ip in inactive_ips:
+                del self.ip_requests[ip]
+
+
+
+rate_limiter = RateLimiter()
 
 @app.middleware("http")
-async def rate_limit_and_log(request: Request, call_next):
-    start_ts = time.time()
-    ip = _client_ip(request)
-
-    # ----------- Логируем входящий запрос ---------------------------------
-    method = request.method
-    path   = request.url.path
-    query  = request.url.query
-
-    try:
-        body_bytes = await request.body()
-        body = body_bytes.decode(errors="replace")[:200]
-    except Exception:
-        body = "<unable to read body>"
-
-    logging_api.info(f'{ip} -> {method} {path}?{query} | body={body}')
-    #logging_api.info(f'ip: {ip} -> method: {method} {path}?{query} | body={body}')
-
-    # ----------- Rate-limit ----------------------------------------------
-    async with lock:
-        hits = _ip_hits[ip]
-        now = time.time()
-        boundary = now - TIME_WINDOW
-        # чистим старые записи
-        while hits and hits[0] < boundary:
-            hits.popleft()
-        hits.append(now)
-        if len(hits) > MAX_DEQUE_LEN:
-            hits.popleft()  # для надёжности, чтобы очередь не пухла
-        exceeded = len(hits) > REQUEST_LIMIT
-
-    if exceeded:
-        logging_api.warning(f"429 Too Many Requests for {ip} ({len(hits)}/{REQUEST_LIMIT})")
-        return Response(status_code=429, content="Too Many Requests")
-
-    # ----------- Продолжаем обработку ------------------------------------
-    try:
-        response = await call_next(request)
-    except Exception as exc:
-        logging_api.exception(f"Error while processing request from {ip}")
-        raise exc
-
-    elapsed_ms = (time.time() - start_ts) * 1000
-    logging_api.info(f'{ip} <- {method} {path} | {response.status_code} | {elapsed_ms:.1f}ms')
+async def combined_middleware(request: Request, call_next):
+    # Получение реального IP
+    ip = request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+    if not ip:
+        ip = request.headers.get("X-Real-IP", "")
+    if not ip:
+        ip = request.client.host
+    
+    # Rate limiting
+    if not await rate_limiter.is_allowed(ip):
+        logger_api.warning(f"Rate limit exceeded for IP: {ip}")
+        return Response(
+            status_code=429, 
+            content="Rate limit exceeded. Try again later.",
+            headers={"Retry-After": str(TIME_WINDOW)}
+        )
+    
+    # Получаем body один раз
+    body = await request.body()
+    
+    # Декодируем для логов
+    if body:
+        try:
+            decoded_body = urllib.parse.unquote_plus(body.decode('utf-8'))
+            if len(decoded_body) > 200:
+                decoded_body = decoded_body[:200] + "..."
+        except:
+            decoded_body = body.decode('utf-8', errors='ignore')[:200]
+    else:
+        decoded_body = ""
+    
+    # Логируем
+    logger_api.info(f"{ip} -> {request.method} {request.url.path} | {decoded_body}")
+    
+    # Пересоздаем request
+    async def receive():
+        return {"type": "http.request", "body": body}
+    
+    request._receive = receive
+    
+    response = await call_next(request)
     return response
 
+# Порядок выполнения:
+# 1. Получение IP
+# 2. Проверка rate limit (если превышен - возврат 429 без логирования)
+# 3. Чтение body
+# 4. Логирование запроса
+# 5. Выполнение основного обработчика
+
+
+
+# Фоновая задача для очистки
+@asynccontextmanager
+async def lifespan(app):
+    # Запуск
+    cleanup_task = asyncio.create_task(periodic_cleanup())
+    yield
+    # Остановка
+    cleanup_task.cancel()
+
+async def periodic_cleanup():
+    while True:
+        await asyncio.sleep(TIME_WINDOW * 2)
+        await rate_limiter.cleanup_old_ips()
+
+app.router.lifespan_context = lifespan
 
 
 
@@ -123,6 +181,11 @@ async def rate_limit_and_log(request: Request, call_next):
 
 
 
+
+
+
+
+#############
 
 # Parsing JSON content:
 async def parse_json_content(content: str) -> Union[str, dict]:
@@ -140,7 +203,7 @@ async def verify_uuid(some: str) -> bool:
         uuid_obj = uuid.UUID(some, version=4)
         return str(uuid_obj) == some
     except:
-        logging_api.error(f"Error: Invalid API Name Key format: {some}")
+        logger_api.error(f"Error: Invalid API Name Key format: {some}")
         return False
 
 
@@ -152,14 +215,14 @@ async def verify_user(access_id: uuid, appkey: uuid) -> bool:
 
     # If no accounts found:
     if not data_access_user:
-        logging_api.error(f"Error: Invalid Access ID API: {access_id}")
+        logger_api.error(f"Error: Invalid Access ID API: {access_id}")
         return False
     
     data_access = DictObj(data_access_user)
     
     # Check the key value:
     if str(data_access.api_value) != appkey:
-        logging_api.error(f"Error: Invalid Access ID or API Value: {access_id} | {appkey}")
+        logger_api.error(f"Error: Invalid Access ID or API Value: {access_id} | {appkey}")
         return False
     
     # Get Telegram user data:
@@ -168,12 +231,12 @@ async def verify_user(access_id: uuid, appkey: uuid) -> bool:
 
     # Check user balance:
     if data_user.money <= 0 :
-        logging_api.error(f"Error: Don't have money: {access_id} | {appkey}")
+        logger_api.error(f"Error: Don't have money: {access_id} | {appkey}")
         return False
 
     # Check if user is blocked:
     if data_user.block_user:
-        logging_api.error(f"Error: User has blocked: {access_id} | {appkey}")
+        logger_api.error(f"Error: User has blocked: {access_id} | {appkey}")
         return False
     
     return True
@@ -191,17 +254,17 @@ async def verify_appkey(request: Request) -> str:
 
     # Validate UUID:
     if not await verify_uuid(received_key):
-        logging_api.error(f"Invalid API Name format: {received_key}")
+        logger_api.error(f"Invalid API Name format: {received_key}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid API Name format")
 
     # In paranoia mode, only super users can access:
     if PARANOIA_MODE == True and header_name != SUPER_HEADER_NAMES:
-        logging_api.info(f"Temporary issue – we're working on it! : {header_name}")
+        logger_api.info(f"Temporary issue – we're working on it! : {header_name}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Temporary issue – we're working on it!")
 
     # In normal mode, rejects invalid names:
     elif not received_key:
-        logging_api.error(f"Missing or invalid API Name header: {received_key}")
+        logger_api.error(f"Missing or invalid API Name header: {received_key}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing or invalid API Name header")
 
     return received_key
@@ -236,10 +299,11 @@ async def openai_api(
     """Endpoint for proxying requests to OpenAI chat API."""
     # Authentication and authorization
     if not await verify_user(access_id, appkey):
+        logger_api.error("Wrong Access ID, API Key, or no money, or just blocked)")
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Wrong Access ID, API Key, or no money, or just blocked)")
     
-    # logging_api
-    logging_api.info(f"{access_id} -> proxy API: 'openai-chat'")
+    # logger_api
+    logger_api.info(f"{access_id} -> proxy API: 'openai-chat'")
     print(f"INFO: {access_id} -> proxy API: 'openai-chat'")
 
     # Parse optional JSON content
@@ -268,10 +332,10 @@ async def openai_api(
         answer = await openai_text(description)
     except:
         answer = "Error: mod_openai dont response"
-        logging_api.error(answer)
+        logger_api.error(answer)
     finally:
         if file_path and not await remove_file_os(file_path):
-            logging_api.error(f"Failed to remove file - {file_path}")
+            logger_api.error(f"Failed to remove file - {file_path}")
 
     return answer
 
@@ -299,41 +363,41 @@ async def dall_e_point(
     if not await verify_user(access_id, appkey):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Wrong Access ID, API Key, or no money, or just blocked)")
     
-    # logging_api
-    logging_api.info(f"{access_id} -> proxy API: 'openai-img'")
+    # logger_api
+    logger_api.info(f"{access_id} -> proxy API: 'openai-img'")
     print(f"INFO: {access_id} -> proxy API: 'openai-img'")
     
     # Check mistakes:
     if len(user_content) > 4000 and model == "dall-e-3":
-        logging_api.error("Error! Not support > 4000 simbol")
+        logger_api.error("Error! Not support > 4000 simbol")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Error! Not support > 4000 simbol",
         )
 
     if len(user_content) > 1000 and model == "dall-e-2":
-        logging_api.error("Error! Not support > 1000 simbols dall-e-2")
+        logger_api.error("Error! Not support > 1000 simbols dall-e-2")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Error! Not support > 1000 simbols dall-e-2",
         )
 
     if quality and model == "dall-e-2":
-        logging_api.error("Error! Not support quality dall-e-2.")
+        logger_api.error("Error! Not support quality dall-e-2.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Error! Not support quality dall-e-2.",
         )
 
     if size and size == "1792x1024" and model == "dall-e-2":
-        logging_api.error("Error! Not support 1792x1024 to dall-e-2.")
+        logger_api.error("Error! Not support 1792x1024 to dall-e-2.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Error! Not support 1792x1024 to dall-e-2.",
         )
 
     if size and size == "1024x1792" and model == "dall-e-2":
-        logging_api.error("Error! Not support 1024x1792 to dall-e-2.")
+        logger_api.error("Error! Not support 1024x1792 to dall-e-2.")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Error! Not support 1024x1792 to dall-e-2.",
@@ -341,13 +405,13 @@ async def dall_e_point(
 
     if model == "dall-e-3":
         if size and size == "256x256" or size and size == "512x512":
-            logging_api.error("Error! Not support 512x512 and 256x256 to dall-e-3.")
+            logger_api.error("Error! Not support 512x512 and 256x256 to dall-e-3.")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Error! Not support 512x512 and 256x256 to dall-e-3.",
             )
         if n and n > 1:
-            logging_api.error("Error! Not support n > 1 to dall-e-3.")
+            logger_api.error("Error! Not support n > 1 to dall-e-3.")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Error! Not support n > 1 to dall-e-3.",
@@ -355,13 +419,13 @@ async def dall_e_point(
         
     if model == "dall-e-2":
         if n and n > 10:
-            logging_api.error("Error! Not support n > 10 to dall-e-2.")
+            logger_api.error("Error! Not support n > 10 to dall-e-2.")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Error! Not support n > 10 to dall-e-2.",
             )
         if style:
-            logging_api.error("Error! Not support style to dall-e-2.")
+            logger_api.error("Error! Not support style to dall-e-2.")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Error! Not support style to dall-e-2.",
@@ -414,7 +478,7 @@ async def dall_e_point(
         answer_img = await openai_img(description)
     except:
         answer_img = "Error: mod_openai_img dont response"
-        logging_api.error(answer_img)
+        logger_api.error(answer_img)
 
     return answer_img
 
@@ -444,8 +508,8 @@ async def point_speech_to_audio_openai(
     if not await verify_user(access_id, appkey):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Wrong Access ID, API Key, or no money, or just blocked)")
     
-    # logging_api
-    logging_api.info(f"{access_id} -> proxy API: 'openai-text-to-voice'")
+    # logger_api
+    logger_api.info(f"{access_id} -> proxy API: 'openai-text-to-voice'")
     print(f"INFO: {access_id} -> proxy API: 'openai-text-to-voice'")
 
     # Prepare request description
@@ -465,14 +529,14 @@ async def point_speech_to_audio_openai(
         return {"b64_json": encoded_file}
     
     except Exception as e:
-        logging_api.error(f"Error in voice processing: {str(e)}", exc_info=True)
+        logger_api.error(f"Error in voice processing: {str(e)}", exc_info=True)
         #print(f"Error in voice processing: {str(e)}")
         return {"system": f"Error in voice processing openai_text_to_voice: {str(e)}"}
 
     finally:
         if file_path and not await remove_file_os(file_path):
             #print(f"Failed to remove file - {file_path}")
-            logging_api.error(f"Failed to remove file - {file_path}")
+            logger_api.error(f"Failed to remove file - {file_path}")
 
 
 
@@ -496,8 +560,8 @@ async def point_transcription_openai(
     if not await verify_user(access_id, appkey):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Wrong Access ID, API Key, or no money, or just blocked)")
     
-    # logging_api
-    logging_api.info(f"{access_id} -> proxy API: 'openai-voice-to-text'")
+    # logger_api
+    logger_api.info(f"{access_id} -> proxy API: 'openai-voice-to-text'")
     print(f"INFO: {access_id} -> proxy API: 'openai-voice-to-text'")
 
     # Handle file upload if present
@@ -521,10 +585,10 @@ async def point_transcription_openai(
         answer_text = await openai_voice_to_text(description)
     except:
         answer_text = "Error: mod_openai openai-voice-to-text dont response"
-        logging_api.error(answer_text)
+        logger_api.error(answer_text)
     finally:
         if file_path and not await remove_file_os(file_path):
-            logging_api.error(f"Failed to remove file - {file_path}")
+            logger_api.error(f"Failed to remove file - {file_path}")
 
     return answer_text
 
@@ -559,8 +623,8 @@ async def gemini_api(
     if not await verify_user(access_id, appkey):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Wrong Access ID, API Key, or no money, or just blocked)")
     
-    # logging_api
-    logging_api.info(f"{access_id} -> proxy API: 'gemini'")
+    # logger_api
+    logger_api.info(f"{access_id} -> proxy API: 'gemini'")
     print(f"INFO: {access_id} -> proxy API: 'gemini'")
 
     # Parse optional JSON content
@@ -589,10 +653,10 @@ async def gemini_api(
         answer = await gemini_text(description)
     except:
         answer = "Error: mod_gemini dont response"
-        logging_api.error(answer)
+        logger_api.error(answer)
     finally:
         if file_path and not await remove_file_os(file_path):
-            logging_api.error(f"Failed to remove file - {file_path}")
+            logger_api.error(f"Failed to remove file - {file_path}")
 
     return answer
 
@@ -620,8 +684,8 @@ async def claude_api(
     if not await verify_user(access_id, appkey):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Wrong Access ID, API Key, or no money, or just blocked)")
     
-    # logging_api
-    logging_api.info(f"{access_id} -> proxy API: 'claude'")
+    # logger_api
+    logger_api.info(f"{access_id} -> proxy API: 'claude'")
     print(f"INFO: {access_id} -> proxy API: 'claude'")
 
     # Parse optional JSON content
@@ -650,10 +714,10 @@ async def claude_api(
         answer = await claude_text(description)
     except:
         answer = "Error: mod_claude dont response"
-        logging_api.error(answer)
+        logger_api.error(answer)
     finally:
         if file_path and not await remove_file_os(file_path):
-            logging_api.error(f"Failed to remove file - {file_path}")
+            logger_api.error(f"Failed to remove file - {file_path}")
 
     return answer
 
@@ -683,8 +747,8 @@ async def grok_api(
     if not await verify_user(access_id, appkey):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Wrong Access ID, API Key, or no money, or just blocked)")
     
-    # logging_api
-    logging_api.info(f"{access_id} -> proxy API: 'Grok'")
+    # logger_api
+    logger_api.info(f"{access_id} -> proxy API: 'Grok'")
     print(f"INFO: {access_id} -> proxy API: 'Grok'")
 
     # Parse optional JSON content
@@ -713,10 +777,10 @@ async def grok_api(
         answer = await grok_text(description)
     except:
         answer = "Error: grok_text dont response"
-        logging_api.error(answer)
+        logger_api.error(answer)
     finally:
         if file_path and not await remove_file_os(file_path):
-            logging_api.error(f"Failed to remove file - {file_path}")
+            logger_api.error(f"Failed to remove file - {file_path}")
 
     return answer
 
@@ -725,17 +789,45 @@ async def grok_api(
 
 
 
-# uvicorn_logger = setup_logger('uvicorn', LOG_CONFIG_API)
-# uvicorn_error_logger = setup_logger('uvicorn.error', LOG_CONFIG_API)
-# uvicorn_access_logger = setup_logger('uvicorn.access', LOG_CONFIG_API)
 
 
 
+LOG_CONFIG = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "default": {
+            "format": "%(asctime)s %(name)s %(levelname)s: %(message)s",
+        },
+    },
+    "handlers": {
+        "api_file": {
+            "formatter": "default",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": "./log/api.log",
+            "maxBytes": 10485760,
+            "backupCount": 5,
+        },
+        "uvicorn_file": {
+            "formatter": "default", 
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": "./log/uvicorn.log",
+            "maxBytes": 10485760,
+            "backupCount": 5,
+        },
+    },
+    "loggers": {
+        "api": {"handlers": ["api_file"], "level": "INFO", "propagate": False}, 
+        "uvicorn": {"handlers": ["uvicorn_file"], "level": "INFO", "propagate": False},
+        "uvicorn.access": {"handlers": ["uvicorn_file"], "level": "INFO", "propagate": False},
+    }
+}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_config=LOG_CONFIG)
 
 
-# Для локального запуска
-# if __name__ == "__main__":
-#     uvicorn.run(app, host="0.0.0.0", port=8000, log_config=None)
+
 
 
 
@@ -808,13 +900,13 @@ async def grok_api(
 
 #     if username != USERNAME_ADMIN:
 #         error_msg = f"Access denied for user '{username}'"
-#         logging_api.error(error_msg)
+#         logger_api.error(error_msg)
 #         return error_msg
 
 #     # Verify user and their appkey (подтверждение авторизации):
 #     verification = await verify_user_appkey(username, model, appkey)
 #     if verification.get("status_code") != status.HTTP_200_OK:
-#         logging_api.error("User verification failed: %s", verification)
+#         logger_api.error("User verification failed: %s", verification)
 #         return verification
 
 #     # Сбор данных запроса в один dict: 
@@ -845,7 +937,7 @@ async def grok_api(
 
 #     if username != USERNAME_ADMIN:
 #         error_msg = f"Access denied for user '{username}'"
-#         logging_api.error(error_msg)
+#         logger_api.error(error_msg)
 #         return error_msg
 
 #     model = "assistent-oa" # Пока что не знаю как и че делать с этим..
@@ -853,7 +945,7 @@ async def grok_api(
 #     # Verify user and their appkey (подтверждение авторизации):
 #     verification = await verify_user_appkey(username, model, appkey)
 #     if verification.get("status_code") != status.HTTP_200_OK:
-#         logging_api.error("User verification failed: %s", verification)
+#         logger_api.error("User verification failed: %s", verification)
 #         return verification
 
 
@@ -872,7 +964,7 @@ async def grok_api(
 
 #     if username != USERNAME_ADMIN:
 #         error_msg = f"Access denied for user '{username}'"
-#         logging_api.error(error_msg)
+#         logger_api.error(error_msg)
 #         return error_msg
 
 #     model = "assistent-oa" # Пока что не знаю как и че делать с этим..
@@ -880,7 +972,7 @@ async def grok_api(
 #     # Verify user and their appkey (подтверждение авторизации):
 #     verification = await verify_user_appkey(username, model, appkey)
 #     if verification.get("status_code") != status.HTTP_200_OK:
-#         logging_api.error("User verification failed: %s", verification)
+#         logger_api.error("User verification failed: %s", verification)
 #         return verification
 
 #     return await oa_assist_list()
@@ -899,7 +991,7 @@ async def grok_api(
 
 #     if username != USERNAME_ADMIN:
 #         error_msg = f"Access denied for user '{username}'"
-#         logging_api.error(error_msg)
+#         logger_api.error(error_msg)
 #         return error_msg
 
 #     model = "assistent-oa" # Пока что не знаю как и че делать с этим..
@@ -907,7 +999,7 @@ async def grok_api(
 #     # Verify user and their appkey (подтверждение авторизации):
 #     verification = await verify_user_appkey(username, model, appkey)
 #     if verification.get("status_code") != status.HTTP_200_OK:
-#         logging_api.error("User verification failed: %s", verification)
+#         logger_api.error("User verification failed: %s", verification)
 #         return verification
     
 #     return await oa_assist_del(assistant_id)
@@ -927,7 +1019,7 @@ async def grok_api(
 
 #     if username != USERNAME_ADMIN:
 #         error_msg = f"Access denied for user '{username}'"
-#         logging_api.error(error_msg)
+#         logger_api.error(error_msg)
 #         return error_msg
 
 #     model = "assistent-oa" # Пока что не знаю как и че делать с этим..
@@ -935,7 +1027,7 @@ async def grok_api(
 #     # Verify user and their appkey (подтверждение авторизации):
 #     verification = await verify_user_appkey(username, model, appkey)
 #     if verification.get("status_code") != status.HTTP_200_OK:
-#         logging_api.error("User verification failed: %s", verification)
+#         logger_api.error("User verification failed: %s", verification)
 #         return verification
     
 #     return await oa_thread_del(thread_id)
@@ -957,7 +1049,7 @@ async def grok_api(
 
 #     if username != USERNAME_ADMIN:
 #         error_msg = f"Access denied for user '{username}'"
-#         logging_api.error(error_msg)
+#         logger_api.error(error_msg)
 #         return error_msg
 
 #     model = "assistent-oa" # Пока что не знаю как и че делать с этим..
@@ -965,7 +1057,7 @@ async def grok_api(
 #     # Verify user and their appkey (подтверждение авторизации):
 #     verification = await verify_user_appkey(username, model, appkey)
 #     if verification.get("status_code") != status.HTTP_200_OK:
-#         logging_api.error("User verification failed: %s", verification)
+#         logger_api.error("User verification failed: %s", verification)
 #         return verification
     
 #     return await oa_returning_result_assist(run_id, thread_id, tool_outputs)
@@ -1026,7 +1118,7 @@ async def grok_api(
 #         body = "<unable to read body>"
 #     # ------------------------------------------------------------------------
 
-#     logging_api.info(f"{client_host} -> {method} {url_path}?{query} | body={body[:200]}")
+#     logger_api.info(f"{client_host} -> {method} {url_path}?{query} | body={body[:200]}")
 
 
 
@@ -1036,13 +1128,13 @@ async def grok_api(
 #         request_count = len(ip_request_counts[ip])
 
 #     if request_count > REQUEST_LIMIT:
-#         logging_api.error(f"Rate limit exceeded for IP: {ip}")
+#         logger_api.error(f"Rate limit exceeded for IP: {ip}")
 #         return Response(status_code=429, content="Too Many Requests")
 
 #     response = await call_next(request)
 
 #     elapsed = (datetime.now() - now) * 1000
-#     logging_api.info(
+#     logger_api.info(
 #         f"{client_host} <- {method} {url_path} | "
 #         f"status={response.status_code} | {elapsed:.1f}ms"
 #     )
@@ -1065,3 +1157,99 @@ async def grok_api(
 
 
 
+# # --------------------------------------------------------------------
+# _ip_hits: dict[str, Deque[float]] = defaultdict(deque)
+# lock = asyncio.Lock()
+
+
+# def _client_ip(request: Request) -> str:
+#     """IP клиента с учётом прокси."""
+#     xff = request.headers.get("x-forwarded-for")
+#     return xff.split(",")[0].strip() if xff else request.client.host
+
+
+# @app.middleware("http")
+# async def rate_limit_and_log(request: Request, call_next):
+#     start_ts = time.time()
+#     ip = _client_ip(request)
+
+#     # ----------- Логируем входящий запрос ---------------------------------
+#     method = request.method
+#     path   = request.url.path
+#     query  = request.url.query
+
+#     try:
+#         body_bytes = await request.body()
+#         body = body_bytes.decode(errors="replace")[:200]
+#     except Exception:
+#         body = "<unable to read body>"
+
+#     logger_api.info(f'{ip} -> {method} {path}?{query} | body={body}')
+#     #logger_api.info(f'ip: {ip} -> method: {method} {path}?{query} | body={body}')
+
+#     # ----------- Rate-limit ----------------------------------------------
+#     async with lock:
+#         hits = _ip_hits[ip]
+#         now = time.time()
+#         boundary = now - TIME_WINDOW
+#         # чистим старые записи
+#         while hits and hits[0] < boundary:
+#             hits.popleft()
+#         hits.append(now)
+#         if len(hits) > MAX_DEQUE_LEN:
+#             hits.popleft()  # для надёжности, чтобы очередь не пухла
+#         exceeded = len(hits) > REQUEST_LIMIT
+
+#     if exceeded:
+#         logger_api.warning(f"429 Too Many Requests for {ip} ({len(hits)}/{REQUEST_LIMIT})")
+#         return Response(status_code=429, content="Too Many Requests")
+
+#     # ----------- Продолжаем обработку ------------------------------------
+#     try:
+#         response = await call_next(request)
+#     except Exception as exc:
+#         logger_api.exception(f"Error while processing request from {ip}")
+#         raise exc
+
+#     elapsed_ms = (time.time() - start_ts) * 1000
+#     logger_api.info(f'{ip} <- {method} {path} | {response.status_code} | {elapsed_ms:.1f}ms')
+#     return response
+
+
+
+
+
+
+
+
+
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+
+# # Protection from poking
+# ip_request_counts = defaultdict(list)
+# lock = asyncio.Lock() # "Creating" (Создание) lock.
+
+# @app.middleware("http")
+# async def rate_limit(request: Request, call_next):
+#     ip = request.client.host
+#     now = datetime.now()
+#     time_window_start = now - timedelta(seconds=TIME_WINDOW)
+
+#     async with lock: # "Acquiring" (Получение) lock.
+#         ip_request_counts[ip] = [t for t in ip_request_counts[ip] if t > time_window_start]
+#         ip_request_counts[ip].append(now)
+#         request_count = len(ip_request_counts[ip])
+
+#     if request_count > REQUEST_LIMIT:
+#         logger_api.critical(f"Rate limit exceeded for IP: {ip}")
+#         return Response(status_code=429, content="Too Many Requests")
+
+#     response = await call_next(request)
+#     return response

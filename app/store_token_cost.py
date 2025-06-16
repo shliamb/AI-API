@@ -1,5 +1,6 @@
-from config import LOG_CONFIG_BOT, PRICE, setup_logger
-logger_bot = setup_logger('bot', LOG_CONFIG_BOT)
+from config import PRICE
+from setup_config_logger import setup_logger
+logger_db = setup_logger('db', '/log/db.log')
 import uuid
 from datetime import datetime
 from worker_db import read_account_access_id, add_record_stat, read_user, update_user 
@@ -32,7 +33,7 @@ async def calculate_token_cost(access_id: uuid, model_version: str, used_tokens:
         
     if one_tok_price == None:
         #print(f"The model {model_version} was not found in the price list")
-        logger_bot.error(f"The model {model_version} was not found in the price list")
+        logger_db.error(f"The model {model_version} was not found in the price list")
         one_tok_price = 0.000095 # Sorry..
 
 
@@ -52,7 +53,7 @@ async def calculate_token_cost(access_id: uuid, model_version: str, used_tokens:
 
     if not await add_record_stat(data_stat):
         #print("Error: Failed to add statistics using the AI model")
-        logger_bot.error("Error: Failed to add statistics using the AI model")
+        logger_db.error("Error: Failed to add statistics using the AI model")
 
     user_data = await read_user(user_id)
     new_money = user_data.get("money") - total_cost
@@ -60,6 +61,6 @@ async def calculate_token_cost(access_id: uuid, model_version: str, used_tokens:
 
     if not await update_user(data_money):
         #print("Error: Failed to update money using the AI model")
-        logger_bot.error("Error: Failed to update money using the AI model")
+        logger_db.error("Error: Failed to update money using the AI model")
 
     return total_cost

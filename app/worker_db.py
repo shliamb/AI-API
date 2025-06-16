@@ -1,6 +1,7 @@
 from keys import USER_DB, PASSWORD_DB, DB_NAME
-from config import MONEY_TO_START, LOG_CONFIG_DB, HOST, setup_logger
-logger_db = setup_logger('db', LOG_CONFIG_DB)
+from config import MONEY_TO_START, HOST
+from setup_config_logger import setup_logger
+logger_db = setup_logger('db', '/log/db.log')
 import asyncpg
 # import json
 # import asyncio
@@ -20,8 +21,6 @@ async def get_connection():
 
 
 
-
-logger_db.info("INFO: Hi i am here, db!")
 
 
 
@@ -71,6 +70,8 @@ async def add_user(user_data):
 async def read_user(user_id):
     connection = None
     try:
+        logger_db.info(f"INFO: Reade user_id:{user_id}")
+
         connection = await get_connection()
         result = await connection.fetch(
             '''

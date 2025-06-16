@@ -1,9 +1,10 @@
 # Base
-from config import MONEY_TO_START, GUEST_APP_KEY, COUNTS_QUANTITY, NOTIFICATION, MIN_PAY, DOWNLOAD, LOG_CONFIG_BOT, LOGS_FOLDER, setup_logger
+from config import MONEY_TO_START, GUEST_APP_KEY, COUNTS_QUANTITY, NOTIFICATION, MIN_PAY, DOWNLOAD, LOGS_FOLDER
 from keys import TOKEN_TELEGRAM, IS_ADMIN
 #import logging
 #logging.getLogger('aiogram').propagate = False # Блокировка логирование aiogram до его импорта
-logger_bot = setup_logger('bot', LOG_CONFIG_BOT)
+from setup_config_logger import setup_logger
+logger_bot = setup_logger('bot', '/log/bot.log')
 # import re
 import random
 import os
@@ -40,8 +41,6 @@ bot = Bot(TOKEN_TELEGRAM)
 
 PARANOIA_MODE = False
 
-
-logger_bot.info("INFO: Hi i am here, bot!")
 
 
 
@@ -204,6 +203,8 @@ async def main_menu(message: types.Message):
     if not data:
         await forced_start(message)
         return
+
+    logger_bot.info(f"Tap menu user_id: {id}")
 
     language = data.get("language")
     money = round(data.get("money"), 2)
@@ -549,10 +550,12 @@ async def invoice_user_1(message: Message, state: FSMContext):
 
     # Проверка на число
     if message.text.isdigit() is not True:
+        logger_bot.error(f"The minimum amount is {MIN_PAY} $.")
         await bot.send_message(message.chat.id, f"Enter only the amount in numbers in USD.")
         return
 
     if float(summ) < MIN_PAY:
+        logger_bot.error(f"The minimum amount is {MIN_PAY} $.")
         await bot.send_message(message.chat.id, f"The minimum amount is {MIN_PAY} $.")
         return
 

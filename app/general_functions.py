@@ -1,4 +1,4 @@
-from config import TIME_CORRECTION, LOG_CONFIG_BOT, setup_logger
+from config import TIME_CORRECTION
 from datetime import datetime, timezone, timedelta
 import random
 import string
@@ -9,7 +9,8 @@ import aiofiles
 import asyncio
 from mutagen import File
 from io import BytesIO
-logger_bot = setup_logger('bot', LOG_CONFIG_BOT)
+from setup_config_logger import setup_logger
+logger_bot = setup_logger('bot', '/log/bot.log')
 
 
 

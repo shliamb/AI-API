@@ -1,5 +1,5 @@
-import logging
-logging.basicConfig(format='%(levelname)s - %(message)s', level=logging.INFO)
+from setup_config_logger import setup_logger
+logger_ai = setup_logger('ai', '/log/ai.log')
 from typing import List, Optional, Union
 
 
@@ -33,7 +33,7 @@ class AssistOpenAI:
             return getattr(response, 'id', None)
         
         except Exception as e:
-            logging.error(f"Failed to create assistant: {e}")
+            logger_ai.error(f"Failed to create assistant: {e}")
             return None
     
 
@@ -47,7 +47,7 @@ class AssistOpenAI:
             return getattr(response, 'data', None)
 
         except Exception as e:
-            logging.error(f"list_assist failed: {e}")
+            logger_ai.error(f"list_assist failed: {e}")
             return None
 
 
@@ -60,7 +60,7 @@ class AssistOpenAI:
             return response or None
 
         except Exception as e:
-            logging.error(f"get_assist failed: {e}")
+            logger_ai.error(f"get_assist failed: {e}")
             return None
     
 
@@ -72,7 +72,7 @@ class AssistOpenAI:
             return response or None
 
         except Exception as e:
-            logging.error(f"delete_assist failed: {e}")
+            logger_ai.error(f"delete_assist failed: {e}")
             return None
     
 
@@ -84,7 +84,7 @@ class AssistOpenAI:
             return getattr(empty_thread, 'id', None)
         
         except Exception as e:
-            logging.error(f"create_tread failed: {e}")
+            logger_ai.error(f"create_tread failed: {e}")
             return None
 
 
@@ -102,7 +102,7 @@ class AssistOpenAI:
             return getattr(message_thread, 'id', None)
         
         except Exception as e:
-            logging.error(f"create_tread_and_message failed: {e}")
+            logger_ai.error(f"create_tread_and_message failed: {e}")
             return None
     
 
@@ -113,7 +113,7 @@ class AssistOpenAI:
             return my_thread or None
         
         except Exception as e:
-            logging.error(f"get_tread failed: {e}")
+            logger_ai.error(f"get_tread failed: {e}")
             return None
     
 
@@ -124,7 +124,7 @@ class AssistOpenAI:
             return response or None
 
         except Exception as e:
-            logging.error(f"Failed to delete_tread: {e}")
+            logger_ai.error(f"Failed to delete_tread: {e}")
             return None
 
 
@@ -140,7 +140,7 @@ class AssistOpenAI:
             return thread_message or None
         
         except Exception as e:
-            logging.error(f"Failed to create_message: {e}")
+            logger_ai.error(f"Failed to create_message: {e}")
             return None
     
 
@@ -152,7 +152,7 @@ class AssistOpenAI:
             return getattr(thread_messages, 'data', None)
 
         except Exception as e:
-            logging.error(f"Failed to list_message: {e}")
+            logger_ai.error(f"Failed to list_message: {e}")
             return None
 
 
@@ -168,7 +168,7 @@ class AssistOpenAI:
             return getattr(run, 'id', None)
         
         except Exception as e:
-            logging.error(f"Failed to run_assist: {e}")
+            logger_ai.error(f"Failed to run_assist: {e}")
             return None
     
 
@@ -187,7 +187,7 @@ class AssistOpenAI:
             return getattr(run, 'id', None)
 
         except Exception as e:
-            logging.error(f"Failed to create_tread_and_run_assist: {e}")
+            logger_ai.error(f"Failed to create_tread_and_run_assist: {e}")
             return None
     
 
@@ -202,7 +202,7 @@ class AssistOpenAI:
             return run or None
         
         except Exception as e:
-            logging.error(f"Failed to cansel_run: {e}")
+            logger_ai.error(f"Failed to cansel_run: {e}")
             return None
 
     
@@ -236,7 +236,7 @@ class AssistOpenAI:
                         return {"status": status, "message": last_assist_message, "response": run_status}
                     
                     except (IndexError, AttributeError):
-                        logging.warning(f"Could not extract message content: {e}")
+                        logger_ai.warning(f"Could not extract message content: {e}")
                         return {"status": status, "message": None, "response": run_status}
 
                 return {"status": status, "message": None, "response": run_status}
@@ -250,7 +250,7 @@ class AssistOpenAI:
             return {"status": status, "response": run_status}
 
         except Exception as e:
-            logging.error(f"Failed to get_runs_threads: {e}")
+            logger_ai.error(f"Failed to get_runs_threads: {e}")
             return {"error": str(e), "response": None}
         
 
@@ -282,7 +282,7 @@ class AssistOpenAI:
             return output or None
         
         except Exception as e:
-            logging.error(f"Failed to oa_returning_result_assist: {e}")
+            logger_ai.error(f"Failed to oa_returning_result_assist: {e}")
             return {"error": str(e), "response": None}
 
 

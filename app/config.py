@@ -1,46 +1,4 @@
-#### LOGGING ####
-import logging
-
-
-def setup_logger(name, log_config):
-    logger = logging.getLogger(name)
-    logger.setLevel(log_config['level'])
-    logger.handlers = []
-    logger.propagate = False  # Важно!
-    
-    formatter = logging.Formatter(log_config['format'])
-    file_handler = logging.FileHandler(log_config['filename'], mode=log_config['filemode'])
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-    
-    return logger
-
-
-LOG_CONFIG_API = {
-    'format': '%(levelname)s - %(asctime)s - %(name)s - %(message)s',
-    'level': logging.INFO,
-    'filename': './log/api.log',
-    'filemode': 'a'
-}
-LOG_CONFIG_DB = {
-    'format': '%(levelname)s - %(asctime)s - %(name)s - %(message)s',
-    'level': logging.INFO,
-    'filename': './log/db.log',
-    'filemode': 'a'
-}
-LOG_CONFIG_BOT = {
-    'format': '%(levelname)s - %(asctime)s - %(name)s - %(message)s',
-    'level': logging.INFO, 
-    'filename': './log/bot.log', 
-    'filemode': 'a'
-}
-LOG_CONFIG_AI = {
-    'format': '%(levelname)s - %(asctime)s - %(name)s - %(message)s',
-    'level': logging.INFO, 
-    'filename': './log/ai.log', 
-    'filemode': 'a'
-}
-
+##### CONFIGS #####
 
 # TELEGRAMM and DB
 HOST = "app_postgres"  # app_postgres or localhost
@@ -62,12 +20,12 @@ MAX_DEQUE_LEN = REQUEST_LIMIT + 5  # жёсткий предел длины оч
 
 
 # Folders:
-LOGS_FOLDER = "./log/"
-UPLOADS = "./uploads/"
-AUDIO_FOLDER = "./audio/"
-PATH_JSON_USERS = "./json/"
-DOWNLOAD = "./download/"
-BACKUP_DB = "./backup_db/"
+LOGS_FOLDER = "/log/"
+UPLOADS = "/uploads/"
+AUDIO_FOLDER = "/audio/"
+PATH_JSON_USERS = "/json/"
+DOWNLOAD = "/download/"
+BACKUP_DB = "/backup_db/"
 
 # AI Default:
 DEF_MOD_GOOGLE = "gemini-1.5-flash-latest"
@@ -75,8 +33,6 @@ DEF_MOD_OPENAI = "gpt-4o-mini-2024-07-18"
 DEF_MOD_GROK = "grok-2-vision-latest"
 DEF_MOD_CLAUDE = "claude-3-haiku-20240307"
 DEF_CLAUDE_VERSION = "2023-06-01" # Специфичная для антропик вешь..
-
-
 
 
 
