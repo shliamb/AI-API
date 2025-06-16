@@ -25,6 +25,7 @@ services:
     container_name: fastapi_app
     ports:
       - "8000:80"
+      #8000 - Порт снаружи (на твоей машине/сервере), 80 - Порт внутри контейнера FastAPI
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_USER: ${USER_DB}
@@ -51,7 +52,7 @@ services:
     networks:
       - db-network
     # ports:
-    #   - "8081:80"  # Публикация порта 80 контейнера на порт 8081 хоста
+    #   - "8081:80"
 
 volumes:
   postgres_data:

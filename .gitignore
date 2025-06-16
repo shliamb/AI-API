@@ -4,3 +4,4 @@ log/
 venv/
 .env
 app/__pycache__/
+tests/__pycache__/
