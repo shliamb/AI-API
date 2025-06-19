@@ -1,5 +1,6 @@
+from config import PATH_LOGS
 from setup_config_logger import setup_logger
-logger_ai = setup_logger('ai', '/log/ai.log')
+logger_ai = setup_logger('ai', f'{PATH_LOGS}ai.log')
 from typing import List, Optional, Union
 
 

@@ -1,9 +1,10 @@
-from config import PRICE
+from config import PRICE, PATH_LOGS
 from setup_config_logger import setup_logger
-logger_db = setup_logger('db', '/log/db.log')
+logger_db = setup_logger('db', f'{PATH_LOGS}db.log')
 import uuid
 from datetime import datetime
-from worker_db import read_account_access_id, add_record_stat, read_user, update_user 
+from worker_db import read_account_access_id, add_record_stat, read_user, update_user
+from general_functions import day_utcnow
 
 
 
@@ -43,7 +44,7 @@ async def calculate_token_cost(access_id: uuid, model_version: str, used_tokens:
 
     data_stat = {
         "user_id": user_id,
-        "time": datetime.now(),
+        "time": await day_utcnow(),
         "use_model": model_version,
         "sesion_token": used_tokens,
         "price_1_tok": one_tok_price,
@@ -57,7 +58,7 @@ async def calculate_token_cost(access_id: uuid, model_version: str, used_tokens:
 
     user_data = await read_user(user_id)
     new_money = user_data.get("money") - total_cost
-    data_money = {"user_id": user_id, "money": new_money, "last_visit": datetime.now()}
+    data_money = {"user_id": user_id, "money": new_money, "last_visit": await day_utcnow()}
 
     if not await update_user(data_money):
         #print("Error: Failed to update money using the AI model")

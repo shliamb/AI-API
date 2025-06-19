@@ -1,7 +1,7 @@
-from config import UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK, ALLOWED_HEADER_NAMES, SUPER_HEADER_NAMES, MAX_DEQUE_LEN #, TIME_OUT_ERR_USERNAME, WAITING_TIME, LIMIT_TRY, PRICE, USERNAME_ADMIN
+from config import UPLOADS, DEF_MOD_GOOGLE, DEF_MOD_OPENAI, DEF_MOD_CLAUDE, TIME_WINDOW, REQUEST_LIMIT, DEF_MOD_GROK, ALLOWED_HEADER_NAMES, SUPER_HEADER_NAMES, PATH_LOGS #, MAX_DEQUE_LEN #, TIME_OUT_ERR_USERNAME, WAITING_TIME, LIMIT_TRY, PRICE, USERNAME_ADMIN
 
 from setup_config_logger import setup_logger
-logger_api = setup_logger('api', '/log/api.log')
+logger_api = setup_logger('api', f'{PATH_LOGS}api.log')
 
 import asyncio
 import aiofiles
@@ -1103,7 +1103,7 @@ if __name__ == "__main__":
 #     Логирует запросы.
 #     '''
 #     ip = request.client.host
-#     now = datetime.now()
+#     now = await day_utcnow()
 #     time_window_start = now - timedelta(seconds=TIME_WINDOW)
 
 #     # ---- request data ------------------------------------------------------
@@ -1133,7 +1133,7 @@ if __name__ == "__main__":
 
 #     response = await call_next(request)
 
-#     elapsed = (datetime.now() - now) * 1000
+#     elapsed = (await day_utcnow() - now) * 1000
 #     logger_api.info(
 #         f"{client_host} <- {method} {url_path} | "
 #         f"status={response.status_code} | {elapsed:.1f}ms"
@@ -1239,7 +1239,7 @@ if __name__ == "__main__":
 # @app.middleware("http")
 # async def rate_limit(request: Request, call_next):
 #     ip = request.client.host
-#     now = datetime.now()
+#     now = await day_utcnow()
 #     time_window_start = now - timedelta(seconds=TIME_WINDOW)
 
 #     async with lock: # "Acquiring" (Получение) lock.

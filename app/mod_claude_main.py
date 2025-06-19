@@ -1,6 +1,6 @@
-from config import DEF_CLAUDE_VERSION, TIMEOUT_SERVER_AI
+from config import DEF_CLAUDE_VERSION, TIMEOUT_SERVER_AI, PATH_LOGS
 from setup_config_logger import setup_logger
-logger_ai = setup_logger('ai', '/log/ai.log')
+logger_ai = setup_logger('ai', f'{PATH_LOGS}ai.log')
 #import asyncio
 import aiohttp
 from keys import API_KEY_CLAUDE

@@ -1,6 +1,6 @@
-from config import AUDIO_FOLDER, TIMEOUT_SERVER_AI
+from config import AUDIO_FOLDER, TIMEOUT_SERVER_AI, PATH_LOGS
 from setup_config_logger import setup_logger
-logger_ai = setup_logger('ai', '/log/ai.log')
+logger_ai = setup_logger('ai', f'{PATH_LOGS}ai.log')
 from openai import AsyncOpenAI, OpenAIError
 import aiofiles
 import tiktoken

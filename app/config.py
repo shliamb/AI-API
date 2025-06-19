@@ -1,7 +1,19 @@
-##### CONFIGS #####
+#### CONFIGS Set it up manually: ####
+HOST = "app_postgres" # app_postgres localhost
+DOCKER = True # True or False
+TIME_CORRECTION = + 3
+########
+
+
+# Folders:
+PATH_LOGS = "/log/" if DOCKER else "./log/" # При запуске в докере поставить - /logs/
+UPLOADS = "/uploads/" if DOCKER else "./uploads/"
+AUDIO_FOLDER = "/audio/" if DOCKER else "./audio/"
+DOWNLOAD = "/download/" if DOCKER else "./download/"
+BACKUP_DB = "/backup_db/" if DOCKER else "./backup_db/"
+PATH_JSON_USERS = "/json/" if DOCKER else "./json/"
 
 # TELEGRAMM and DB
-HOST = "app_postgres"  # app_postgres or localhost
 TIMEOUT_SERVER_AI = 300 # 3 минуты ожидания от сервера ИИ
 NOTIFICATION = True
 COUNTS_QUANTITY = 3 # MAX Коллисчество подключений - аккаунтов телеграмм пользователю
@@ -10,7 +22,6 @@ ALLOWED_HEADER_NAMES = {"appkey", "some_key", "bad_key"}  # возможные �
 GUEST_APP_KEY = "appkey"
 SUPER_HEADER_NAMES = "bad_key"
 MIN_PAY = 1 # Minimum pay
-TIME_CORRECTION = +3 # Moscow
 
 
 # FASTAPI
@@ -18,14 +29,6 @@ REQUEST_LIMIT = 30 # сколько запросов…
 TIME_WINDOW = 60 # …за сколько секунд
 MAX_DEQUE_LEN = REQUEST_LIMIT + 5  # жёсткий предел длины очереди
 
-
-# Folders:
-LOGS_FOLDER = "/log/"
-UPLOADS = "/uploads/"
-AUDIO_FOLDER = "/audio/"
-PATH_JSON_USERS = "/json/"
-DOWNLOAD = "/download/"
-BACKUP_DB = "/backup_db/"
 
 # AI Default:
 DEF_MOD_GOOGLE = "gemini-1.5-flash-latest"

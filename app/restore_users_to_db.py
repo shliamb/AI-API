@@ -1,11 +1,11 @@
-# Base:
+from config import PATH_LOGS
 from worker_db import add_user, add_account
 # import asyncio
 import json
 import uuid
 from datetime import datetime
 from setup_config_logger import setup_logger
-logger_db = setup_logger('db', '/log/db.log')
+logger_db = setup_logger('db', f'{PATH_LOGS}db.log')
 
 
 

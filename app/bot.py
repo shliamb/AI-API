@@ -1,10 +1,10 @@
 # Base
-from config import MONEY_TO_START, GUEST_APP_KEY, COUNTS_QUANTITY, NOTIFICATION, MIN_PAY, DOWNLOAD, LOGS_FOLDER
+from config import MONEY_TO_START, GUEST_APP_KEY, COUNTS_QUANTITY, NOTIFICATION, MIN_PAY, DOWNLOAD, PATH_LOGS
 from keys import TOKEN_TELEGRAM, IS_ADMIN
 #import logging
 #logging.getLogger('aiogram').propagate = False # Блокировка логирование aiogram до его импорта
 from setup_config_logger import setup_logger
-logger_bot = setup_logger('bot', '/log/bot.log')
+logger_bot = setup_logger('bot', f'{PATH_LOGS}bot.log')
 # import re
 import random
 import os
@@ -28,6 +28,7 @@ from aiogram.fsm.state import State, StatesGroup
 # from aiogram.fsm.storage.memory import MemoryStorage
 # from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 # Service
+from general_functions import day_utcnow
 from worker_db import read_user, add_user, update_user, add_account, read_accounts_user_id, del_account, read_stat_for_user_id, read_users, delete_stat_table
 from backupdb import backup_db
 from restore_db import restore_db
@@ -169,7 +170,7 @@ async def command_start_handler(message: Message, state: FSMContext) -> None:
         "last_name": last_name,
 
         "money": MONEY_TO_START,
-        "last_visit": datetime.now(),
+        "last_visit": await day_utcnow(),
         "language": language_code,
         "counts_api": COUNTS_QUANTITY,
         "notifications": NOTIFICATION
@@ -945,7 +946,7 @@ async def admin_get_log(message: types.Message):
     if id != IS_ADMIN:
         return
 
-    data_folder = Path(LOGS_FOLDER)
+    data_folder = Path(PATH_LOGS)
     empts = True
     for entry in data_folder.iterdir():
         if entry.is_file() and entry.stat().st_size > 0:  # Проверяем, что файл не пустой
@@ -974,7 +975,7 @@ async def admin_clear_log(message: types.Message):
     if id != IS_ADMIN:
         return
 
-    data_folder = Path(LOGS_FOLDER)
+    data_folder = Path(PATH_LOGS)
     empts = True
     for entry in data_folder.iterdir():
         if entry.is_file() and entry.stat().st_size > 0:  # Проверяем, что файл не пустой
