@@ -29,7 +29,7 @@ from aiogram.fsm.state import State, StatesGroup
 # from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 # Service
 from general_functions import day_utcnow
-from worker_db import read_user, add_user, update_user, add_account, read_accounts_user_id, del_account, read_stat_for_user_id, read_users, delete_stat_table
+from worker_db import read_user, add_user, update_user, add_account, read_accounts_user_id, del_account, read_stat_for_user_id, read_users, delete_stat_table, drop_all_tables_and_reset_schema
 from backupdb import backup_db
 from restore_db import restore_db
 from create_tables import create_tables_in_db
@@ -803,8 +803,9 @@ async def admin_main_menu(message: types.Message):
         f"        Restore Users – /resUs\n\n"
         f"<b>🗑 CLEAR:</b>\n"
         f"        Stat Tab DB – /dStat\n"
-        f"        Logs – /dLogs\n\n"
-        # f"        Get an exel – /stat\n\n"
+        f"        Logs – /dLogs\n"
+        f"        All Tabs DB – /allDel\n\n"
+        #f"        Get an exel – /stat\n\n"
         f"<b>🧪 SPECIAL:</b>\n"
         f"        Paranoi mode – /para\n"
     )
@@ -881,6 +882,21 @@ async def backup(message: types.Message):
     await message.bot.send_document(chat_id=message.chat.id, document=types.input_file.FSInputFile(last_downloaded_file))
 
 
+
+
+# Fast Delete All Tables in DB:
+@dp.message(Command('allDel'))
+async def delete_all_tables_in_db_admin(message: types.Message):
+    await typing(message)
+    id = user_id(message)
+
+    if id != IS_ADMIN:
+        return
+
+    if await drop_all_tables_and_reset_schema():
+        await bot.send_message(message.chat.id, "All tables have been deleted successfully.")
+    else:
+        await bot.send_message(message.chat.id, "Error deleting all tables.")
 
 
 

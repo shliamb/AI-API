@@ -585,6 +585,25 @@ async def json_old_users():
 
 
 
+# Fast delete ALL Tabs:
+async def drop_all_tables_and_reset_schema():
+    connection = None
+    try:
+        connection = await get_connection()
+        # Удаляем схему public со всеми объектами и создаём её заново
+        await connection.execute("DROP SCHEMA public CASCADE;")
+        await connection.execute("CREATE SCHEMA public;")
+        # Возвращаем стандартные права (без указания конкретной роли)
+        await connection.execute("GRANT ALL ON SCHEMA public TO PUBLIC;")
+        return True
+    except Exception as e:
+        logger_db.error(f"Error in drop_all_tables_and_reset_schema: {e}")
+        return False
+    finally:
+        if connection:
+            await connection.close()
+
+
 
 
 
