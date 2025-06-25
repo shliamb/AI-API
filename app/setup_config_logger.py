@@ -22,8 +22,8 @@ _uvicorn_disabled = False
 class TimezoneFormatter(logging.Formatter):
     """Форматтер с поддержкой временных зон"""
     
-    def init(self, *args, timezone_offset_hours: int = 0, **kwargs):
-        super().init(*args, **kwargs)
+    def __init__(self, *args, timezone_offset_hours: int = 0, **kwargs):
+        super().__init__(*args, **kwargs)
         self.timezone_offset = datetime.timedelta(hours=timezone_offset_hours)
     
     def formatTime(self, record, datefmt=None):
