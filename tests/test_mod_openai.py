@@ -7,8 +7,13 @@ path_file = None
 
 url = f"http://{HOST}/api/openai-chat/"
 
+PROXIES = {
+    "http": "http://14a368e1f0fb8:3f48aeba51@45.149.100.135:12323"
+    #"https": "http://14a368e1f0fb8:3f48aeba51@45.149.100.135:12323",  # желательно добавить и для HTTPS
+}
+
 data = {
-        "access_id": "39d092a8-23e4-4684-91cf-ec9cd1d50790",
+        "access_id": "a66c5349-e2df-47a8-919f-3570c521872d",
         "user_content": "Что на рисунке видишь?",
         "system_content": "Ты крутой юморист, каждое слово - шутка",
         "model": "gpt-4o-mini-2024-07-18",
@@ -18,7 +23,7 @@ data = {
 }
 
 headers = {
-    "appkey": "a9446aa4-cf9a-461e-898c-fce4d84efc01",
+    'appkey': '4af25a70-29d8-4a1e-8b68-f582014305c7',
 }
 
 if path_file:
@@ -26,7 +31,7 @@ if path_file:
         file = {'file': ('image.jpg', f)}
         response = requests.post(url, headers=headers, data=data, files=file)
 else:
-    response = requests.post(url, headers=headers, data=data)
+    response = requests.post(url, headers=headers, data=data, proxies=PROXIES)
 
 
 

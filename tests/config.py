@@ -1,1 +1,1 @@
-HOST = "localhost:8000"   # 167.99.210.245:8000    or    localhost:8000     or     some else..
+HOST = "167.99.210.245:8000"   # 167.99.210.245:8000    or    localhost:8000     or     some else..
