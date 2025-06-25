@@ -246,9 +246,6 @@ async def verify_user(access_id: uuid, appkey: uuid) -> bool:
 async def verify_appkey(request: Request) -> str:
     received_key = None
 
-    print("request.headers:", request.headers)
-    print("received_key:", received_key)
-
     # Check authorization names from allowed list:
     for header_name in ALLOWED_HEADER_NAMES:
         if header_name in request.headers:
@@ -299,8 +296,6 @@ async def openai_api(
     model: str = Form(None),
     file: Optional[UploadFile] = File(None)
 ):
-    
-    print(access_id, appkey)
     """Endpoint for proxying requests to OpenAI chat API."""
     # Authentication and authorization
     if not await verify_user(access_id, appkey):
