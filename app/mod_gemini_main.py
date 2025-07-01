@@ -2,6 +2,7 @@ from config import TIMEOUT_SERVER_AI, PATH_LOGS
 from setup_config_logger import setup_logger
 logger_ai = setup_logger('ai', f'{PATH_LOGS}ai.log')
 #import asyncio
+#import json
 import aiohttp
 from keys import API_KEY_GEMINI
 from general_functions import DictObj, encode_file
@@ -23,9 +24,10 @@ async def gemini_text(description: dict) -> dict:
     system_content = dict_des.system_content
     model_name = dict_des.model
     file_path = dict_des.file_path
-    # tools = description.get("tools")
     assist_content = dict_des.assist_content
-    # ?? 'response_format':'[generationConfig: {responseMimeType: "application/json",responseSchema: {type: SchemaType.ARRAY,items: {type: SchemaType.OBJECT,properties: {recipe_name: {type: SchemaType.STRING,},},},},}});]'
+    tools = dict_des.tools
+    tool_config = dict_des.tool_config
+    
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={API_KEY_GEMINI}"
 
@@ -42,7 +44,7 @@ async def gemini_text(description: dict) -> dict:
 
     if file_path:
         encoded_image = await encode_file(file_path)
-        contents.append([{"parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]}])
+        contents.append({"role": "user", "parts": [{"text": user_content}, {"inline_data": {"mime_type": "image/jpeg", "data": encoded_image}}]})
     else:
         if assist_content:
             for one in assist_content:
@@ -58,28 +60,75 @@ async def gemini_text(description: dict) -> dict:
     if system_content:
         data["system_instruction"] = {"parts": {"text": system_content}}
 
+    if tools:
+        data['tools'] = tools
+        if tool_config: # При отсуствии будет AUTO
+            data['tool_config'] = tool_config
 
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=data, headers=headers, timeout=TIMEOUT_SERVER_AI) as response:
 
+            if not response.ok:
+                error_text = await response.text()
+                logger_ai.error(f"Ошибка API: Статус {response.status}, Ответ: {error_text}")
+                return {"error": error_text, "response": None, "expenses": 0, "used_tokens": 0}
+
             try:
                 result = await response.json()
-            except:
-                text_data = await response.text()
-                return {"response": text_data, "expenses": 0, "used_tokens": 0}
+            except Exception as e:
+                # Этот блок сработает, если ответ от сервера вообще не JSON
+                error_text = await response.text()
+                logger_ai.error(f"Не удалось распарсить JSON: {e}: {error_text}")
+                return {"error": f"Не удалось распарсить JSON: {e}", "response": error_text, "expenses": 0, "used_tokens": 0}
 
-            # Tokens:
             try:
-                response_text = result['candidates'][0]['content']['parts'][0]['text']
-                used_tokens = result['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
-            except:
-                text_data = await response.text()
-                return {"response": text_data, "expenses": 0, "used_tokens": 0}
+                # 1. Сначала считаем токены, эта структура общая для всех успешных ответов.
+                used_tokens = result.get('usageMetadata', {}).get('totalTokenCount', 0)
 
-            # Calculation of money spent on tokens
-            expenses = await calculate_token_cost(access_id, model_name, used_tokens, input_data="text")
-            return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
+                # 2. Безопасно получаем доступ к "сердцу" ответа
+                part = result['candidates'][0]['content']['parts'][0]
+                
+                final_response_content = None
+
+                # 3. Проверяем, что вернула модель: вызов функции или текст
+                if 'functionCall' in part:
+                    # Сценарий 1: Модель вызвала функцию. Берем ее аргументы.
+                    final_response_content = part['functionCall']['args']
+                elif 'text' in part:
+                    # Сценарий 2: Модель вернула простой текст.
+                    final_response_content = part['text']
+                
+                if final_response_content is None:
+                    # Сценарий 3: Неожиданная структура ответа
+                    return {"error": "Неожиданный формат ответа от API", "response": result, "used_tokens": used_tokens}
+
+                # 4. Возвращаем унифицированный результат
+                expenses = await calculate_token_cost(access_id, model_name, used_tokens, input_data="text")
+                return {"response": final_response_content, "expenses": expenses, "used_tokens": used_tokens}
+                #return {"response": final_response_content, "expenses": 0, "used_tokens": used_tokens}
+
+            except (KeyError, IndexError) as e:
+                # Этот блок сработает, если структура JSON не такая, как мы ожидали 
+                # (например, отсутствует ключ 'candidates')
+                return {"error": f"Ошибка разбора структуры ответа: {e}", "response": result, "used_tokens": 0}
+
+
+
+
+
+
+            # # Tokens:
+            # try:
+            #     response_text = result['candidates'][0]['content']['parts'][0]['text']
+            #     used_tokens = result['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
+            # except:
+            #     text_data = await response.text()
+            #     return {"response": text_data, "expenses": 0, "used_tokens": 0}
+
+            # # Calculation of money spent on tokens
+            # expenses = await calculate_token_cost(access_id, model_name, used_tokens, input_data="text")
+            # return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
 
 
 

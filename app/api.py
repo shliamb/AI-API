@@ -613,7 +613,8 @@ async def gemini_api(
     appkey: uuid.UUID = Depends(verify_appkey),
     user_content: str = Form(...),                  # !
     assist_content: str = Form(None),               # history
-    response_format: str = Form(None),              # Json response rules if need this, text or json
+    tools: str = Form(None),              # Json response rules if need this, text or json
+    tool_config: str = Form(None), 
     system_content: str = Form(None),
     model: str = Form(None),
     file: Optional[UploadFile] = File(None)
@@ -629,7 +630,8 @@ async def gemini_api(
 
     # Parse optional JSON content
     parsed_assist_content = await parse_json_content(assist_content) if assist_content else None
-    parsed_response_format = await parse_json_content(response_format) if response_format else None
+    parsed_tools = await parse_json_content(tools) if tools else None
+    parsed_tool_config = await parse_json_content(tool_config) if tool_config else None
 
     # Handle file upload if present
     file_path = f"{UPLOADS}{random_name()}-{file.filename}" if file else None
@@ -645,7 +647,8 @@ async def gemini_api(
         "model": model or DEF_MOD_GOOGLE,
         "system_content": system_content,
         "assist_content": parsed_assist_content,
-        "response_format": parsed_response_format,
+        "tools": parsed_tools,
+        "tool_config": parsed_tool_config,
         "file_path": file_path
     }
 
