@@ -69,10 +69,10 @@ async def gemini_text(description: dict) -> dict:
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=data, headers=headers, timeout=TIMEOUT_SERVER_AI) as response:
 
-            if not response.ok:
+            if not response.ok: # Не 200
                 error_text = await response.text()
                 logger_ai.error(f"Ошибка API: Статус {response.status}, Ответ: {error_text}")
-                return {"error": error_text, "response": None, "expenses": 0, "used_tokens": 0}
+                return {"response": f"Error: {error_text}", "expenses": 0, "used_tokens": 0}
 
             try:
                 result = await response.json()
@@ -80,58 +80,20 @@ async def gemini_text(description: dict) -> dict:
                 # Этот блок сработает, если ответ от сервера вообще не JSON
                 error_text = await response.text()
                 logger_ai.error(f"Не удалось распарсить JSON: {e}: {error_text}")
-                return {"error": f"Не удалось распарсить JSON: {e}", "response": error_text, "expenses": 0, "used_tokens": 0}
+                return {"response": f"Error: {error_text}, {e}", "expenses": 0, "used_tokens": 0}
 
             try:
-                # 1. Сначала считаем токены, эта структура общая для всех успешных ответов.
                 used_tokens = result.get('usageMetadata', {}).get('totalTokenCount', 0)
-
-                # 2. Безопасно получаем доступ к "сердцу" ответа
-                part = result['candidates'][0]['content']['parts'][0]
-
-                print("\nresult:", result)
-                
-                final_response_content = None
-
-                # 3. Проверяем, что вернула модель: вызов функции или текст
-                if 'functionCall' in part:
-                    print("\npart:", part)
-                    # Сценарий 1: Модель вызвала функцию. Берем ее аргументы.
-                    final_response_content = part['functionCall']['args']
-                elif 'text' in part:
-                    # Сценарий 2: Модель вернула простой текст.
-                    final_response_content = part['text']
-                
-                if final_response_content is None:
-                    # Сценарий 3: Неожиданная структура ответа
-                    return {"error": "Неожиданный формат ответа от API", "response": result, "used_tokens": used_tokens}
-
-                # 4. Возвращаем унифицированный результат
+                part = result['candidates'][0]['content']['parts']
                 expenses = await calculate_token_cost(access_id, model_name, used_tokens, input_data="text")
-                return {"response": final_response_content, "expenses": expenses, "used_tokens": used_tokens}
-                #return {"response": final_response_content, "expenses": 0, "used_tokens": used_tokens}
+                return {"response": part, "expenses": expenses, "used_tokens": used_tokens}
 
             except (KeyError, IndexError) as e:
                 # Этот блок сработает, если структура JSON не такая, как мы ожидали 
                 # (например, отсутствует ключ 'candidates')
-                return {"error": f"Ошибка разбора структуры ответа: {e}", "response": result, "used_tokens": 0}
+                return {"response": f"Error: {result}, {e}", "used_tokens": 0}
 
 
-
-
-
-
-            # # Tokens:
-            # try:
-            #     response_text = result['candidates'][0]['content']['parts'][0]['text']
-            #     used_tokens = result['usageMetadata']['totalTokenCount'] # totalTokenCount - это все токены и на входе и на выходе.
-            # except:
-            #     text_data = await response.text()
-            #     return {"response": text_data, "expenses": 0, "used_tokens": 0}
-
-            # # Calculation of money spent on tokens
-            # expenses = await calculate_token_cost(access_id, model_name, used_tokens, input_data="text")
-            # return {"response": response_text, "expenses": expenses, "used_tokens": used_tokens}
 
 
 
