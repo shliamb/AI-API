@@ -88,11 +88,14 @@ async def gemini_text(description: dict) -> dict:
 
                 # 2. Безопасно получаем доступ к "сердцу" ответа
                 part = result['candidates'][0]['content']['parts'][0]
+
+                print("\nresult:", result)
                 
                 final_response_content = None
 
                 # 3. Проверяем, что вернула модель: вызов функции или текст
                 if 'functionCall' in part:
+                    print("\npart:", part)
                     # Сценарий 1: Модель вызвала функцию. Берем ее аргументы.
                     final_response_content = part['functionCall']['args']
                 elif 'text' in part:
