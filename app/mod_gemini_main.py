@@ -66,7 +66,7 @@ async def gemini_text(description: dict) -> dict:
             data['tool_config'] = tool_config
 
 
-    print("\ndata:", data)
+    # print("\ndata:", data)
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=data, headers=headers, timeout=TIMEOUT_SERVER_AI) as response:

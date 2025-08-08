@@ -673,6 +673,10 @@ async def get_prices(message: types.Message):
     prices = '''
 
     OpenAI language model 1 million tokens in $:
+        'gpt-5': 13.5,
+        'gpt-5-chat-latest': 13.5,
+        'gpt-5-mini': 2.7,
+        'gpt-5-nano': 0.54,
         'gpt-4.1': 12,
         'gpt-4.1-mini': 2.4,
         'o1-pro': 900,

@@ -48,6 +48,11 @@ PRICE = {
 
     'assistent-oa': 0.1, # Пока что хз че как
 
+    'gpt-5': 13.5,
+    'gpt-5-chat-latest': 13.5,
+    'gpt-5-mini': 2.7,
+    'gpt-5-nano': 0.54,
+
 
     'gpt-4.1': 12, # 1 million Contex gpt-4.1-2025-04-14
     'gpt-4.1-mini': 2.4, # gpt-4.1-mini-2025-04-14
