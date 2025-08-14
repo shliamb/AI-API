@@ -14,7 +14,7 @@ BACKUP_DB = "/backup_db/" if DOCKER else "./backup_db/"
 PATH_JSON_USERS = "/json/" if DOCKER else "./json/"
 
 # TELEGRAMM and DB
-TIMEOUT_SERVER_AI = 300 # 3 минуты ожидания от сервера ИИ
+TIMEOUT_SERVER_AI = 600 # 6 минуты ожидания от сервера ИИ
 NOTIFICATION = True
 COUNTS_QUANTITY = 3 # MAX Коллисчество подключений - аккаунтов телеграмм пользователю
 MONEY_TO_START = 0.3 # 1$ to start work
@@ -31,10 +31,10 @@ MAX_DEQUE_LEN = REQUEST_LIMIT + 5  # жёсткий предел длины оч
 
 
 # AI Default:
-DEF_MOD_GOOGLE = "gemini-1.5-flash-latest"
-DEF_MOD_OPENAI = "gpt-4o-mini-2024-07-18"
-DEF_MOD_GROK = "grok-2-vision-latest"
-DEF_MOD_CLAUDE = "claude-3-haiku-20240307"
+DEF_MOD_GOOGLE = "gemini-2.5-flash"
+DEF_MOD_OPENAI = "gpt-5-nano"
+DEF_MOD_GROK = "grok-3-mini-latest"
+DEF_MOD_CLAUDE = "claude-sonnet-4-latest"
 DEF_CLAUDE_VERSION = "2023-06-01" # Специфичная для антропик вешь..
 
 
@@ -46,7 +46,7 @@ PRICE = {
 
     # New:
 
-    'assistent-oa': 0.1, # Пока что хз че как
+    #'assistent-oa': 0.1, # Пока что хз че как
 
     'gpt-5': 13.5,
     'gpt-5-chat-latest': 13.5,
@@ -98,6 +98,7 @@ PRICE = {
     'whisper-1': 0.0072, # minute (rounded to the nearest second)
 
     # Elon Musk Grok to 1M tokens:
+    'grok-4-0709': 21.6,
     'grok-3-latest': 21.6, # Contex 131072, 
     'grok-3-fast-latest': 36, # Contex 131072, 
     'grok-3-mini-latest': 0.96, # Contex 131072,
@@ -126,7 +127,8 @@ PRICE = {
 
     # Antropic Claude to 1M tokens:  Context window - 200k, 
     # New:
-    'claude-opus-4-20250514': 21.6, # claude-opus-4-20250514
+    'claude-opus-4-1-20250805': 108,
+    'claude-opus-4-20250514': 108, # claude-opus-4-20250514
     'claude-sonnet-4-20250514': 21.6, # claude-sonnet-4-20250514
 
     'claude-3-7-sonnet-latest': 21.6, # 200K context window Most intelligent model, with visible step‑by‑step reasoning claude-3-7-sonnet-20250219
@@ -139,24 +141,3 @@ PRICE = {
 
     }
 
-
-
-
-
-# def setup_logger(name, log_config):
-#     logger = logging.getLogger(name)
-#     logger.setLevel(log_config['level'])
-    
-#     # Удаляем все существующие handlers
-#     logger.handlers = []
-
-#     # ВАЖНО: отключаем propagation к root logger
-#     logger.propagate = False
-    
-#     formatter = logging.Formatter(log_config['format'])
-    
-#     file_handler = logging.FileHandler(log_config['filename'], mode=log_config['filemode'])
-#     file_handler.setFormatter(formatter)
-    
-#     logger.addHandler(file_handler)
-#     return logger

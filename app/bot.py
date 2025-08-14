@@ -118,10 +118,14 @@ async def registration_telegram_user(message: Message, state: FSMContext) -> Non
 
 #### Push /start ####
 @dp.message(CommandStart())
-async def command_start_handler(message: Message, state: FSMContext) -> None:
+async def command_start_handler(message: Message, state: FSMContext):
     await typing(message)
 
     if await paranoia_mode(message):
+        return
+
+    if message.from_user.is_bot:
+        await message.answer("🚔 Sorry, the bot only works with humans.")
         return
 
     # Menu bot
@@ -708,6 +712,7 @@ async def get_prices(message: types.Message):
         'gemini-1.5-flash-8b': 0.5,
     
     The language model from Elon Musk Grok is 1 million in $:
+        'grok-4-0709': 21.6,
         'grok-3-latest': 21.6,
         'grok-3-fast-latest': 36, 
         'grok-3-mini-latest': 0.96,
@@ -718,7 +723,9 @@ async def get_prices(message: types.Message):
         'grok-beta': 24,
 
     The language model from Anthropic is 1 million in $:
-        'claude-opus-4-latest': 21.6,
+        'claude-opus-4-1-20250805': 108,
+        'claude-opus-4-20250514': 108,
+        'claude-opus-4-latest': 108,
         'claude-sonnet-4-latest': 21.6,
         'claude-3-7-sonnet-latest': 21.6,
         'claude-3-5-sonnet-latest': 21.6,
