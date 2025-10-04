@@ -129,6 +129,7 @@ PRICE = {
     # New:
     'claude-opus-4-1-20250805': 108,
     'claude-opus-4-20250514': 108, # claude-opus-4-20250514
+    'claude-sonnet-4-5-20250929': 21.6,
     'claude-sonnet-4-20250514': 21.6, # claude-sonnet-4-20250514
 
     'claude-3-7-sonnet-latest': 21.6, # 200K context window Most intelligent model, with visible step‑by‑step reasoning claude-3-7-sonnet-20250219

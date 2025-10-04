@@ -726,6 +726,7 @@ async def get_prices(message: types.Message):
         'claude-opus-4-1-20250805': 108,
         'claude-opus-4-20250514': 108,
         'claude-opus-4-latest': 108,
+        'claude-sonnet-4-5-20250929': 21.6,
         'claude-sonnet-4-latest': 21.6,
         'claude-3-7-sonnet-latest': 21.6,
         'claude-3-5-sonnet-latest': 21.6,
