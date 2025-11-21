@@ -677,6 +677,8 @@ async def get_prices(message: types.Message):
     prices = '''
 
     OpenAI language model 1 million tokens in $:
+        'gpt-5-pro': 162, # gpt-5-pro-2025-10-06
+        'gpt-5.1': 13.5, # gpt-5.1-2025-11-13
         'gpt-5': 13.5,
         'gpt-5-chat-latest': 13.5,
         'gpt-5-mini': 2.7,
@@ -702,6 +704,7 @@ async def get_prices(message: types.Message):
         'gpt-4-turbo-2024-04-09': 48,
 
     The language model from Google is 1 million in $:
+        'gemini-3-pro': 16.8,
         'gemini-2.5-pro': 13.5,
         'gemini-2.5-flash': 3.36,
         'gemini-2.5-flash-lite-preview-06-17': 0.6,
