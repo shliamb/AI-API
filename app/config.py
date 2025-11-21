@@ -48,8 +48,8 @@ PRICE = {
 
     #'assistent-oa': 0.1, # Пока что хз че как
 
-    'gpt-5-pro': 162,  # gpt-5-pro-2025-10-06
-    'gpt-5.1': 13.5,  # gpt-5.1-2025-11-13
+    'gpt-5-pro-2025-10-06': 162,  # gpt-5-pro-2025-10-06
+    'gpt-5.1-2025-11-13': 13.5,  # gpt-5.1-2025-11-13
 
     'gpt-5': 13.5,
     'gpt-5-chat-latest': 13.5,
@@ -118,7 +118,7 @@ PRICE = {
     # 'gemini-2.0-flash-exp': 0.9, # 15,
     # 'gemini-2.0-flash-lite-001': 0.45,
 
-    'gemini-3-pro': 16.8, # gemini-3-pro-preview
+    'gemini-3-pro-preview': 16.8, # gemini-3-pro-preview
 
     'gemini-2.5-pro': 13.5, # Maximum input tokens 1,048,576
     'gemini-2.5-flash': 3.36, # $3.50  - Text output (thinking- response and reasoning) 3.36
