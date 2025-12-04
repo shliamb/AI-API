@@ -21,15 +21,15 @@ async def calculate_token_cost(access_id: uuid, model_version: str, used_tokens:
     one_tok_price = None
     model_version = model_version.strip() # Пробелы внутри если случайно есть
 
-    print(f"Поиск модели: '{model_version}'")
-    print(f"Тип данных: '{input_data}'")
+    #print(f"Поиск модели: '{model_version}'")
+    #print(f"Тип данных: '{input_data}'")
 
     found = False
     for key, value in PRICE.items():
-        print(f"Сравниваем: ключ='{key}', модель='{model_version}', совпадение={key == model_version}")
+        #print(f"Сравниваем: ключ='{key}', модель='{model_version}', совпадение={key == model_version}")
         if key == model_version:
             found = True
-            print(f"Модель найдена! Цена в словаре: {value}")
+            #print(f"Модель найдена! Цена в словаре: {value}")
             if input_data == "text":
                 one_tok_price = value / 1000000  # Price 1 token to USD
                 print(f"Цена за токен: {one_tok_price}")
@@ -42,10 +42,11 @@ async def calculate_token_cost(access_id: uuid, model_version: str, used_tokens:
                 break
 
     if not found:
-        print(f"The model {model_version} was not found in the price list")
+        #print(f"The model {model_version} was not found in the price list")
+        logger_db.error(f"The model {model_version} was not found in the price list")
         one_tok_price = 0.000095
 
-    print(f"Итоговая цена: {one_tok_price}")
+    #print(f"Итоговая цена: {one_tok_price}")
 
 
     data_account = await read_account_access_id(access_id)
