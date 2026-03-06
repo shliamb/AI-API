@@ -48,6 +48,9 @@ PRICE = {
 
     #'assistent-oa': 0.1, # Пока что хз че как
 
+    'gpt-5.4-pro': 252,
+    'gpt-5.4': 21,
+
     'gpt-5-pro-2025-10-06': 162,  # gpt-5-pro-2025-10-06
     'gpt-5.1-2025-11-13': 13.5,  # gpt-5.1-2025-11-13
 
@@ -101,6 +104,8 @@ PRICE = {
     'whisper-1': 0.0072, # minute (rounded to the nearest second)
 
     # Elon Musk Grok to 1M tokens:
+    'grok-4-1-fast-reasoning': 0.84,
+    'grok-4-1-fast-non-reasoning': 0.84,
     'grok-4-0709': 21.6,
     'grok-3-latest': 21.6, # Contex 131072, 
     'grok-3-fast-latest': 36, # Contex 131072, 
@@ -117,6 +122,9 @@ PRICE = {
     # 'gemini-2.5-flash-preview-04-17': 0.9, # $3.50  - Text output (thinking- response and reasoning)
     # 'gemini-2.0-flash-exp': 0.9, # 15,
     # 'gemini-2.0-flash-lite-001': 0.45,
+
+    'gemini-3.1-pro-preview': 16.8,
+    'gemini-3.1-flash-lite-preview': 2.1,
 
     'gemini-3-pro-preview': 16.8, # gemini-3-pro-preview
 
@@ -136,6 +144,10 @@ PRICE = {
     'claude-opus-4-20250514': 108, # claude-opus-4-20250514
     'claude-sonnet-4-5-20250929': 21.6,
     'claude-sonnet-4-20250514': 21.6, # claude-sonnet-4-20250514
+
+    'claude-opus-4-6': 36,
+    'claude-opus-4-1-20250805': 108,
+    'claude-sonnet-4-6': 21.6,
 
     'claude-3-7-sonnet-latest': 21.6, # 200K context window Most intelligent model, with visible step‑by‑step reasoning claude-3-7-sonnet-20250219
     'claude-3-5-sonnet-latest': 21.6, # output 8192 tokens
