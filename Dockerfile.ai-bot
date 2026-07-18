@@ -1,0 +1,21 @@
+# Dockerfile.ai-bot
+FROM python:3.12-slim
+
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /aibotdir
+
+RUN mkdir -p /audio /downloads /json /log /mp3 /backup_db /voice
+
+COPY requirements.txt ./
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    apt-utils \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY . .
+
+CMD ["python", "aibot/bot.py"]

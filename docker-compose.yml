@@ -3,65 +3,88 @@ version: '3.8'
 services:
 
   postgres:
-    image: postgres:14.13 #latest
+    image: postgres:14.13
     container_name: app_postgres
+    restart: always
     environment:
       POSTGRES_USER: ${USER_DB}
       POSTGRES_PASSWORD: ${PASSWORD_DB}
       POSTGRES_DB: ${DB_NAME}
+      TZ: Europe/Moscow
+    # ports:
+    #   - "127.0.0.1:5432:5432"
     ports:
-      - "127.0.0.1:5432:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - db-network
+      - /etc/localtime:/etc/localtime:ro
+    # networks:
+    #   - db-network
 
-
-
-  web:
+  api:
     build:
       context: .
       dockerfile: Dockerfile.api
-    container_name: fastapi_app
+    container_name: fastapi_api
+    restart: always
+    env_file:
+      - .env
+      - .env.api
     ports:
-      - "8000:80"
-      #8000 - Порт снаружи (на твоей машине/сервере), 80 - Порт внутри контейнера FastAPI
+      - "8000:8000"
     environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_USER: ${USER_DB}
-      POSTGRES_PASSWORD: ${PASSWORD_DB}
-      POSTGRES_DB: ${DB_NAME}
+      TZ: Europe/Moscow
     depends_on:
       - postgres
-    networks:
-      - db-network
+    # networks:
+    #   - db-network
     volumes:
       - shared_logs:/log
+    command:
+      uvicorn aiapi.run_api:app --host 0.0.0.0 --port 8000
 
-
-  bot:
+  api-bot:
     build:
       context: .
-      dockerfile: Dockerfile.bot
-    container_name: telegram_bot
+      dockerfile: Dockerfile.api-bot
+    container_name: api-bot
+    restart: always
+    env_file:
+      - .env
+      - .env.api
     environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_USER: ${USER_DB}
-      POSTGRES_PASSWORD: ${PASSWORD_DB}
-      POSTGRES_DB: ${DB_NAME}
+      TZ: Europe/Moscow
     depends_on:
       - postgres
-    networks:
-      - db-network
-    # ports:
-    #   - "8081:80"
+    # networks:
+    #   - db-network
+    ports:
+      - "8081:81"
     volumes:
       - shared_logs:/log
+
+  ai-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.ai-bot
+    container_name: ai-bot
+    restart: always
+    env_file:
+      - .env
+      - .env.bot
+    environment:
+      TZ: Europe/Moscow
+    depends_on:
+      - postgres
+    # networks:
+    #   - db-network
+    ports:
+      - "8080:80"  # Публикация порта 80 контейнера на порт 8080 хоста
 
 volumes:
   postgres_data:
   shared_logs:
 
-networks:
-  db-network:
-    driver: bridge
+# networks:
+#   db-network:
+#     driver: bridge

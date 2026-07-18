@@ -1,5 +1,5 @@
 #### CONFIGS Set it up manually: ####
-HOST = "app_postgres" # app_postgres localhost
+HOST = "postgres" # postgres localhost
 DOCKER = True # True or False
 TIME_CORRECTION = + 3
 ########
