@@ -40,8 +40,9 @@ services:
     #   - db-network
     volumes:
       - shared_logs:/log
-    command:
-      uvicorn aiapi.run_api:app --host 0.0.0.0 --port 8000
+    # command:
+    #   uvicorn aiapi.run_api:app --host 0.0.0.0 --port 8000
+    command: python aiapi/run_api.py
 
   api-bot:
     build:
